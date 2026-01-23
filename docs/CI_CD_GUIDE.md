@@ -47,7 +47,7 @@ The CI/CD system consists of **three workflows** that handle different aspects o
 - **Preview:** Release candidates (v1.0.0-rc.1, v2.0.0-rc.2, etc.)
 
 ### 3. Verify Submodule Health
-**File:** `cleanroom-labs/.github/workflows/verify-submodules.yml`
+**File:** `cleanroom-website/.github/workflows/verify-submodules.yml`
 
 **Triggers:**
 - Push to `main` branch
@@ -116,7 +116,7 @@ No CI/CD setup needed unless you want independent builds.
 Use the local CI test script:
 
 ```bash
-# From cleanroom-labs directory
+# From cleanroom-website directory
 ./scripts/test-ci-locally.sh
 ```
 
@@ -170,7 +170,7 @@ git push
 **Scenario 3: Update from parent repository**
 
 ```bash
-cd cleanroom-labs
+cd cleanroom-website
 # ... make changes to technical-docs submodule ...
 git add cleanroom-technical-docs
 git commit -m "Update technical docs"
@@ -229,7 +229,7 @@ This triggers:
 **Step 4: Update Parent Repository**
 
 ```bash
-cd cleanroom-labs
+cd cleanroom-website
 cd cleanroom-technical-docs
 git checkout v1.0.0
 cd ..

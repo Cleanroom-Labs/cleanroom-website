@@ -11,7 +11,7 @@ This guide walks through the most common workflows you'll use when working with 
 ## Architecture Quick Reference
 
 ```
-cleanroom-labs/                          # Parent repository
+cleanroom-website/                          # Parent repository
 ├── cleanroom-technical-docs/            # Level 1 submodule (aggregator)
 │   ├── airgap-whisper-docs/             # Level 2 submodule (project)
 │   ├── airgap-deploy-docs/              # Level 2 submodule (project)
@@ -27,8 +27,8 @@ cleanroom-labs/                          # Parent repository
 
 ```bash
 # Clone with all submodules
-git clone --recurse-submodules git@github.com:cleanroom-labs/cleanroom-labs.git
-cd cleanroom-labs
+git clone --recurse-submodules git@github.com:cleanroom-website/cleanroom-website.git
+cd cleanroom-website
 
 # Or if you already cloned without submodules:
 git submodule update --init --recursive
@@ -95,7 +95,7 @@ git add airgap-whisper-docs
 git commit -m "Update whisper docs: fix typo"
 git push
 
-cd ..  # Back to cleanroom-labs
+cd ..  # Back to cleanroom-website
 git add cleanroom-technical-docs
 git commit -m "Update technical docs (whisper typo fix)"
 git push
@@ -113,7 +113,7 @@ git push
 **Option A: Build all documentation**
 
 ```bash
-# From cleanroom-labs root
+# From cleanroom-website root
 ./scripts/test-ci-locally.sh
 ```
 
@@ -127,7 +127,7 @@ This script:
 **Option B: Build single project**
 
 ```bash
-#From cleanroom-labs root
+#From cleanroom-website root
 ./scripts/build-single-project.sh whisper
 
 # Or manually:
@@ -210,8 +210,8 @@ git commit -m "Initial commit"
 git push origin main
 
 # 2. Add as submodule
-cd ~/Projects/cleanroom-labs
-./scripts/add-new-project.sh monitor git@github.com:cleanroom-labs/airgap-monitor-docs.git
+cd ~/Projects/cleanroom-website
+./scripts/add-new-project.sh monitor git@github.com:cleanroom-website/airgap-monitor-docs.git
 
 # 3. Update master docs to reference new project
 cd cleanroom-technical-docs/source
@@ -350,7 +350,7 @@ git push
 4. Adds version badge
 5. Deploys to appropriate environment
 
-**When you push to cleanroom-labs main:**
+**When you push to cleanroom-website main:**
 1. `verify-submodules.yml` checks submodule health
 2. `build-all-docs.yml` builds everything (if submodules changed)
 3. Does NOT deploy (only technical-docs repo deploys)
@@ -375,7 +375,7 @@ git push
 
 ```bash
 # Start your day
-cd cleanroom-labs
+cd cleanroom-website
 git pull --recurse-submodules
 ./scripts/check-submodules.sh
 

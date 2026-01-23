@@ -92,7 +92,7 @@ git submodule update --recursive --remote
 
 2. Update website to use the release:
    ```bash
-   cd /path/to/cleanroom-labs
+   cd /path/to/cleanroom-website
    ./scripts/deploy-release.sh <project> v1.0.0
    ```
 
