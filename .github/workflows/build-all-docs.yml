@@ -1,0 +1,159 @@
+name: Build All Documentation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cleanroom-technical-docs/**'
+      - 'scripts/**'
+      - '.github/workflows/build-all-docs.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cleanroom-technical-docs/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository with submodules
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install Graphviz
+      run: sudo apt-get update && sudo apt-get install -y graphviz
+
+    - name: Install Python dependencies
+      run: |
+        cd cleanroom-technical-docs
+        pip install -r requirements.txt
+
+    - name: Build all project documentation
+      run: |
+        cd cleanroom-technical-docs
+
+        echo "# Building All Project Documentation"
+        echo ""
+
+        # Build each project
+        for project in airgap-whisper-docs airgap-deploy-docs airgap-transfer-docs; do
+          echo "## Building $project"
+          cd $project
+
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+
+          sphinx-build -M html source build
+
+          if [ ! -f build/html/index.html ]; then
+            echo "❌ ERROR: Build failed for $project"
+            exit 1
+          fi
+
+          echo "✓ $project built successfully"
+          echo ""
+          cd ..
+        done
+
+    - name: Build master documentation
+      run: |
+        cd cleanroom-technical-docs
+
+        echo "## Building Master Documentation"
+        make html 2>&1 | tee build.log
+
+        # Check for warnings
+        if grep -i "warning" build.log; then
+          echo ""
+          echo "⚠️  Build completed with warnings"
+          echo ""
+          echo "Warnings found:"
+          grep -i "warning" build.log
+          echo ""
+          echo "Please review and fix warnings before merging"
+          exit 1
+        else
+          echo "✓ Build completed with no warnings"
+        fi
+
+    - name: Copy built docs to public directory
+      run: |
+        echo "Copying built documentation to public/docs/..."
+
+        # Create public/docs if it doesn't exist
+        mkdir -p public/docs
+
+        # Copy master docs
+        cp -r cleanroom-technical-docs/build/html/* public/docs/
+
+        # Optionally copy individual project docs
+        # (useful if you want direct links to project docs)
+        # mkdir -p public/docs/projects
+        # cp -r cleanroom-technical-docs/airgap-whisper-docs/build/html public/docs/projects/whisper
+        # cp -r cleanroom-technical-docs/airgap-deploy-docs/build/html public/docs/projects/deploy
+        # cp -r cleanroom-technical-docs/airgap-transfer-docs/build/html public/docs/projects/transfer
+
+        echo "✓ Documentation copied to public/docs/"
+
+    - name: Verify build output
+      run: |
+        echo "## Build Output Verification"
+        echo ""
+
+        # Check that key files exist
+        if [ ! -f public/docs/index.html ]; then
+          echo "❌ ERROR: Master index.html not found"
+          exit 1
+        fi
+
+        if [ ! -f public/docs/projects/whisper.html ]; then
+          echo "⚠️  WARNING: Whisper stub page not found"
+        fi
+
+        if [ ! -f public/docs/projects/deploy.html ]; then
+          echo "⚠️  WARNING: Deploy stub page not found"
+        fi
+
+        if [ ! -f public/docs/projects/transfer.html ]; then
+          echo "⚠️  WARNING: Transfer stub page not found"
+        fi
+
+        # Show directory structure
+        echo ""
+        echo "Built documentation structure:"
+        tree -L 2 public/docs || ls -la public/docs
+
+        echo ""
+        echo "✓ Build verification complete"
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: documentation
+        path: public/docs
+        retention-days: 30
+
+    - name: Generate build summary
+      run: |
+        echo "# 📚 Documentation Build Summary"
+        echo ""
+        echo "✓ All documentation built successfully"
+        echo ""
+        echo "## Projects Built"
+        echo "- AirGap Whisper"
+        echo "- AirGap Deploy"
+        echo "- AirGap Transfer"
+        echo "- Master documentation"
+        echo ""
+        echo "## Output"
+        echo "Built documentation available in artifacts (retention: 30 days)"

@@ -1,0 +1,150 @@
+name: Verify Submodule Health
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    # Run weekly on Mondays at 9am UTC
+    - cron: '0 9 * * 1'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository with submodules
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        fetch-depth: 0
+
+    - name: Check submodule status
+      run: |
+        echo "# Submodule Health Report"
+        echo ""
+        echo "## Submodule Status"
+        echo ""
+        git submodule status
+
+    - name: Verify technical-docs submodule
+      run: |
+        echo ""
+        echo "## Technical Docs Submodule"
+        echo ""
+
+        cd cleanroom-technical-docs
+
+        # Check if on branch or tag
+        CURRENT=$(git describe --exact-match --tags 2>/dev/null || git branch --show-current || echo "DETACHED")
+
+        if [ "$CURRENT" = "DETACHED" ]; then
+          echo "⚠️  WARNING: Submodule is in DETACHED HEAD state"
+          echo "Current commit: $(git rev-parse --short HEAD)"
+          echo ""
+          echo "To fix, update the submodule reference:"
+          echo "  cd cleanroom-technical-docs"
+          echo "  git checkout <branch-or-tag>"
+          echo "  cd .."
+          echo "  git add cleanroom-technical-docs"
+          echo "  git commit -m 'Update submodule reference'"
+          exit 1
+        else
+          echo "✓ Submodule is on: $CURRENT"
+          echo "  Commit: $(git rev-parse --short HEAD)"
+        fi
+
+        cd ..
+
+    - name: Verify nested submodules
+      run: |
+        echo ""
+        echo "## Nested Submodules (Project Docs)"
+        echo ""
+
+        cd cleanroom-technical-docs
+
+        # Check each project submodule
+        for submodule in airgap-whisper-docs airgap-deploy-docs airgap-transfer-docs; do
+          echo "### $submodule"
+
+          if [ ! -d "$submodule/.git" ]; then
+            echo "❌ ERROR: Submodule $submodule not initialized"
+            exit 1
+          fi
+
+          cd $submodule
+
+          CURRENT=$(git describe --exact-match --tags 2>/dev/null || git branch --show-current || echo "DETACHED")
+
+          if [ "$CURRENT" = "DETACHED" ]; then
+            echo "⚠️  In DETACHED HEAD state"
+            echo "   Commit: $(git rev-parse --short HEAD)"
+          else
+            echo "✓ On: $CURRENT"
+            echo "   Commit: $(git rev-parse --short HEAD)"
+          fi
+
+          # Check for uncommitted changes
+          if ! git diff-index --quiet HEAD --; then
+            echo "⚠️  WARNING: Uncommitted changes detected"
+            git status --short
+          fi
+
+          cd ..
+          echo ""
+        done
+
+        cd ..
+
+    - name: Check for submodule updates
+      run: |
+        echo ""
+        echo "## Available Updates"
+        echo ""
+
+        cd cleanroom-technical-docs
+
+        # Fetch latest from remote (if configured)
+        for submodule in airgap-whisper-docs airgap-deploy-docs airgap-transfer-docs; do
+          cd $submodule
+
+          # Only check if remote is configured (not file://)
+          REMOTE_URL=$(git remote get-url origin 2>/dev/null || echo "")
+          if [[ $REMOTE_URL == http* ]] || [[ $REMOTE_URL == git@* ]]; then
+            echo "Checking $submodule for updates..."
+            git fetch origin --tags >/dev/null 2>&1 || true
+
+            LOCAL=$(git rev-parse HEAD)
+            REMOTE=$(git rev-parse origin/main 2>/dev/null || git rev-parse origin/master 2>/dev/null || echo $LOCAL)
+
+            if [ "$LOCAL" != "$REMOTE" ]; then
+              echo "⚠️  $submodule has updates available"
+              echo "   Local:  $LOCAL"
+              echo "   Remote: $REMOTE"
+            else
+              echo "✓ $submodule is up to date"
+            fi
+          else
+            echo "⚠️  $submodule uses local file:// URL (skipping update check)"
+          fi
+
+          cd ..
+        done
+
+        cd ..
+
+    - name: Generate report summary
+      if: always()
+      run: |
+        echo ""
+        echo "---"
+        echo ""
+        echo "# Summary"
+        echo ""
+        echo "✓ Submodule verification complete"
+        echo ""
+        echo "For detailed submodule management, see:"
+        echo "  docs/SUBMODULES_GUIDE.md"
