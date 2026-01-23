@@ -78,38 +78,12 @@ done
 cd "$ROOT_DIR"
 
 echo ""
-echo "## Building Individual Project Documentation"
+echo "## Building All Documentation (Projects + Master)"
 echo ""
 
 cd cleanroom-technical-docs
 
-for project in airgap-whisper-docs airgap-deploy-docs airgap-transfer-docs; do
-    echo "### Building $project"
-
-    cd $project
-
-    # Install dependencies if needed
-    if [ -f requirements.txt ]; then
-        pip install -r requirements.txt > /dev/null 2>&1
-    fi
-
-    # Build
-    sphinx-build -M html source build
-
-    if [ ! -f build/html/index.html ]; then
-        echo "❌ ERROR: Build failed for $project"
-        exit 1
-    fi
-
-    echo "✓ $project built successfully"
-    echo ""
-    cd ..
-done
-
-echo ""
-echo "## Building Master Documentation"
-echo ""
-
+# Use the Makefile which handles building projects + master + copying
 make html 2>&1 | tee build.log
 
 # Check for warnings
@@ -124,6 +98,19 @@ else
     echo "✓ Build completed with no warnings"
     WARNINGS="false"
 fi
+
+# Verify project docs were copied
+echo ""
+echo "## Verifying Project Documentation"
+echo ""
+
+for project in airgap-whisper airgap-deploy airgap-transfer; do
+    if [ ! -f build/html/$project/index.html ]; then
+        echo "❌ ERROR: $project docs not found in master build"
+        exit 1
+    fi
+    echo "✓ $project documentation present"
+done
 
 # Verify cross-references
 echo ""
