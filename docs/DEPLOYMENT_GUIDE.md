@@ -22,8 +22,8 @@ Before deploying to production, verify:
 
 **Architecture after deployment:**
 ```
-GitHub Organization: cleanroom-labs
-├── cleanroom-labs (parent repo)
+GitHub Organization: cleanroom-website
+├── cleanroom-website (parent repo)
 ├── cleanroom-technical-docs (docs aggregator)
 ├── airgap-whisper-docs (project docs)
 ├── airgap-deploy-docs (project docs)
@@ -34,11 +34,11 @@ GitHub Organization: cleanroom-labs
 
 ### 1.1 Create Organization Repositories
 
-On GitHub (github.com/cleanroom-labs or your organization):
+On GitHub (github.com/cleanroom-website or your organization):
 
 **Create these 5 repositories:**
 
-1. **cleanroom-labs**
+1. **cleanroom-website**
    - Description: "Parent repository for AirGap project suite"
    - Visibility: Public (or Private)
    - Initialize: **Do not** initialize (we're pushing existing code)
@@ -76,19 +76,19 @@ For public repositories, this is not necessary.
 ```bash
 # airgap-whisper-docs
 cd /Users/andfranklin/Projects/airgap-whisper-docs
-git remote add origin git@github.com:cleanroom-labs/airgap-whisper-docs.git
+git remote add origin git@github.com:cleanroom-website/airgap-whisper-docs.git
 git push -u origin main
 git push --tags  # Push any existing tags
 
 # airgap-deploy-docs
 cd /Users/andfranklin/Projects/airgap-deploy-docs
-git remote add origin git@github.com:cleanroom-labs/airgap-deploy-docs.git
+git remote add origin git@github.com:cleanroom-website/airgap-deploy-docs.git
 git push -u origin main
 git push --tags
 
 # airgap-transfer-docs
 cd /Users/andfranklin/Projects/airgap-transfer-docs
-git remote add origin git@github.com:cleanroom-labs/airgap-transfer-docs.git
+git remote add origin git@github.com:cleanroom-website/airgap-transfer-docs.git
 git push -u origin main
 git push --tags
 ```
@@ -98,19 +98,19 @@ git push --tags
 ### 2.2 Update cleanroom-technical-docs Submodule URLs
 
 ```bash
-cd /Users/andfranklin/Projects/cleanroom-labs/cleanroom-technical-docs
+cd /Users/andfranklin/Projects/cleanroom-website/cleanroom-technical-docs
 
 # Edit .gitmodules
 cat > .gitmodules <<'EOF'
 [submodule "airgap-whisper-docs"]
 	path = airgap-whisper-docs
-	url = git@github.com:cleanroom-labs/airgap-whisper-docs.git
+	url = git@github.com:cleanroom-website/airgap-whisper-docs.git
 [submodule "airgap-deploy-docs"]
 	path = airgap-deploy-docs
-	url = git@github.com:cleanroom-labs/airgap-deploy-docs.git
+	url = git@github.com:cleanroom-website/airgap-deploy-docs.git
 [submodule "airgap-transfer-docs"]
 	path = airgap-transfer-docs
-	url = git@github.com:cleanroom-labs/airgap-transfer-docs.git
+	url = git@github.com:cleanroom-website/airgap-transfer-docs.git
 EOF
 
 # Update submodule configuration
@@ -122,24 +122,24 @@ git commit -m "Update submodule URLs to GitHub"
 ### 2.3 Push cleanroom-technical-docs
 
 ```bash
-cd /Users/andfranklin/Projects/cleanroom-labs/cleanroom-technical-docs
-git remote add origin git@github.com:cleanroom-labs/cleanroom-technical-docs.git
+cd /Users/andfranklin/Projects/cleanroom-website/cleanroom-technical-docs
+git remote add origin git@github.com:cleanroom-website/cleanroom-technical-docs.git
 git push -u origin main
 git push --tags
 ```
 
 **Verify:** Check that technical-docs shows on GitHub with submodules listed.
 
-### 2.4 Update cleanroom-labs Submodule URL
+### 2.4 Update cleanroom-website Submodule URL
 
 ```bash
-cd /Users/andfranklin/Projects/cleanroom-labs
+cd /Users/andfranklin/Projects/cleanroom-website
 
 # Edit .gitmodules
 cat > .gitmodules <<'EOF'
 [submodule "cleanroom-technical-docs"]
 	path = cleanroom-technical-docs
-	url = git@github.com:cleanroom-labs/cleanroom-technical-docs.git
+	url = git@github.com:cleanroom-website/cleanroom-technical-docs.git
 EOF
 
 # Update submodule configuration
@@ -148,11 +148,11 @@ git add .gitmodules
 git commit -m "Update technical-docs submodule URL to GitHub"
 ```
 
-### 2.5 Push cleanroom-labs
+### 2.5 Push cleanroom-website
 
 ```bash
-cd /Users/andfranklin/Projects/cleanroom-labs
-git remote add origin git@github.com:cleanroom-labs/cleanroom-labs.git
+cd /Users/andfranklin/Projects/cleanroom-website
+git remote add origin git@github.com:cleanroom-website/cleanroom-website.git
 git push -u origin main
 git push --tags
 ```
@@ -163,7 +163,7 @@ git push --tags
 
 ### 3.1 Enable GitHub Pages for cleanroom-technical-docs
 
-1. Navigate to: `https://github.com/cleanroom-labs/cleanroom-technical-docs`
+1. Navigate to: `https://github.com/cleanroom-website/cleanroom-technical-docs`
 2. Click **Settings** → **Pages**
 3. Under "Build and deployment":
    - **Source:** Select "GitHub Actions"
@@ -187,14 +187,14 @@ This ensures workflows can deploy to GitHub Pages.
 ### 4.1 Create Empty Commit to Trigger CI
 
 ```bash
-cd /Users/andfranklin/Projects/cleanroom-labs/cleanroom-technical-docs
+cd /Users/andfranklin/Projects/cleanroom-website/cleanroom-technical-docs
 git commit --allow-empty -m "Trigger initial GitHub Pages deployment"
 git push
 ```
 
 ### 4.2 Monitor Build
 
-1. Navigate to: `https://github.com/cleanroom-labs/cleanroom-technical-docs/actions`
+1. Navigate to: `https://github.com/cleanroom-website/cleanroom-technical-docs/actions`
 2. Click on the running workflow: "Build and Deploy Sphinx Documentation"
 3. Watch the build progress:
    - "build" job should complete successfully
@@ -208,7 +208,7 @@ git push
 
 **Your documentation will be available at:**
 ```
-https://cleanroom-labs.github.io/cleanroom-technical-docs/
+https://cleanroom-website.github.io/cleanroom-technical-docs/
 ```
 
 **Check that:**
@@ -240,7 +240,7 @@ For tag-based deployments with preview/production separation:
 ### 5.2 Test Tagged Deployment
 
 ```bash
-cd /Users/andfranklin/Projects/cleanroom-labs/cleanroom-technical-docs
+cd /Users/andfranklin/Projects/cleanroom-website/cleanroom-technical-docs
 git tag v0.1.0-rc.1
 git push origin v0.1.0-rc.1
 ```
@@ -258,8 +258,8 @@ To verify everything works from GitHub:
 ```bash
 # Somewhere outside your current work directory
 cd ~/tmp
-git clone --recurse-submodules git@github.com:cleanroom-labs/cleanroom-labs.git
-cd cleanroom-labs
+git clone --recurse-submodules git@github.com:cleanroom-website/cleanroom-website.git
+cd cleanroom-website
 
 # Verify
 ./scripts/check-submodules.sh
@@ -274,7 +274,7 @@ From now on, team members should:
 
 ```bash
 # Clone (first time)
-git clone --recurse-submodules git@github.com:cleanroom-labs/cleanroom-labs.git
+git clone --recurse-submodules git@github.com:cleanroom-website/cleanroom-website.git
 
 # Pull updates (daily)
 git pull --recurse-submodules
@@ -306,7 +306,7 @@ git push origin main
 
 **Check deployment:**
 - Actions tab shows green checkmark
-- Documentation updates at `https://cleanroom-labs.github.io/cleanroom-technical-docs/`
+- Documentation updates at `https://cleanroom-website.github.io/cleanroom-technical-docs/`
 
 ### Deploying a Release
 
@@ -348,7 +348,7 @@ git push origin v1.0.0
 ### Daily Monitoring
 
 **Check GitHub Actions tab:**
-- `https://github.com/cleanroom-labs/cleanroom-technical-docs/actions`
+- `https://github.com/cleanroom-website/cleanroom-technical-docs/actions`
 
 **Look for:**
 - All builds passing (green checkmarks)
@@ -457,7 +457,7 @@ Deployment is successful when:
 - [ ] Submodules using GitHub URLs (not file://)
 - [ ] GitHub Pages enabled for technical-docs
 - [ ] CI builds passing automatically on push
-- [ ] Documentation accessible at `cleanroom-labs.github.io/cleanroom-technical-docs/`
+- [ ] Documentation accessible at `cleanroom-website.github.io/cleanroom-technical-docs/`
 - [ ] Cross-references working
 - [ ] Tag-based deployments working (optional, test with RC tag)
 - [ ] Team can clone and work with repositories
@@ -478,7 +478,7 @@ To use a custom domain (e.g., docs.cleanroomlabs.com):
 
 1. Add CNAME record in DNS:
    ```
-   docs.cleanroomlabs.com → cleanroom-labs.github.io
+   docs.cleanroomlabs.com → cleanroom-website.github.io
    ```
 
 2. In repository Settings → Pages:

@@ -51,7 +51,7 @@ Successfully implemented a nested git submodule architecture for managing docume
 
 **Architecture:**
 ```
-cleanroom-labs/                                 # Parent repository
+cleanroom-website/                                 # Parent repository
 ├── cleanroom-technical-docs/                   # Submodule (aggregator)
 │   ├── airgap-whisper-docs/                    # Submodule (project docs)
 │   ├── airgap-deploy-docs/                     # Submodule (project docs)
@@ -86,13 +86,13 @@ cleanroom-labs/                                 # Parent repository
    - Version badge injection
    - Triggers: git tags
 
-3. **verify-submodules.yml** (cleanroom-labs):
+3. **verify-submodules.yml** (cleanroom-website):
    - Submodule health checks
    - Detached HEAD warnings
    - Update availability checks
    - Triggers: push, PR, manual, weekly
 
-4. **build-all-docs.yml** (cleanroom-labs):
+4. **build-all-docs.yml** (cleanroom-website):
    - Full documentation build
    - Warning detection (fails CI if warnings)
    - Artifact upload
@@ -107,7 +107,7 @@ cleanroom-labs/                                 # Parent repository
 
 **Implemented:**
 ```
-Level 1: cleanroom-labs → cleanroom-technical-docs
+Level 1: cleanroom-website → cleanroom-technical-docs
 Level 2: cleanroom-technical-docs → project-docs (whisper, deploy, transfer)
 Level 3: (future) code repos → project-docs (dual-homing)
 ```
@@ -233,7 +233,7 @@ From the implementation plan:
 1. **Create GitHub repositories:**
    ```bash
    # On GitHub, create:
-   # - cleanroom-labs (organization repo)
+   # - cleanroom-website (organization repo)
    # - cleanroom-technical-docs (organization repo)
    # - airgap-whisper-docs (organization repo)
    # - airgap-deploy-docs (organization repo)
@@ -244,17 +244,17 @@ From the implementation plan:
    ```bash
    # For each repository:
    cd <repo-directory>
-   git remote add origin git@github.com:cleanroom-labs/<repo-name>.git
+   git remote add origin git@github.com:cleanroom-website/<repo-name>.git
    git push -u origin main
    ```
 
 3. **Update .gitmodules URLs:**
    ```bash
    # In cleanroom-technical-docs/.gitmodules:
-   # Change file:///Users/... to git@github.com:cleanroom-labs/...
+   # Change file:///Users/... to git@github.com:cleanroom-website/...
 
-   # In cleanroom-labs/.gitmodules:
-   # Change file:///Users/... to git@github.com:cleanroom-labs/...
+   # In cleanroom-website/.gitmodules:
+   # Change file:///Users/... to git@github.com:cleanroom-website/...
    ```
 
 4. **Configure GitHub Pages:**
@@ -320,8 +320,8 @@ cd ..
 - `cleanroom-technical-docs/source/conf.py` - Master Sphinx config
 - `cleanroom-technical-docs/.github/workflows/sphinx-docs.yml` - Main CI
 - `cleanroom-technical-docs/.github/workflows/deploy-tagged.yml` - Tagged deploy
-- `cleanroom-labs/.github/workflows/verify-submodules.yml` - Health checks
-- `cleanroom-labs/.github/workflows/build-all-docs.yml` - Full build
+- `cleanroom-website/.github/workflows/verify-submodules.yml` - Health checks
+- `cleanroom-website/.github/workflows/build-all-docs.yml` - Full build
 
 ## Next Steps
 
