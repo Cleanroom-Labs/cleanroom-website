@@ -2,55 +2,7 @@
 
 ## Repository Structure
 
-This plan uses a **git submodule architecture** where the technical documentation is embedded within the website repository:
-
-```
-cleanroom-website/
-├── cleanroom-technical-docs/   # Git submodule → Sphinx documentation
-│   ├── airgap-whisper-docs/    # Git submodule → Project docs
-│   ├── airgap-deploy-docs/     # Git submodule → Project docs
-│   ├── airgap-transfer-docs/   # Git submodule → Project docs
-│   ├── source/                 # Master documentation source
-│   └── build/                  # Generated documentation
-├── scripts/
-│   └── build-docs.mjs          # Sphinx build integration
-├── public/
-│   └── docs/                   # Copied Sphinx output (gitignored)
-└── ... (Next.js files)
-```
-
-The build script copies documentation from the submodule's build output to `public/docs/`.
-
-**Benefits of submodule approach:**
-- Single repository to clone for development
-- Documentation versions tied to website versions via git SHAs
-- Simplified CI/CD (no coordination between repos needed)
-- Independent documentation development workflow
-
-## Quick Reference
-
-**Essential Commands:**
-```bash
-# Initial setup
-npm run build-docs        # Build Sphinx documentation
-npm run dev              # Start dev server (fast, uses cached docs)
-npm run dev:clean        # Rebuild docs + start dev server
-npm run build            # Production build (rebuilds docs)
-
-# Deployment
-git push                 # Triggers automatic Vercel deployment
-```
-
-**Key Files:**
-- `scripts/build-docs.mjs` - Sphinx build integration
-- `next.config.js` - Next.js configuration with security headers
-- `public/docs/` - Generated Sphinx output (gitignored)
-- `.gitignore` - Excludes node_modules, .next, public/docs, etc.
-
-**Troubleshooting:**
-- Docs not loading? Run `npm run build-docs` first
-- Sphinx build fails? Check Python venv and Graphviz installation
-- See full troubleshooting guide below
+See [README.md](README.md) for the current repository structure and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for design decisions.
 
 ## Migration Progress
 
@@ -823,94 +775,6 @@ fs.writeFileSync(lastCommitPath, currentCommit);
 
 This skips Sphinx rebuild if technical docs haven't changed, significantly speeding up deployments.
 
----
-
-## Appendix: Technical Decisions
-
-### Why Next.js?
-- Server-side rendering for better SEO
-- Built-in routing and API routes
-- Excellent developer experience
-- Strong ecosystem and community
-
-### Why Vercel?
-- Seamless Next.js integration (by the same company)
-- Automatic deployments and preview URLs
-- Built-in CDN and edge functions
-- Generous free tier
-- Simple custom domain setup with automatic SSL
-
-### Why Keep Sphinx Separate?
-- Sphinx is purpose-built for technical documentation
-- Rich ecosystem of extensions (autodoc, napoleon, needflow, etc.)
-- Proven for large documentation projects
-- Better than converting everything to MDX
-- Separation of concerns: docs vs marketing site
-
-### Alternative Approaches Considered
-1. **Convert Sphinx to MDX:** Would lose Sphinx's powerful features (autodoc, needflow, etc.)
-2. **Separate docs subdomain:** More complex DNS setup, less integrated user experience
-3. **Full client-side rendering:** Worse SEO, slower initial page load
-4. **Other hosting (Netlify, AWS):** Vercel has better Next.js integration and simpler setup
-5. **TypeScript from start:** Adds initial complexity; can migrate incrementally later
-
-### Technology Choices
-- **Next.js 13+:** Modern features, excellent DX, strong ecosystem
-- **Vercel:** Seamless Next.js integration, free tier, automatic deployments
-- **Sphinx:** Industry-standard for technical docs, rich extension ecosystem
-- **ES Modules:** Modern JavaScript, better tree-shaking, standardized
-- **Tailwind CSS:** Utility-first, fast development, small bundle size
-
-### Repository Structure Decision
-
-**Chosen Approach: Git Submodules** ✅
-
-```
-cleanroom-website/
-└── cleanroom-technical-docs/  # Git submodule
-    ├── airgap-whisper-docs/   # Nested submodule
-    ├── airgap-deploy-docs/    # Nested submodule
-    └── airgap-transfer-docs/  # Nested submodule
-```
-
-**Why submodules:**
-- Documentation version tied to website version via git SHAs
-- Single repository to clone for development
-- Simplified CI/CD (no coordination between repos)
-- Independent documentation development workflow
-- Version coupling for reproducible deployments
-
-**Setup:**
-```bash
-# Clone with all submodules
-git clone --recurse-submodules <repo-url>
-
-# Or initialize submodules after clone
-git submodule update --init --recursive
-
-# Update submodules to latest
-git submodule update --remote --recursive
-```
-
-**Alternative Approaches Considered:**
-
-**Sibling Directories:**
-```
-Projects/
-├── cleanroom-website/
-└── cleanroom-technical-docs/
-```
-- ❌ Rejected: Requires coordinating separate repositories
-- ❌ Documentation version not tied to website version
-- Build script would use `../../cleanroom-technical-docs`
-
-**Monorepo:**
-- ❌ Rejected: Overkill for current scope
-- Would require tools like Turborepo or Nx
-- More complex setup, better for larger teams
-
----
-
 ## Quick Start Checklist
 
 ### Phase 1: Project Setup (5-10 min)
@@ -962,72 +826,7 @@ Projects/
 
 ## Troubleshooting
 
-### Common Issues and Solutions
-
-**Issue: "Cannot use import statement outside a module" error**
-- Solution: Ensure build script is named `build-docs.mjs` (not `.js`)
-- Or add `"type": "module"` to package.json if using .js extension
-
-**Issue: Sphinx build fails with "No module named 'sphinx'"**
-- Solution: Verify Python venv exists and has dependencies installed:
-  ```bash
-  cd ../cleanroom-technical-docs
-  python3 -m venv .venv
-  source .venv/bin/activate  # Windows: .venv\Scripts\activate
-  pip install -r requirements.txt
-  ```
-
-**Issue: needflow diagrams not rendering**
-- Solution: Install Graphviz system package (see step 4 in Project Setup)
-- Verify installation: `dot -V` should show version number
-
-**Issue: Documentation not loading on localhost**
-- Solution: Build docs first, then start dev server:
-  ```bash
-  npm run build-docs
-  npm run dev
-  ```
-
-**Issue: "Sphinx directory not found" error**
-- Solution: Verify submodules are initialized: `git submodule update --init --recursive`
-- Check that cleanroom-technical-docs exists as a submodule
-- Verify paths in build script: `../cleanroom-technical-docs` (not `../../`)
-
-**Issue: GitHub Actions failing on Sphinx build**
-- Solution: Verify workflow includes:
-  1. Checkout with `submodules: recursive`
-  2. Python setup with correct version
-  3. Graphviz installation
-  4. Python venv creation and activation
-  5. Submodule verification step
-
-**Issue: 404 errors on /docs paths in production**
-- Solution: Verify next.config.js includes rewrites configuration
-- Check public/docs/ contains index.html after build
-- Inspect Vercel build logs for Sphinx errors
-
-**Issue: Vercel build timing out**
-- Solution: Sphinx builds are usually fast, but check:
-  1. Complex Sphinx extensions may slow builds
-  2. Large number of pages increases build time
-  3. Vercel caches between builds (first build slowest)
-  4. Consider simplifying Sphinx configuration if chronic
-
-**Issue: Custom domain SSL not working**
-- Solution: Wait up to 48 hours for DNS propagation
-- Verify A record: @ → 76.76.21.21
-- Verify CNAME: www → cname.vercel-dns.com
-- Check domain status in Vercel dashboard
-
-**Issue: CSP blocking Sphinx functionality**
-- Solution: Sphinx search requires 'unsafe-eval' in script-src
-- Sphinx styles require 'unsafe-inline' in style-src
-- These are included in the recommended CSP configuration
-
-**Issue: Dev server doesn't show updated docs**
-- Solution: Run `npm run build-docs` to rebuild
-- Or use `npm run dev:clean` which rebuilds automatically
-- Remember: `npm run dev` uses cached docs for speed
+See [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) for common issues and solutions.
 
 ---
 
@@ -1064,3 +863,14 @@ Projects/
 5. Merge to staging (if using staging branch)
 6. Final testing on staging
 7. Merge to main for production deployment
+
+---
+
+## Related Documentation
+
+- [README.md](README.md) - Getting started and current build commands
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - Design decisions and rationale
+- [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) - Common issues and solutions
+- [docs/CI_CD_GUIDE.md](docs/CI_CD_GUIDE.md) - GitHub Actions workflows
+- [docs/DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) - Production deployment steps
+- [docs/SUBMODULES_GUIDE.md](docs/SUBMODULES_GUIDE.md) - Submodule operations
