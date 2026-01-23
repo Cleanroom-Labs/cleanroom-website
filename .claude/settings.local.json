@@ -10,7 +10,14 @@
       "Bash(make:*)",
       "Bash(git mv:*)",
       "Bash(git remote set-url:*)",
-      "Bash(git push)"
+      "Bash(git push)",
+      "Bash(git init:*)",
+      "Bash(./scripts/check-submodules.sh:*)",
+      "Bash(source .venv/bin/activate)",
+      "Bash(pip install:*)",
+      "Bash(sphinx-build:*)",
+      "Bash(source ../../../airgap-whisper-docs/.venv/bin/activate)",
+      "Bash(python3:*)"
     ]
   }
 }
