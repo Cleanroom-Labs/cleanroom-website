@@ -2,56 +2,39 @@
 
 ## Problem Statement
 
-Cleanroom Labs maintains 3+ AirGap projects with:
+This project maintains multiple documentation sets with:
 - Independent development timelines
 - Documentation versioned with code
 - Centralized documentation website
 - Shared branding and styling
-- Waterfall workflow (docs-first)
 
 ## Solution: Nested Submodules
 
-### Structure
+A three-level nested submodule architecture:
+
+1. **Website → Technical Docs** (single submodule)
+2. **Technical Docs → Project Docs** (multiple submodules)
+3. **Code Repo → Project Docs** (dual-homing, optional)
 
 ```
-cleanroom-website/                    # Next.js website
+cleanroom-website/                    # Parent repository
 ├── cleanroom-technical-docs/         # Submodule (aggregates projects)
+│   ├── <project>-docs/               # Submodules (project docs)
 │   ├── shared/                       # Shared theme configuration
-│   │   ├── theme-config.py          # Common Sphinx settings
-│   │   └── extensions.txt           # Shared dependencies
-│   ├── source/
-│   │   ├── index.rst                # Master landing page
-│   │   ├── conf.py                  # Master config
-│   │   └── _static/
-│   │       └── custom.css           # Shared styling
-│   ├── project-1-docs/              # Submodule
-│   ├── project-2-docs/              # Submodule  
-│   └── project-3-docs/              # Submodule
+│   └── source/                       # Master documentation
 └── scripts/                          # Helper scripts
 ```
 
-Each code repository also includes its docs as a submodule:
+For operational details, see [cleanroom-technical-docs/README.md](../cleanroom-technical-docs/README.md).
 
-```
-airgap-project-1/                     # Code repository
-├── docs/ → airgap-project-1-docs/    # Same repo as in technical-docs
-├── src/
-└── tests/
-```
+## Design Decisions
 
-## Key Design Decisions
-
-### 1. Three-Level Nesting
-
-**Levels:**
-1. Website → Technical Docs (single submodule)
-2. Technical Docs → Project Docs (multiple submodules)
-3. Code Repo → Project Docs (dual-homing)
+### Three-Level Nesting
 
 **Benefits:**
-- Explicit version coupling (git SHAs)
+- Explicit version coupling via git SHAs
 - Separate review workflows
-- Independent ownership
+- Independent ownership per project
 - Centralized aggregation
 - Semantic versioning support
 
@@ -60,96 +43,50 @@ airgap-project-1/                     # Code repository
 - Requires submodule knowledge
 - More complex than monorepo
 
-### 2. Shared Theme via Inheritance
+### Shared Theme via Inheritance
 
-Projects import shared configuration:
+Projects import shared configuration from `shared/theme_config.py`, allowing:
+- Single source of truth for styling
+- Easy global updates
+- Project-specific overrides when needed
 
-```python
-# project-1-docs/source/conf.py
-import sys, os
-sys.path.insert(0, os.path.abspath('../../shared'))
-from theme_config import *  # Import shared settings
+### Tag-Based Deployment
 
-# Project-specific overrides
-project = 'AirGap Project 1'
-version = '1.0.0'
-```
-
-**Location:** `cleanroom-technical-docs/shared/theme-config.py`
-
-### 3. Tag-Based Deployment
-
-**Release Process:**
-1. Tag docs: `git tag v1.0.0 && git push origin v1.0.0`
-2. Tag code: `git tag v1.0.0 && git push origin v1.0.0`
-3. Update website: `./scripts/deploy-release.sh project-1 v1.0.0`
-
-### 4. Cross-Project References
-
-Using Sphinx intersphinx:
-
-```python
-intersphinx_mapping = {
-    'project2': ('https://cleanroomlabs.dev/docs/project-2/', None),
-}
-```
-
-```rst
-See :doc:`project2:installation` for details.
-```
+Releases use git tags:
+- `v*` tags (e.g., `v1.0.0`) → Production deployment
+- `v*-rc.*` tags (e.g., `v1.0.0-rc.1`) → Preview deployment
 
 ## Alternatives Considered
 
 ### Monorepo
-❌ No version coupling between docs and code
-❌ Less clear ownership
-❌ Can't tag docs independently
+- ❌ No version coupling between docs and code
+- ❌ Less clear ownership
+- ❌ Can't tag docs independently
 
 ### Separate Repos (No Submodules)
-❌ No centralized aggregation
-❌ Hard to ensure consistent theme
-❌ No dual-homing
+- ❌ No centralized aggregation
+- ❌ Hard to ensure consistent theme
+- ❌ No dual-homing capability
 
 ### Sparse Checkout
-❌ Complex configuration
-❌ Doesn't solve version coupling
+- ❌ Complex configuration
+- ❌ Doesn't solve version coupling
 
-## Multi-Version Support (Future)
+## Future: Multi-Version Support
+
+Planned structure for versioned documentation:
 
 ```
 public/docs/
-├── project-1/
-│   ├── latest/     → symlink to 2.0.0/
+├── <project>/
+│   ├── latest/     → symlink to current version
 │   ├── 2.0.0/
-│   ├── 1.1.0/
 │   └── 1.0.0/
 ```
 
-Implementation phases:
-1. MVP: Single version per project (current)
-2. Add version switcher dropdown
-3. Build multiple versions in parallel
-4. Add RC preview URLs
-
 Tool: `sphinx-multiversion` extension
-
-## Maintenance
-
-### Adding New Project
-1. Create docs repository
-2. Set up conf.py with shared theme import
-3. Run `./scripts/add-new-project.sh <project> <repo-url>`
-4. Update master index.rst
-5. Configure intersphinx
-
-### Updating Shared Theme
-1. Edit `cleanroom-technical-docs/shared/theme-config.py`
-2. Test with one project
-3. Roll out to others
-4. Verify builds
 
 ## References
 
-- [Submodules Guide](./SUBMODULES_GUIDE.md)
-- [Migration Plan](../migration-plan.md)
-- [Git Submodules Docs](https://git-scm.com/book/en/v2/Git-Tools-Submodules)
+- [Submodules Guide](./SUBMODULES_GUIDE.md) - Daily operations
+- [Git Submodules Documentation](https://git-scm.com/book/en/v2/Git-Tools-Submodules)
