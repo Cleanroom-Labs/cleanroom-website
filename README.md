@@ -125,6 +125,7 @@ See [docs/CI_CD_GUIDE.md](docs/CI_CD_GUIDE.md) for details.
 ## Documentation
 
 - [Architecture](docs/ARCHITECTURE.md) - Design decisions and rationale
-- [Submodules Guide](docs/SUBMODULES_GUIDE.md) - Daily operations and troubleshooting
+- [Submodules Guide](docs/SUBMODULES_GUIDE.md) - Daily operations
 - [CI/CD Guide](docs/CI_CD_GUIDE.md) - Workflow configuration
 - [Deployment Guide](docs/DEPLOYMENT_GUIDE.md) - Production deployment steps
+- [Troubleshooting](docs/TROUBLESHOOTING.md) - Common issues and solutions
