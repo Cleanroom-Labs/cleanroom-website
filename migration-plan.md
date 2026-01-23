@@ -52,6 +52,35 @@ git push                 # Triggers automatic Vercel deployment
 - Sphinx build fails? Check Python venv and Graphviz installation
 - See full troubleshooting guide below
 
+## Migration Progress
+
+### Phase 1: Documentation Infrastructure ✅ Complete
+- [x] Sphinx documentation setup with nested submodules
+- [x] Build script (`scripts/build-docs.mjs`) with cross-platform support
+- [x] Python venv integration
+- [x] GitHub Actions CI/CD (`build-all-docs.yml`, `verify-submodules.yml`)
+- [x] Output to `public/docs/` (gitignored)
+
+### Phase 2: Next.js Integration ❌ Not Started
+- [ ] Initialize Next.js project (Section 1)
+- [ ] Install dependencies - Tailwind, fs-extra (Section 1)
+- [ ] Configure `next.config.js` with security headers (Section 2)
+- [ ] Add npm scripts to `package.json` (Section 2)
+
+### Phase 3: Web UI ❌ Not Started
+- [ ] Create Layout component with SEO meta tags (Section 3)
+- [ ] Create docs landing page (Section 2)
+- [ ] Implement navigation
+
+### Phase 4: Deployment ❌ Not Started
+- [ ] Set up Vercel account and connect repo (Section 4)
+- [ ] Configure build settings (Section 4)
+- [ ] Set up custom domain - cleanroomlabs.dev (Section 5)
+
+### Phase 5: Monitoring ❌ Not Started
+- [ ] Add Vercel Analytics (Section 7)
+- [ ] Set up Sentry error monitoring (Section 8)
+
 ## 1. Project Setup & Development
 
 1. **Initialize Next.js project:**
@@ -158,94 +187,19 @@ git push                 # Triggers automatic Vercel deployment
 
 ## 2. Sphinx Documentation Integration
 
-1. **Create a build script (`scripts/build-docs.mjs`):**
+1. **Build script (`scripts/build-docs.mjs`):**
 
-   Note: Using `.mjs` extension for ES modules compatibility with modern Next.js.
+   > **✅ Implemented:** This script already exists. See `scripts/build-docs.mjs` for the full implementation.
 
-   ```javascript
-   import { execSync } from 'child_process';
-   import fs from 'fs-extra';
-   import path from 'path';
-   import { fileURLToPath } from 'url';
-   import { dirname } from 'path';
-
-   const __filename = fileURLToPath(import.meta.url);
-   const __dirname = dirname(__filename);
-
-   const SPHINX_DIR = path.resolve(__dirname, '../cleanroom-technical-docs');
-   const SPHINX_SOURCE = path.join(SPHINX_DIR, 'source');
-   const SPHINX_BUILD = path.join(SPHINX_DIR, 'build/html');
-   const TARGET_DIR = path.resolve(__dirname, '../public/docs');
-
-   const isWindows = process.platform === 'win32';
-   const VENV_PYTHON = isWindows
-     ? path.join(SPHINX_DIR, '.venv/Scripts/python.exe')
-     : path.join(SPHINX_DIR, '.venv/bin/python');
-
-   try {
-     if (!fs.existsSync(SPHINX_DIR)) {
-       throw new Error(`Sphinx directory not found: ${SPHINX_DIR}\nExpected submodule at cleanroom-technical-docs/.`);
-     }
-
-     if (!fs.existsSync(SPHINX_SOURCE)) {
-       throw new Error(`Sphinx source directory not found: ${SPHINX_SOURCE}`);
-     }
-
-     console.log('Building Sphinx documentation...');
-     console.log(`Sphinx directory: ${SPHINX_DIR}`);
-
-     let sphinxCmd;
-     if (fs.existsSync(VENV_PYTHON)) {
-       sphinxCmd = `"${VENV_PYTHON}" -m sphinx -M html source build`;
-       console.log('Using virtual environment Python');
-     } else {
-       // Fallback to system Sphinx (requires sphinx-build in PATH)
-       sphinxCmd = isWindows
-         ? 'sphinx-build -M html source build'
-         : 'make html';
-       console.log('Using system Sphinx');
-     }
-
-     try {
-       execSync(sphinxCmd, {
-         cwd: SPHINX_DIR,
-         stdio: 'inherit',
-         shell: true
-       });
-     } catch (buildError) {
-       throw new Error(`Sphinx build failed. Check that:\n` +
-         `1. Python venv is set up: ${VENV_PYTHON}\n` +
-         `2. Dependencies installed: pip install -r requirements.txt\n` +
-         `3. Graphviz is installed (for needflow diagrams)\n` +
-         `Original error: ${buildError.message}`);
-     }
-
-     if (!fs.existsSync(SPHINX_BUILD)) {
-       throw new Error(`Sphinx build directory not found: ${SPHINX_BUILD}`);
-     }
-
-     console.log('Copying documentation to public folder...');
-     fs.ensureDirSync(TARGET_DIR);
-
-     try {
-       fs.copySync(SPHINX_BUILD, TARGET_DIR, { overwrite: true });
-     } catch (copyError) {
-       throw new Error(`Failed to copy docs to public folder: ${copyError.message}`);
-     }
-
-     const indexPath = path.join(TARGET_DIR, 'index.html');
-     if (!fs.existsSync(indexPath)) {
-       throw new Error(`Documentation index.html not found after copy: ${indexPath}`);
-     }
-
-     console.log('✓ Documentation integrated successfully!');
-     console.log(`  Source: ${SPHINX_BUILD}`);
-     console.log(`  Target: ${TARGET_DIR}`);
-   } catch (error) {
-     console.error('✗ Documentation build failed:', error.message);
-     process.exit(1);
-   }
-   ```
+   The existing script handles:
+   - Submodule verification
+   - Python 3 version check
+   - Virtual environment setup (creates `.venv` if missing)
+   - Dependency installation from `requirements.txt`
+   - Sphinx build execution
+   - Cross-platform support (Windows/macOS/Linux)
+   - Colorful console output with status indicators
+   - Output copying to `public/docs/`
 
 2. **Configure Next.js to serve Sphinx docs (`next.config.js`):**
    ```javascript
@@ -547,7 +501,7 @@ jobs:
         with:
           python-version: '3.11'
           cache: 'pip'
-          cache-dependency-path: '../cleanroom-technical-docs/requirements.txt'
+          cache-dependency-path: 'cleanroom-technical-docs/requirements.txt'
 
       - name: Install system dependencies
         run: sudo apt-get update && sudo apt-get install -y graphviz
