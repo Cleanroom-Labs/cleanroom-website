@@ -128,5 +128,4 @@ See [docs/CI_CD_GUIDE.md](docs/CI_CD_GUIDE.md) for details.
 - [Submodules Guide](docs/SUBMODULES_GUIDE.md) - Daily operations and troubleshooting
 - [CI/CD Guide](docs/CI_CD_GUIDE.md) - Workflow configuration
 - [Deployment Guide](docs/DEPLOYMENT_GUIDE.md) - Production deployment steps
-- [Team Training](docs/TEAM_TRAINING.md) - Onboarding material
 - [Migration Plan](migration-plan.md) - Original migration documentation

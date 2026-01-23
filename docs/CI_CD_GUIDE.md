@@ -17,7 +17,7 @@ The CI/CD system consists of **three workflows** that handle different aspects o
 **What it does:**
 1. Checks out repository with all nested submodules
 2. Verifies submodule initialization
-3. Builds each project's documentation (whisper, deploy, transfer)
+3. Builds each project's documentation (project submodules)
 4. Builds master documentation with intersphinx references
 5. Verifies cross-references are working
 6. Deploys to GitHub Pages (main branch only)
@@ -71,7 +71,7 @@ Developer → Push to main → CI Build → GitHub Pages
                 ↓
            Submodules updated
                 ↓
-           Individual builds (whisper, deploy, transfer)
+           Individual builds (project submodules)
                 ↓
            Master build with intersphinx
                 ↓
@@ -136,20 +136,20 @@ This simulates the GitHub Actions workflow and will:
 
 ### Deploying Documentation Changes
 
-**Scenario 1: Update content in a project (e.g., whisper)**
+**Scenario 1: Update content in a project**
 
 ```bash
 # Edit content in project docs
-cd cleanroom-technical-docs/airgap-whisper-docs
+cd cleanroom-technical-docs/<project>-docs
 # ... make changes ...
 git add .
-git commit -m "Update whisper documentation"
+git commit -m "Update documentation"
 git push
 
 # Update submodule reference
 cd ..
-git add airgap-whisper-docs
-git commit -m "Update whisper docs submodule"
+git add <project>-docs
+git commit -m "Update docs submodule"
 git push
 
 # This triggers cleanroom-technical-docs CI → deploys to GitHub Pages
@@ -186,7 +186,7 @@ git push
 
 ```bash
 # Tag the docs
-cd cleanroom-technical-docs/airgap-whisper-docs
+cd cleanroom-technical-docs/<project>-docs
 git tag v1.0.0-rc.1
 git push origin v1.0.0-rc.1
 
@@ -211,7 +211,7 @@ This triggers:
 
 ```bash
 # Tag the docs (final)
-cd cleanroom-technical-docs/airgap-whisper-docs
+cd cleanroom-technical-docs/<project>-docs
 git tag v1.0.0
 git push origin v1.0.0
 
@@ -253,7 +253,7 @@ git push
 **Error: Submodule not initialized**
 
 ```
-ERROR: Submodule airgap-whisper-docs not initialized
+ERROR: Submodule <project>-docs not initialized
 ```
 
 **Cause:** Checkout didn't include `submodules: recursive`
@@ -292,7 +292,7 @@ WARNING: intersphinx inventory 'https://...' not fetchable
 ```yaml
 - name: Build individual project documentation
   run: |
-    for project in airgap-whisper-docs ...; do
+    for project in <project>-docs ...; do
       cd $project
       sphinx-build -M html source build
       cd ..
@@ -374,13 +374,13 @@ on:
 **Solution:**
 ```bash
 cd cleanroom-technical-docs
-git submodule update --remote airgap-whisper-docs
+git submodule update --remote <project>-docs
 # Or manually:
-cd airgap-whisper-docs
+cd <project>-docs
 git checkout v1.0.0
 cd ..
-git add airgap-whisper-docs
-git commit -m "Update whisper docs to v1.0.0"
+git add <project>-docs
+git commit -m "Update docs to v1.0.0"
 ```
 
 ### Local Build Works, CI Fails
