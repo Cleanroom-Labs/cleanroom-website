@@ -1,2 +1,12 @@
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# Sphinx build output
 /public/docs/
+
+# Claude
 .claude/
