@@ -1,17 +1,43 @@
 # Website Migration Plan: Articulation to Next.js with Vercel
 
-## Important: Repository Structure
+## Repository Structure
 
-This plan assumes `cleanroom-technical-docs` is a **sibling directory** to `cleanroom-website`:
+This plan uses a **sibling directory structure** where both repositories exist side-by-side:
+
 ```
 Projects/
 ├── cleanroom-website/          # Next.js website (this project)
-└── cleanroom-technical-docs/   # Sphinx documentation (sibling directory)
+└── cleanroom-technical-docs/   # Sphinx documentation
 ```
 
-**Alternative: Submodule approach** (if you prefer tighter integration):
-- Add as submodule: `git submodule add <repo-url> docs-source`
-- Update script paths accordingly to `./docs-source` instead of `../cleanroom-technical-docs`
+The build script automatically looks for `../cleanroom-technical-docs` relative to the website directory.
+
+**Note:** Alternative approaches (submodules, monorepo) are discussed in the Appendix.
+
+## Quick Reference
+
+**Essential Commands:**
+```bash
+# Initial setup
+npm run build-docs        # Build Sphinx documentation
+npm run dev              # Start dev server (fast, uses cached docs)
+npm run dev:clean        # Rebuild docs + start dev server
+npm run build            # Production build (rebuilds docs)
+
+# Deployment
+git push                 # Triggers automatic Vercel deployment
+```
+
+**Key Files:**
+- `scripts/build-docs.mjs` - Sphinx build integration
+- `next.config.js` - Next.js configuration with security headers
+- `public/docs/` - Generated Sphinx output (gitignored)
+- `.gitignore` - Excludes node_modules, .next, public/docs, etc.
+
+**Troubleshooting:**
+- Docs not loading? Run `npm run build-docs` first
+- Sphinx build fails? Check Python venv and Graphviz installation
+- See full troubleshooting guide below
 
 ## 1. Project Setup & Development
 
@@ -133,20 +159,17 @@ Projects/
    const __filename = fileURLToPath(import.meta.url);
    const __dirname = dirname(__filename);
 
-   // Path to your cleanroom-technical-docs directory
    const SPHINX_DIR = path.resolve(__dirname, '../../cleanroom-technical-docs');
    const SPHINX_SOURCE = path.join(SPHINX_DIR, 'source');
    const SPHINX_BUILD = path.join(SPHINX_DIR, 'build/html');
    const TARGET_DIR = path.resolve(__dirname, '../public/docs');
 
-   // Platform-specific Python paths
    const isWindows = process.platform === 'win32';
    const VENV_PYTHON = isWindows
      ? path.join(SPHINX_DIR, '.venv/Scripts/python.exe')
      : path.join(SPHINX_DIR, '.venv/bin/python');
 
    try {
-     // Verify Sphinx directory exists
      if (!fs.existsSync(SPHINX_DIR)) {
        throw new Error(`Sphinx directory not found: ${SPHINX_DIR}\nExpected sibling directory structure.`);
      }
@@ -155,13 +178,11 @@ Projects/
        throw new Error(`Sphinx source directory not found: ${SPHINX_SOURCE}`);
      }
 
-     // Build Sphinx docs
      console.log('Building Sphinx documentation...');
      console.log(`Sphinx directory: ${SPHINX_DIR}`);
 
      let sphinxCmd;
      if (fs.existsSync(VENV_PYTHON)) {
-       // Use venv Python (cross-platform)
        sphinxCmd = `"${VENV_PYTHON}" -m sphinx -M html source build`;
        console.log('Using virtual environment Python');
      } else {
@@ -186,12 +207,10 @@ Projects/
          `Original error: ${buildError.message}`);
      }
 
-     // Verify build output exists
      if (!fs.existsSync(SPHINX_BUILD)) {
        throw new Error(`Sphinx build directory not found: ${SPHINX_BUILD}`);
      }
 
-     // Copy built files to public/docs
      console.log('Copying documentation to public folder...');
      fs.ensureDirSync(TARGET_DIR);
 
@@ -201,7 +220,6 @@ Projects/
        throw new Error(`Failed to copy docs to public folder: ${copyError.message}`);
      }
 
-     // Verify critical files were copied
      const indexPath = path.join(TARGET_DIR, 'index.html');
      if (!fs.existsSync(indexPath)) {
        throw new Error(`Documentation index.html not found after copy: ${indexPath}`);
@@ -222,15 +240,7 @@ Projects/
    const nextConfig = {
      reactStrictMode: true,
 
-     // Serve Sphinx HTML directly (Next.js auto-serves /docs/index.html for /docs)
-     async rewrites() {
-       return [
-         {
-           source: '/docs/:path*',
-           destination: '/docs/:path*',
-         },
-       ];
-     },
+     // Next.js automatically serves static files from public/docs/
 
      // Security headers
      async headers() {
@@ -261,11 +271,29 @@ Projects/
    module.exports = nextConfig;
    ```
 
-   **Note on CSS Integration:**
-   - Sphinx generates its own CSS in `_static/` which will be served from `/docs/_static/`
-   - Tailwind CSS in your Next.js app won't affect Sphinx docs (different namespaces)
-   - If you want unified styling, customize Sphinx's CSS in `source/_static/custom.css`
-   - Consider using CSS variables to share colors/fonts between both systems
+### CSS Integration Strategy
+
+**Approach:** Keep Sphinx and Next.js styling separate (no conflicts)
+- Sphinx generates its own CSS in `public/docs/_static/`
+- Next.js/Tailwind CSS only affects your React components
+- Both systems coexist without interference
+
+**For unified branding:**
+1. Define CSS variables for shared colors/fonts
+2. Customize Sphinx theme via `cleanroom-technical-docs/source/_static/custom.css`
+3. Reference same color values in both stylesheets
+
+**Example custom.css:**
+```css
+:root {
+  --brand-primary: #3b82f6;
+  --brand-dark: #1e293b;
+}
+
+.wy-nav-top {
+  background-color: var(--brand-primary);
+}
+```
 
 3. **Create a docs landing page component (`pages/docs.js`):**
    ```javascript
@@ -323,18 +351,7 @@ Projects/
    // Can be parsed and integrated into a unified search experience
    ```
 
-## 3. Styling & Customization
-
-1. **Create theme similar to dreamsofcode.io:**
-   - Dark mode with clean typography
-   - Code highlighting with Prism.js
-   - Custom styling for docs section to match your branding
-
-2. **Modify Sphinx theme as needed:**
-   - Create custom CSS to override Sphinx styles for better integration
-   - Customize `_static/custom.css` in Sphinx to match website theme
-
-## 4. SEO & Performance Optimization
+## 3. SEO & Performance Optimization
 
 1. **Create robots.txt (`public/robots.txt`):**
    ```txt
@@ -412,7 +429,7 @@ Projects/
    }
    ```
 
-## 5. Vercel Deployment
+## 4. Vercel Deployment
 
 1. **Initialize Git repository:**
    ```bash
@@ -458,38 +475,7 @@ Projects/
    - Vercel provides a preview URL (yourproject.vercel.app)
    - Watch build logs for any Sphinx or Python issues
 
-7. **Optimize build caching (optional):**
-
-   To speed up builds, consider caching Sphinx output if docs haven't changed:
-
-   Update `scripts/build-docs.mjs` to check for changes:
-   ```javascript
-   // Add at the top of try block
-   const lastCommitPath = path.join(__dirname, '../.sphinx-last-commit');
-   const currentCommit = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
-
-   if (fs.existsSync(lastCommitPath)) {
-     const lastCommit = fs.readFileSync(lastCommitPath, 'utf8').trim();
-     const docsChanged = execSync(
-       `git diff --quiet ${lastCommit} HEAD -- ../cleanroom-technical-docs || echo changed`,
-       { encoding: 'utf8' }
-     ).trim();
-
-     if (docsChanged !== 'changed' && fs.existsSync(TARGET_DIR)) {
-       console.log('✓ Docs unchanged, using cached build');
-       return;
-     }
-   }
-
-   // ... existing build logic ...
-
-   // After successful build, save commit hash
-   fs.writeFileSync(lastCommitPath, currentCommit);
-   ```
-
-   This skips Sphinx rebuild if technical docs haven't changed, significantly speeding up deployments.
-
-## 6. Custom Domain Setup
+## 5. Custom Domain Setup
 
 1. **Add domain in Vercel:**
    - Go to project settings in Vercel dashboard
@@ -510,7 +496,7 @@ Projects/
    - SSL certificate is automatically issued
    - Custom domain becomes active (may take up to 48 hours for DNS propagation)
 
-## 7. Continuous Integration
+## 6. Continuous Integration
 
 Vercel automatically builds and deploys on every push to your repository and creates preview deployments for pull requests.
 
@@ -594,7 +580,7 @@ jobs:
 - ✓ Updated to latest action versions
 - ✓ Python venv activation in CI
 
-## 8. Analytics Integration
+## 7. Analytics Integration
 
 1. **Add Vercel Analytics:**
    ```bash
@@ -615,7 +601,7 @@ jobs:
    }
    ```
 
-## 9. Error Monitoring with Sentry
+## 8. Error Monitoring with Sentry
 
 1. **Create free Sentry account:**
    - Sign up at sentry.io
@@ -651,7 +637,7 @@ jobs:
 
 This provides real-time error alerts and helps diagnose production issues.
 
-## 10. Pre-Launch Checklist
+## 9. Pre-Launch Checklist
 
 **Before deploying to production:**
 
@@ -698,7 +684,7 @@ If critical issues are found:
 3. Investigate issues in preview deployment
 4. Redeploy when fixed
 
-## 11. Staging Environment (Optional but Recommended)
+## 10. Staging Environment (Optional but Recommended)
 
 **Use Vercel preview deployments:**
 
@@ -727,7 +713,7 @@ https://cleanroom-website-git-feature-branch-username.vercel.app
 
 ---
 
-## 12. Optional: Testing Strategy
+## 11. Optional: Testing Strategy
 
 While not strictly required for launch, testing improves reliability:
 
@@ -793,7 +779,7 @@ Add to GitHub Actions for automated performance checks:
     uploadArtifacts: true
 ```
 
-## 13. Optional: TypeScript Migration
+## 12. Optional: TypeScript Migration
 
 While this plan uses JavaScript, TypeScript is recommended for larger projects:
 
@@ -840,53 +826,40 @@ While this plan uses JavaScript, TypeScript is recommended for larger projects:
 
 ---
 
-## Summary: Key Improvements in This Plan
+## 13. Advanced Optimizations
 
-This migration plan includes comprehensive improvements across all areas:
+**Note:** Implement these optimizations after basic deployment is working.
 
-### Critical Fixes
-1. ✓ Clarified repository structure (sibling directories vs submodules)
-2. ✓ Fixed numbering error (duplicate step 3)
-3. ✓ Converted build script to ES modules (.mjs)
-4. ✓ Cross-platform Python path support (Windows/Mac/Linux)
-5. ✓ Fixed Next.js Link syntax (removed deprecated `<a>` wrapper)
-6. ✓ Improved error messages with specific troubleshooting steps
-7. ✓ fs-extra as dev dependency (not production)
+### Build Caching
 
-### Performance & Developer Experience
-8. ✓ Optimized dev script (doesn't rebuild docs on every start)
-9. ✓ Added dev:clean for forced rebuild
-10. ✓ Removed redundant rewrites in next.config.js
-11. ✓ Eliminated duplicate Sphinx build in CI workflow
-12. ✓ Uses npm ci in CI for faster, reproducible installs
+To speed up builds, consider caching Sphinx output if docs haven't changed.
 
-### Configuration & Setup
-13. ✓ Comprehensive .gitignore template
-14. ✓ Node.js version specification (engines field)
-15. ✓ Python version requirements (3.9+ minimum)
-16. ✓ Proper pip cache configuration for CI
+Update `scripts/build-docs.mjs` to check for changes:
+```javascript
+// Add at the top of try block
+const lastCommitPath = path.join(__dirname, '../.sphinx-last-commit');
+const currentCommit = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
 
-### Security & SEO
-17. ✓ Content-Security-Policy header with Sphinx compatibility
-18. ✓ robots.txt configuration
-19. ✓ Sitemap generation with next-sitemap
-20. ✓ SEO meta tags and Open Graph integration
-21. ✓ Security headers for production
+if (fs.existsSync(lastCommitPath)) {
+  const lastCommit = fs.readFileSync(lastCommitPath, 'utf8').trim();
+  const docsChanged = execSync(
+    `git diff --quiet ${lastCommit} HEAD -- ../cleanroom-technical-docs || echo changed`,
+    { encoding: 'utf8' }
+  ).trim();
 
-### Documentation & Guidance
-22. ✓ Sphinx search integration explained
-23. ✓ CSS conflict resolution strategy
-24. ✓ Vercel build timeout considerations
-25. ✓ Build artifact verification in CI
-26. ✓ TypeScript migration path (optional)
-27. ✓ Performance optimization recommendations
+  if (docsChanged !== 'changed' && fs.existsSync(TARGET_DIR)) {
+    console.log('✓ Docs unchanged, using cached build');
+    return;
+  }
+}
 
-### Architecture Improvements
-- ES modules throughout for modern JavaScript
-- Platform-specific handling (Windows/Unix)
-- Detailed error context for debugging
-- Proper Python virtual environment in CI
-- Next.js 13+ best practices
+// ... existing build logic ...
+
+// After successful build, save commit hash
+fs.writeFileSync(lastCommitPath, currentCommit);
+```
+
+This skips Sphinx rebuild if technical docs haven't changed, significantly speeding up deployments.
 
 ---
 
@@ -926,67 +899,77 @@ This migration plan includes comprehensive improvements across all areas:
 - **ES Modules:** Modern JavaScript, better tree-shaking, standardized
 - **Tailwind CSS:** Utility-first, fast development, small bundle size
 
+### Alternative Repository Structures
+
+**Sibling Directories (Recommended):**
+```
+Projects/
+├── cleanroom-website/
+└── cleanroom-technical-docs/
+```
+- Simple and clean separation
+- Easy to work with independently
+- Build script uses `../cleanroom-technical-docs`
+
+**Submodule Approach:**
+- Add as submodule: `git submodule add <repo-url> docs-source`
+- Tighter integration within the website repo
+- Update script paths to `./docs-source`
+- Requires submodule commands for updates
+
+**Monorepo Approach:**
+- Use tools like Turborepo or Nx
+- Single repository with multiple packages
+- Shared dependencies and build coordination
+- More complex setup, better for larger teams
+
 ---
 
 ## Quick Start Checklist
 
-Use this checklist to track your migration progress:
+### Phase 1: Project Setup (5-10 min)
+- [ ] Initialize Next.js project and install dependencies
+- [ ] Configure Node.js version (18+) in package.json
+- [ ] Set up .gitignore with comprehensive exclusions
+- [ ] Set up Python venv in cleanroom-technical-docs
+- [ ] Install Graphviz system dependency
 
-### Initial Setup
-- [ ] 1. Initialize Next.js project
-- [ ] 2. Install all Node.js dependencies
-- [ ] 3. Configure Node.js version in package.json (engines field)
-- [ ] 4. Set up .gitignore with all necessary exclusions
-- [ ] 5. Set up Python venv for Sphinx (in cleanroom-technical-docs)
-- [ ] 6. Install Python dependencies in venv
-- [ ] 7. Install Graphviz system dependency
+### Phase 2: Build Integration (10-15 min)
+- [ ] Create build-docs.mjs script with cross-platform support
+- [ ] Configure next.config.js with security headers
+- [ ] Update package.json scripts (dev, dev:clean, build)
+- [ ] Test builds: `npm run build-docs && npm run dev`
 
-### Build Configuration
-- [ ] 8. Create build-docs.mjs script with cross-platform support
-- [ ] 9. Configure next.config.js with rewrites and security headers
-- [ ] 10. Update package.json scripts (dev, dev:clean, build, build-docs)
-- [ ] 11. Test local Sphinx build: `npm run build-docs`
-- [ ] 12. Test local Next.js dev: `npm run dev`
+### Phase 3: Core Pages (1-2 hours)
+- [ ] Implement Layout component with SEO meta tags
+- [ ] Create home page, docs landing page, navigation
+- [ ] Verify mobile responsive design
+- [ ] Test on Chrome, Firefox, Safari
 
-### Content & Pages
-- [ ] 13. Implement Layout component with SEO meta tags
-- [ ] 14. Create home page
-- [ ] 15. Create docs landing page
-- [ ] 16. Implement navigation and footer
-- [ ] 17. Verify mobile responsive design
+### Phase 4: SEO & Performance (30 min)
+- [ ] Configure robots.txt and sitemap (next-sitemap)
+- [ ] Add Open Graph meta tags
+- [ ] Run Lighthouse audit (aim for >90)
 
-### SEO & Performance
-- [ ] 18. Configure robots.txt
-- [ ] 19. Set up sitemap generation (next-sitemap)
-- [ ] 20. Add SEO meta tags and Open Graph
-- [ ] 21. Optimize images with Next.js Image component
+### Phase 5: CI/CD (20 min)
+- [ ] Set up GitHub Actions workflow
+- [ ] Verify CI builds successfully with artifact checks
 
-### CI/CD & Testing
-- [ ] 22. Set up GitHub Actions workflow
-- [ ] 23. Verify CI builds successfully
-- [ ] 24. Test on multiple browsers
-- [ ] 25. Run Lighthouse audit
+### Phase 6: Vercel Deployment (15 min)
+- [ ] Create Vercel account and connect GitHub repo
+- [ ] Configure build settings and environment variables
+- [ ] Verify preview deployment works
 
-### Deployment
-- [ ] 26. Create Vercel account and connect repo
-- [ ] 27. Configure Vercel build settings
-- [ ] 28. Add environment variables (Sentry DSN, etc.)
-- [ ] 29. Verify preview deployment works
-- [ ] 30. Configure custom domain in Vercel
-- [ ] 31. Update DNS records in Porkbun
-- [ ] 32. Wait for SSL certificate issuance
+### Phase 7: Domain Setup (10 min + DNS propagation)
+- [ ] Configure custom domain in Vercel
+- [ ] Update DNS records in Porkbun (A and CNAME)
+- [ ] Wait for SSL certificate (automatic)
 
-### Monitoring
-- [ ] 33. Set up Sentry error monitoring
-- [ ] 34. Add Vercel Analytics
-- [ ] 35. Configure alert notifications
-
-### Launch
-- [ ] 36. Complete pre-launch checklist (Section 10)
-- [ ] 37. Deploy to production
-- [ ] 38. Verify post-launch checklist (Section 10)
-- [ ] 39. Monitor for errors and performance issues
-- [ ] 40. Document rollback procedure for team
+### Phase 8: Monitoring & Launch
+- [ ] Set up Sentry error monitoring and Vercel Analytics
+- [ ] Complete pre-launch checklist (Section 9)
+- [ ] Deploy to production and verify all systems
+- [ ] Monitor for errors and performance issues
 
 ---
 
