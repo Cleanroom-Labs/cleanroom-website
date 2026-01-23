@@ -21,8 +21,8 @@
 
 4. **Set up Python environment for Sphinx (required):**
    ```bash
-   # Navigate to technical-docs directory
-   cd ../technical-docs
+   # Navigate to cleanroom-technical-docs directory
+   cd ../cleanroom-technical-docs
    python3 -m venv .venv
    source .venv/bin/activate  # On Windows: .venv\Scripts\activate
    pip install -r requirements.txt
@@ -61,8 +61,8 @@
    const fs = require('fs-extra');
    const path = require('path');
 
-   // Path to your technical-docs directory (CORRECTED PATH)
-   const SPHINX_DIR = '../technical-docs';
+   // Path to your cleanroom-technical-docs directory (CORRECTED PATH)
+   const SPHINX_DIR = '../cleanroom-technical-docs';
    const VENV_PYTHON = path.join(SPHINX_DIR, '.venv/bin/python');
    const TARGET_DIR = './public/docs';
 
@@ -255,7 +255,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          submodules: true  # Pull technical-docs submodule
+          submodules: true  # Pull cleanroom-technical-docs submodule
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -273,7 +273,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y graphviz
 
       - name: Install Python dependencies
-        working-directory: ./technical-docs
+        working-directory: ./cleanroom-technical-docs
         run: pip install -r requirements.txt
 
       - name: Install npm dependencies
@@ -283,7 +283,7 @@ jobs:
         run: npm run lint
 
       - name: Build Sphinx documentation
-        working-directory: ./technical-docs
+        working-directory: ./cleanroom-technical-docs
         run: make html
 
       - name: Build Next.js site
@@ -439,7 +439,7 @@ https://cleanroom-website-git-feature-branch-username.vercel.app
 This migration plan has been enhanced with several critical improvements:
 
 ### Critical Fixes
-1. ✓ Correct Sphinx directory path (`technical-docs` not `sphinx-docs`)
+1. ✓ Correct Sphinx directory path (`cleanroom-technical-docs` not `sphinx-docs`)
 2. ✓ Python environment setup with venv
 3. ✓ Install fs-extra dependency
 4. ✓ Better docs integration (rewrites, not redirects)
@@ -535,7 +535,7 @@ Use this checklist to track your migration progress:
 ### Common Issues and Solutions
 
 **Issue: Sphinx build fails with "No module named 'sphinx'"**
-- Solution: Activate the virtual environment first: `source ../technical-docs/.venv/bin/activate`
+- Solution: Activate the virtual environment first: `source ../cleanroom-technical-docs/.venv/bin/activate`
 
 **Issue: needflow diagrams not rendering**
 - Solution: Install Graphviz system package (see step 4 in Project Setup)
@@ -577,7 +577,7 @@ Use this checklist to track your migration progress:
 - Verify SSL certificate renewal (automatic with Vercel)
 
 ### Updating Documentation
-1. Make changes in technical-docs repository
+1. Make changes in cleanroom-technical-docs repository
 2. Commit and push changes
 3. Website will automatically rebuild and redeploy
 4. Verify changes on preview deployment before merging to main

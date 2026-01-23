@@ -1,3 +1,3 @@
-[submodule "technical-docs"]
-	path = technical-docs
+[submodule "cleanroom-technical-docs"]
+	path = cleanroom-technical-docs
 	url = /Users/andfranklin/Projects/cleanroom-technical-docs
