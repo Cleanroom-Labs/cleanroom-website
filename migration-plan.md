@@ -2,17 +2,30 @@
 
 ## Repository Structure
 
-This plan uses a **sibling directory structure** where both repositories exist side-by-side:
+This plan uses a **git submodule architecture** where the technical documentation is embedded within the website repository:
 
 ```
-Projects/
-├── cleanroom-website/          # Next.js website (this project)
-└── cleanroom-technical-docs/   # Sphinx documentation
+cleanroom-website/
+├── cleanroom-technical-docs/   # Git submodule → Sphinx documentation
+│   ├── airgap-whisper-docs/    # Git submodule → Project docs
+│   ├── airgap-deploy-docs/     # Git submodule → Project docs
+│   ├── airgap-transfer-docs/   # Git submodule → Project docs
+│   ├── source/                 # Master documentation source
+│   └── build/                  # Generated documentation
+├── scripts/
+│   └── build-docs.mjs          # Sphinx build integration
+├── public/
+│   └── docs/                   # Copied Sphinx output (gitignored)
+└── ... (Next.js files)
 ```
 
-The build script automatically looks for `../cleanroom-technical-docs` relative to the website directory.
+The build script copies documentation from the submodule's build output to `public/docs/`.
 
-**Note:** Alternative approaches (submodules, monorepo) are discussed in the Appendix.
+**Benefits of submodule approach:**
+- Single repository to clone for development
+- Documentation versions tied to website versions via git SHAs
+- Simplified CI/CD (no coordination between repos needed)
+- Independent documentation development workflow
 
 ## Quick Reference
 
@@ -159,7 +172,7 @@ git push                 # Triggers automatic Vercel deployment
    const __filename = fileURLToPath(import.meta.url);
    const __dirname = dirname(__filename);
 
-   const SPHINX_DIR = path.resolve(__dirname, '../../cleanroom-technical-docs');
+   const SPHINX_DIR = path.resolve(__dirname, '../cleanroom-technical-docs');
    const SPHINX_SOURCE = path.join(SPHINX_DIR, 'source');
    const SPHINX_BUILD = path.join(SPHINX_DIR, 'build/html');
    const TARGET_DIR = path.resolve(__dirname, '../public/docs');
@@ -171,7 +184,7 @@ git push                 # Triggers automatic Vercel deployment
 
    try {
      if (!fs.existsSync(SPHINX_DIR)) {
-       throw new Error(`Sphinx directory not found: ${SPHINX_DIR}\nExpected sibling directory structure.`);
+       throw new Error(`Sphinx directory not found: ${SPHINX_DIR}\nExpected submodule at cleanroom-technical-docs/.`);
      }
 
      if (!fs.existsSync(SPHINX_SOURCE)) {
@@ -517,16 +530,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        # If using submodules, add: with: { submodules: true }
-
-      - name: Checkout Sphinx docs (sibling directory)
+      - name: Checkout repository with submodules
         uses: actions/checkout@v4
         with:
-          repository: your-org/cleanroom-technical-docs
-          path: ../cleanroom-technical-docs
-          # Or use submodules approach if preferred
+          submodules: recursive  # Initialize all nested submodules
+          fetch-depth: 0         # Full history for proper submodule resolution
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -573,7 +581,7 @@ jobs:
 ```
 
 **Key improvements:**
-- ✓ Fixed pip cache path for sibling directory structure
+- ✓ Recursive submodule checkout with full history
 - ✓ Removed duplicate Sphinx build (npm run build includes it)
 - ✓ Uses `npm ci` for faster, reproducible installs
 - ✓ Verifies artifacts exist instead of just listing
@@ -899,28 +907,52 @@ This skips Sphinx rebuild if technical docs haven't changed, significantly speed
 - **ES Modules:** Modern JavaScript, better tree-shaking, standardized
 - **Tailwind CSS:** Utility-first, fast development, small bundle size
 
-### Alternative Repository Structures
+### Repository Structure Decision
 
-**Sibling Directories (Recommended):**
+**Chosen Approach: Git Submodules** ✅
+
+```
+cleanroom-website/
+└── cleanroom-technical-docs/  # Git submodule
+    ├── airgap-whisper-docs/   # Nested submodule
+    ├── airgap-deploy-docs/    # Nested submodule
+    └── airgap-transfer-docs/  # Nested submodule
+```
+
+**Why submodules:**
+- Documentation version tied to website version via git SHAs
+- Single repository to clone for development
+- Simplified CI/CD (no coordination between repos)
+- Independent documentation development workflow
+- Version coupling for reproducible deployments
+
+**Setup:**
+```bash
+# Clone with all submodules
+git clone --recurse-submodules <repo-url>
+
+# Or initialize submodules after clone
+git submodule update --init --recursive
+
+# Update submodules to latest
+git submodule update --remote --recursive
+```
+
+**Alternative Approaches Considered:**
+
+**Sibling Directories:**
 ```
 Projects/
 ├── cleanroom-website/
 └── cleanroom-technical-docs/
 ```
-- Simple and clean separation
-- Easy to work with independently
-- Build script uses `../cleanroom-technical-docs`
+- ❌ Rejected: Requires coordinating separate repositories
+- ❌ Documentation version not tied to website version
+- Build script would use `../../cleanroom-technical-docs`
 
-**Submodule Approach:**
-- Add as submodule: `git submodule add <repo-url> docs-source`
-- Tighter integration within the website repo
-- Update script paths to `./docs-source`
-- Requires submodule commands for updates
-
-**Monorepo Approach:**
-- Use tools like Turborepo or Nx
-- Single repository with multiple packages
-- Shared dependencies and build coordination
+**Monorepo:**
+- ❌ Rejected: Overkill for current scope
+- Would require tools like Turborepo or Nx
 - More complex setup, better for larger teams
 
 ---
@@ -928,10 +960,11 @@ Projects/
 ## Quick Start Checklist
 
 ### Phase 1: Project Setup (5-10 min)
+- [ ] Clone repository with submodules: `git clone --recurse-submodules <repo-url>`
 - [ ] Initialize Next.js project and install dependencies
 - [ ] Configure Node.js version (18+) in package.json
 - [ ] Set up .gitignore with comprehensive exclusions
-- [ ] Set up Python venv in cleanroom-technical-docs
+- [ ] Set up Python venv in cleanroom-technical-docs submodule
 - [ ] Install Graphviz system dependency
 
 ### Phase 2: Build Integration (10-15 min)
@@ -1002,15 +1035,17 @@ Projects/
   ```
 
 **Issue: "Sphinx directory not found" error**
-- Solution: Verify directory structure - cleanroom-technical-docs should be sibling to cleanroom-website
-- Check paths in build script match your actual structure
+- Solution: Verify submodules are initialized: `git submodule update --init --recursive`
+- Check that cleanroom-technical-docs exists as a submodule
+- Verify paths in build script: `../cleanroom-technical-docs` (not `../../`)
 
 **Issue: GitHub Actions failing on Sphinx build**
 - Solution: Verify workflow includes:
-  1. Python setup with correct version
-  2. Graphviz installation
-  3. Python venv creation and activation
-  4. Correct pip cache path
+  1. Checkout with `submodules: recursive`
+  2. Python setup with correct version
+  3. Graphviz installation
+  4. Python venv creation and activation
+  5. Submodule verification step
 
 **Issue: 404 errors on /docs paths in production**
 - Solution: Verify next.config.js includes rewrites configuration
