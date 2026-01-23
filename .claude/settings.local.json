@@ -17,7 +17,19 @@
       "Bash(pip install:*)",
       "Bash(sphinx-build:*)",
       "Bash(source ../../../airgap-whisper-docs/.venv/bin/activate)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(source ../../../airgap-deploy-docs/.venv/bin/activate)",
+      "Bash(source ../../../airgap-transfer-docs/.venv/bin/activate)",
+      "Bash(test:*)",
+      "Bash(.venv/bin/sphinx-build:*)",
+      "Bash(.venv/bin/pip install:*)",
+      "Bash(node scripts/build-docs.mjs:*)",
+      "Bash(./scripts/build-single-project.sh:*)",
+      "Bash(grep:*)",
+      "Bash(../.venv/bin/sphinx-build:*)",
+      "Bash(chmod:*)",
+      "Bash(./scripts/test-ci-locally.sh:*)",
+      "Bash(git rm:*)"
     ]
   }
 }
