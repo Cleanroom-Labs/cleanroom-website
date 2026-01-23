@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git submodule:*)",
+      "Bash(git config:*)",
+      "Bash(git pull:*)",
+      "Bash(make clean:*)",
+      "Bash(make:*)"
+    ]
+  }
+}
