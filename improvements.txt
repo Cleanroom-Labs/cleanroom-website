@@ -1,0 +1,5 @@
+- Make the naming schemes for the requirements and tests more consistent
+- Use consistent names for subitems (Implementation Plan or Development Plan)
+- Not sure if bidirectional linking of items is required in sphinx-needs-guide.rst
+- Not sure the "tests" and other admonitions link to the other sphinx-needs objects in the ways that claude understands it
+- ...
