@@ -6,195 +6,97 @@ See [README.md](README.md) for the current repository structure and [docs/ARCHIT
 
 ## Migration Progress
 
-### Phase 1: Documentation Infrastructure ✅ Complete
-- [x] Sphinx documentation setup with nested submodules
-- [x] Build script (`scripts/build-docs.mjs`) with cross-platform support
-- [x] Python venv integration
-- [x] GitHub Actions CI/CD (`build-all-docs.yml`, `verify-submodules.yml`)
-- [x] Output to `public/docs/` (gitignored)
+### Phase 1: Project Setup ✅ Complete
+- [x] Clone repository with submodules
+- [x] Initialize Next.js project and install dependencies
+- [x] Configure Node.js version (18+) in package.json
+- [x] Set up .gitignore
+- [x] Set up Python venv in cleanroom-technical-docs
+- [x] Install Graphviz system dependency
 
-### Phase 2: Next.js Integration ✅ Complete
-- [x] Initialize Next.js project (Section 1)
-- [x] Install dependencies - Tailwind (Section 1)
-- [x] Configure `next.config.js` with security headers (Section 2)
-- [x] Add npm scripts to `package.json` (Section 2)
+### Phase 2: Build Integration ✅ Complete
+- [x] Create build-docs.mjs script with cross-platform support
+- [x] Configure next.config.js with security headers
+- [x] Add npm scripts to package.json
+- [x] Test builds: npm run build-docs && npm run dev
 
-### Phase 3: Web UI ❌ Not Started
-- [ ] Create Layout component with SEO meta tags (Section 3)
-- [ ] Create docs landing page (Section 2)
-- [ ] Implement navigation
+### Phase 3: Core Pages 🟡 In Progress
+- [x] Create Layout component with basic SEO meta tags
+- [x] Create docs landing page
+- [x] Implement basic navigation
+- [ ] Enhance SEO meta tags (Open Graph, Twitter cards)
+- [ ] Verify mobile responsive design
+- [ ] Test on Chrome, Firefox, Safari
 
-### Phase 4: Deployment ❌ Not Started
-- [ ] Set up Vercel account and connect repo (Section 4)
-- [ ] Configure build settings (Section 4)
-- [ ] Set up custom domain - cleanroomlabs.dev (Section 5)
+### Phase 4: SEO & Performance ❌ Not Started
+- [ ] Configure robots.txt and sitemap (Section 3)
+- [ ] Run Lighthouse audit (aim for >90)
 
-### Phase 5: Monitoring ❌ Not Started
-- [ ] Add Vercel Analytics (Section 7)
+### Phase 5: CI/CD ❌ Not Started
+- [ ] Set up GitHub Actions quality-checks workflow (Section 6)
+- [ ] Verify CI builds successfully with artifact checks
+
+### Phase 6: Vercel Deployment ❌ Not Started
+- [ ] Create Vercel account and connect repo (Section 4)
+- [ ] Configure build settings and environment variables
+- [ ] Verify preview deployment works
+
+### Phase 7: Domain Setup ❌ Not Started
+- [ ] Configure custom domain in Vercel (Section 5)
+- [ ] Update DNS records in Porkbun
+- [ ] Wait for SSL certificate
+
+### Phase 8: Monitoring & Launch ❌ Not Started
+- [ ] Set up Vercel Analytics (Section 7)
 - [ ] Set up Sentry error monitoring (Section 8)
+- [ ] Complete pre-launch checklist (Section 9)
+- [ ] Deploy to production
 
-## 1. Project Setup & Development
+## 1. Project Setup & Development ✅ Complete
 
-1. **Initialize Next.js project:**
-   ```bash
-   npx create-next-app@latest cleanroom-website
-   cd cleanroom-website
-   ```
+> **Implemented.** See actual files for current configuration.
 
-2. **Add dependencies for styling:**
-   ```bash
-   npm install tailwindcss postcss autoprefixer
-   npx tailwindcss init -p
-   ```
+| File | Purpose |
+|------|---------|
+| `package.json` | Dependencies (Next.js, Tailwind, fs-extra) and npm scripts |
+| `.gitignore` | Ignores `node_modules/`, `.next/`, `public/docs/`, `.venv/`, etc. |
+| `next.config.js` | Security headers (X-Frame-Options, X-Content-Type-Options, Referrer-Policy) |
 
-3. **Add additional dependencies:**
-   ```bash
-   npm install --save-dev fs-extra
-   ```
+**Python environment:** The build script auto-creates `.venv` in `cleanroom-technical-docs/` if missing. Requires Python 3.9+ and Graphviz for diagrams.
 
-4. **Set up Python environment for Sphinx (required):**
+## 2. Sphinx Documentation Integration ✅ Complete
 
-   **Minimum version: Python 3.9+** (Python 3.11+ recommended)
+> **Implemented.** See actual files for current configuration.
 
-   ```bash
-   # Navigate to cleanroom-technical-docs directory
-   cd ../cleanroom-technical-docs
-   python3 -m venv .venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-   pip install -r requirements.txt
+| File | Purpose |
+|------|---------|
+| `scripts/build-docs.mjs` | Build orchestrator - submodule verification, venv setup, Sphinx build, output copy |
+| `next.config.js` | Serves static files from `public/docs/` automatically |
+| `pages/docs.js` | Landing page linking to Sphinx docs |
+| `components/Layout.js` | Shared layout with navigation |
 
-   # Install system dependencies (required for needflow diagrams)
-   # macOS: brew install graphviz
-   # Ubuntu/Debian: sudo apt-get install graphviz
-   # Windows: Download from graphviz.org and add to PATH
-   cd ../cleanroom-website
-   ```
+### npm Scripts Reference
 
-5. **Set up basic project structure:**
-   ```
-   cleanroom-website/
-   ├── components/        # Reusable UI components
-   │   ├── Layout.js      # Main layout with nav/footer
-   │   ├── DocsSidebar.js # Navigation for docs section
-   │   └── ...
-   ├── pages/             # Route pages
-   │   ├── index.js       # Home page
-   │   ├── about.js       # About page
-   │   ├── blog/          # Blog posts
-   │   └── docs/          # Special docs integration area
-   ├── public/            # Static assets
-   │   ├── docs/          # Where Sphinx output will go (generated, gitignored)
-   │   └── ...
-   ├── styles/            # Custom CSS
-   ├── scripts/           # Build/automation scripts
-   ├── .gitignore         # Git ignore file
-   └── package.json       # Node dependencies
-   ```
+```json
+"scripts": {
+  "dev": "next dev",
+  "dev:clean": "npm run build-docs && next dev",
+  "build": "npm run build-docs && next build",
+  "build-docs": "node scripts/build-docs.mjs",
+  "start": "next start",
+  "lint": "next lint"
+}
+```
 
-6. **Configure Node.js version in package.json:**
-   Add this to your `package.json`:
-   ```json
-   "engines": {
-     "node": ">=18.0.0",
-     "npm": ">=9.0.0"
-   }
-   ```
-
-7. **Set up .gitignore:**
-   Create/update `.gitignore` in your Next.js project:
-   ```gitignore
-   # Dependencies
-   node_modules/
-
-   # Next.js
-   .next/
-   out/
-
-   # Generated Sphinx docs (rebuilds on deploy)
-   public/docs/
-
-   # Python
-   __pycache__/
-   *.py[cod]
-   *$py.class
-   .venv/
-   venv/
-
-   # Build artifacts
-   build/
-   dist/
-
-   # Environment variables
-   .env*.local
-
-   # Debug
-   npm-debug.log*
-   yarn-debug.log*
-   yarn-error.log*
-
-   # OS
-   .DS_Store
-   Thumbs.db
-   ```
-
-## 2. Sphinx Documentation Integration
-
-1. **Build script (`scripts/build-docs.mjs`):**
-
-   > **✅ Implemented:** This script already exists. See `scripts/build-docs.mjs` for the full implementation.
-
-   The existing script handles:
-   - Submodule verification
-   - Python 3 version check
-   - Virtual environment setup (creates `.venv` if missing)
-   - Dependency installation from `requirements.txt`
-   - Sphinx build execution
-   - Cross-platform support (Windows/macOS/Linux)
-   - Colorful console output with status indicators
-   - Output copying to `public/docs/`
-
-2. **Configure Next.js to serve Sphinx docs (`next.config.js`):**
-   ```javascript
-   /** @type {import('next').NextConfig} */
-   const nextConfig = {
-     reactStrictMode: true,
-
-     // Next.js automatically serves static files from public/docs/
-
-     // Security headers
-     async headers() {
-       return [
-         {
-           source: '/:path*',
-           headers: [
-             { key: 'X-Frame-Options', value: 'DENY' },
-             { key: 'X-Content-Type-Options', value: 'nosniff' },
-             { key: 'Referrer-Policy', value: 'origin-when-cross-origin' },
-             {
-               key: 'Content-Security-Policy',
-               value: [
-                 "default-src 'self'",
-                 "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // Sphinx search needs eval
-                 "style-src 'self' 'unsafe-inline'", // Sphinx styles need inline
-                 "img-src 'self' data: https:",
-                 "font-src 'self' data:",
-                 "connect-src 'self'",
-               ].join('; '),
-             },
-           ],
-         },
-       ];
-     },
-   };
-
-   module.exports = nextConfig;
-   ```
+- `npm run dev` - Fast startup, uses existing built docs
+- `npm run dev:clean` - Rebuilds docs first
+- `npm run build` - Production build (always rebuilds docs)
 
 ### CSS Integration Strategy
 
 **Approach:** Keep Sphinx and Next.js styling separate (no conflicts)
 - Sphinx generates its own CSS in `public/docs/_static/`
-- Next.js/Tailwind CSS only affects your React components
+- Next.js/Tailwind CSS only affects React components
 - Both systems coexist without interference
 
 **For unified branding:**
@@ -202,73 +104,9 @@ See [README.md](README.md) for the current repository structure and [docs/ARCHIT
 2. Customize Sphinx theme via `cleanroom-technical-docs/source/_static/custom.css`
 3. Reference same color values in both stylesheets
 
-**Example custom.css:**
-```css
-:root {
-  --brand-primary: #3b82f6;
-  --brand-dark: #1e293b;
-}
+### Sphinx Search
 
-.wy-nav-top {
-  background-color: var(--brand-primary);
-}
-```
-
-3. **Create a docs landing page component (`pages/docs.js`):**
-   ```javascript
-   import Layout from '../components/Layout';
-   import Link from 'next/link';
-
-   export default function DocsIndex() {
-     return (
-       <Layout>
-         <div className="docs-container">
-           <h1>Documentation</h1>
-           <p>View the complete technical documentation:</p>
-           <Link href="/docs/index.html" className="btn-primary">
-             Browse Documentation →
-           </Link>
-         </div>
-       </Layout>
-     );
-   }
-   ```
-
-   **Note:** Next.js 13+ no longer requires wrapping `<Link>` around `<a>` tags. Apply className directly to Link.
-
-4. **Add npm scripts to package.json:**
-   ```json
-   "scripts": {
-     "dev": "next dev",
-     "dev:clean": "npm run build-docs && next dev",
-     "build": "npm run build-docs && next build",
-     "build-docs": "node scripts/build-docs.mjs",
-     "start": "next start",
-     "lint": "next lint"
-   }
-   ```
-
-   **Development workflow:**
-   - `npm run dev` - Fast startup, uses existing built docs (run `build-docs` manually when docs change)
-   - `npm run dev:clean` - Rebuilds docs first, slower but ensures latest docs
-   - `npm run build` - Production build (always rebuilds docs)
-
-   **Note:** This significantly improves dev startup time. Only rebuild docs when they actually change.
-
-5. **Sphinx Search Integration:**
-
-   Sphinx generates its own search functionality (`searchindex.js`) which will work automatically:
-   - Search box appears in Sphinx-generated pages
-   - Requires JavaScript enabled (allowed by CSP above)
-   - Search is client-side, no backend needed
-   - Works with Sphinx themes that include search (most do)
-
-   If you want to integrate Sphinx search into your main Next.js site:
-   ```javascript
-   // Optional: Fetch Sphinx search index in your Next.js pages
-   // public/docs/searchindex.js contains the search data
-   // Can be parsed and integrated into a unified search experience
-   ```
+Sphinx generates client-side search (`searchindex.js`) that works automatically in the docs pages.
 
 ## 3. SEO & Performance Optimization
 
@@ -774,55 +612,6 @@ fs.writeFileSync(lastCommitPath, currentCommit);
 ```
 
 This skips Sphinx rebuild if technical docs haven't changed, significantly speeding up deployments.
-
-## Quick Start Checklist
-
-### Phase 1: Project Setup (5-10 min)
-- [ ] Clone repository with submodules: `git clone --recurse-submodules <repo-url>`
-- [ ] Initialize Next.js project and install dependencies
-- [ ] Configure Node.js version (18+) in package.json
-- [ ] Set up .gitignore with comprehensive exclusions
-- [ ] Set up Python venv in cleanroom-technical-docs submodule
-- [ ] Install Graphviz system dependency
-
-### Phase 2: Build Integration (10-15 min)
-- [ ] Create build-docs.mjs script with cross-platform support
-- [ ] Configure next.config.js with security headers
-- [ ] Update package.json scripts (dev, dev:clean, build)
-- [ ] Test builds: `npm run build-docs && npm run dev`
-
-### Phase 3: Core Pages (1-2 hours)
-- [ ] Implement Layout component with SEO meta tags
-- [ ] Create home page, docs landing page, navigation
-- [ ] Verify mobile responsive design
-- [ ] Test on Chrome, Firefox, Safari
-
-### Phase 4: SEO & Performance (30 min)
-- [ ] Configure robots.txt and sitemap (next-sitemap)
-- [ ] Add Open Graph meta tags
-- [ ] Run Lighthouse audit (aim for >90)
-
-### Phase 5: CI/CD (20 min)
-- [ ] Set up GitHub Actions workflow
-- [ ] Verify CI builds successfully with artifact checks
-
-### Phase 6: Vercel Deployment (15 min)
-- [ ] Create Vercel account and connect GitHub repo
-- [ ] Configure build settings and environment variables
-- [ ] Verify preview deployment works
-
-### Phase 7: Domain Setup (10 min + DNS propagation)
-- [ ] Configure custom domain in Vercel
-- [ ] Update DNS records in Porkbun (A and CNAME)
-- [ ] Wait for SSL certificate (automatic)
-
-### Phase 8: Monitoring & Launch
-- [ ] Set up Sentry error monitoring and Vercel Analytics
-- [ ] Complete pre-launch checklist (Section 9)
-- [ ] Deploy to production and verify all systems
-- [ ] Monitor for errors and performance issues
-
----
 
 ## Troubleshooting
 
