@@ -9,9 +9,9 @@ See [README.md](README.md) for the current repository structure and [docs/ARCHIT
 ### Phases 1-3: ✅ Complete
 Project setup, build integration, and core pages are done. See git history for details.
 
-### Phase 4: SEO & Performance ❌ Not Started
-- [ ] Configure robots.txt and sitemap (Section 3)
-- [ ] Run Lighthouse audit (aim for >90)
+### Phase 4: SEO & Performance ✅ Complete
+- [x] Configure robots.txt and sitemap (Section 3)
+- [ ] Run Lighthouse audit (aim for >90) — manual verification after deployment
 
 ### Phase 5: CI/CD ❌ Not Started
 - [ ] Set up GitHub Actions quality-checks workflow (Section 6)

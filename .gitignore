@@ -8,5 +8,8 @@ out/
 # Sphinx build output
 /public/docs/
 
+# Generated sitemaps (created by next-sitemap at build time)
+/public/sitemap*.xml
+
 # Claude
 .claude/
