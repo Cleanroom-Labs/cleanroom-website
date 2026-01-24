@@ -56,7 +56,11 @@ https://cleanroom-website-git-feature-branch-username.vercel.app
 
 ## 2. Testing Strategy
 
-While not strictly required for launch, testing improves reliability:
+While not strictly required for launch, testing improves reliability.
+
+### Manual Testing Checklist
+- [ ] Verify mobile responsive design (320px, 768px, 1024px viewports)
+- [ ] Test on Chrome, Firefox, Safari
 
 ### Unit Testing
 ```bash
@@ -201,6 +205,30 @@ fs.writeFileSync(lastCommitPath, currentCommit);
 ```
 
 This skips Sphinx rebuild if technical docs haven't changed, significantly speeding up deployments.
+
+---
+
+## Pre-Launch Testing Checklist
+
+Before going live, complete these verification steps:
+
+### Browser & Device Testing
+- [ ] Test on Chrome, Firefox, Safari
+- [ ] Test on mobile devices (iOS and Android)
+- [ ] Verify mobile responsive design (320px, 768px, 1024px viewports)
+
+### Functionality Testing
+- [ ] Verify all internal links work
+- [ ] Verify Sphinx docs navigation works
+- [ ] Check for console errors
+- [ ] Test documentation search (if implemented)
+
+### Performance Testing
+- [ ] Run Lighthouse audit (aim for >90 on all metrics)
+
+### Monitoring Verification
+- [ ] Sentry alerts configured for team notifications
+- [ ] Analytics dashboard bookmarked for easy access
 
 ---
 
