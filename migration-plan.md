@@ -6,28 +6,8 @@ See [README.md](README.md) for the current repository structure and [docs/ARCHIT
 
 ## Migration Progress
 
-### Phase 1: Project Setup ✅ Complete
-- [x] Clone repository with submodules
-- [x] Initialize Next.js project and install dependencies
-- [x] Configure Node.js version (18+) in package.json
-- [x] Set up .gitignore
-- [x] Set up Python venv in cleanroom-technical-docs
-- [x] Install Graphviz system dependency
-
-### Phase 2: Build Integration ✅ Complete
-- [x] Create build-docs.mjs script with cross-platform support
-- [x] Configure next.config.js with security headers
-- [x] Add npm scripts to package.json
-- [x] Test builds: npm run build-docs && npm run dev
-
-### Phase 3: Core Pages ✅ Complete
-- [x] Create Layout component with basic SEO meta tags
-- [x] Create docs landing page
-- [x] Implement basic navigation
-- [x] Enhance SEO meta tags (Open Graph, Twitter cards)
-- [x] Add favicon and PWA manifest assets
-- [ ] Verify mobile responsive design (manual testing)
-- [ ] Test on Chrome, Firefox, Safari (manual testing)
+### Phases 1-3: ✅ Complete
+Project setup, build integration, and core pages are done. See git history for details.
 
 ### Phase 4: SEO & Performance ❌ Not Started
 - [ ] Configure robots.txt and sitemap (Section 3)
@@ -50,8 +30,9 @@ See [README.md](README.md) for the current repository structure and [docs/ARCHIT
 ### Phase 8: Monitoring & Launch ❌ Not Started
 - [ ] Set up Vercel Analytics (Section 7)
 - [ ] Set up Sentry error monitoring (Section 8)
-- [ ] Complete pre-launch checklist (Section 9)
 - [ ] Deploy to production
+- [ ] Verify custom domain and HTTPS working
+- [ ] Confirm analytics and error tracking active
 
 ## 3. SEO & Performance Optimization
 
@@ -90,71 +71,15 @@ See [README.md](README.md) for the current repository structure and [docs/ARCHIT
    "postbuild": "next-sitemap"
    ```
 
-3. **Add SEO meta tags to Layout component:**
-   ```javascript
-   import Head from 'next/head';
-
-   export default function Layout({ children, title, description }) {
-     const defaultTitle = 'Cleanroom Labs - Software Engineering';
-     const defaultDescription = 'Technical documentation and resources';
-
-     return (
-       <>
-         <Head>
-           <title>{title || defaultTitle}</title>
-           <meta name="description" content={description || defaultDescription} />
-           <meta property="og:title" content={title || defaultTitle} />
-           <meta property="og:description" content={description || defaultDescription} />
-           <meta property="og:type" content="website" />
-           <meta name="twitter:card" content="summary_large_image" />
-           <link rel="icon" href="/favicon.ico" />
-         </Head>
-         {children}
-       </>
-     );
-   }
-   ```
-
-4. **Performance optimizations:**
-   - Use Next.js `<Image>` component for optimized images
-   - Enable font optimization in `next.config.js`
-   - Consider static generation (SSG) for marketing pages
-   - Use Incremental Static Regeneration (ISR) for blog posts
-
-   ```javascript
-   // Example: Static generation for home page
-   export async function getStaticProps() {
-     return {
-       props: {},
-       revalidate: 3600, // Rebuild every hour
-     };
-   }
-   ```
-
 ## 4. Vercel Deployment
 
-1. **Initialize Git repository:**
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit"
-   ```
-
-2. **Push to GitHub:**
-   ```bash
-   # Create a new GitHub repository through the web interface
-   git remote add origin https://github.com/your-username/cleanroom-website.git
-   git branch -M main
-   git push -u origin main
-   ```
-
-3. **Connect to Vercel:**
+1. **Connect to Vercel:**
    - Create a Vercel account at vercel.com (free tier)
    - Click "Add New..." and select "Project"
    - Import your GitHub repository
    - Vercel will auto-detect Next.js settings
 
-4. **Configure build settings:**
+2. **Configure build settings:**
    - Build Command: `npm run build` (includes Sphinx build)
    - Output Directory: `.next` (Next.js default)
    - Install Command: `npm ci`
@@ -167,12 +92,12 @@ See [README.md](README.md) for the current repository structure and [docs/ARCHIT
    - Vercel caches dependencies and build artifacts between deploys
    - First build may be slower; subsequent builds are faster
 
-5. **Configure environment variables in Vercel:**
+3. **Configure environment variables in Vercel:**
    Add any needed environment variables:
    - `NEXT_PUBLIC_SENTRY_DSN` (if using Sentry)
    - Apply to Production, Preview, and Development environments
 
-6. **Deploy your site:**
+4. **Deploy your site:**
    - Click "Deploy"
    - Vercel provides a preview URL (yourproject.vercel.app)
    - Watch build logs for any Sphinx or Python issues
@@ -334,52 +259,7 @@ jobs:
 
 This provides real-time error alerts and helps diagnose production issues.
 
-## 9. Pre-Launch Checklist
-
-**Before deploying to production:**
-
-### Development Complete
-- [ ] All core pages implemented
-- [ ] Sphinx documentation building successfully
-- [ ] Content migration completed (if applicable)
-- [ ] Navigation working across all sections
-- [ ] Mobile responsive design verified
-
-### Testing Complete
-- [ ] Test on Chrome, Firefox, Safari
-- [ ] Test on mobile devices
-- [ ] Verify all internal links work
-- [ ] Verify Sphinx docs navigation works
-- [ ] Check for console errors
-- [ ] Run Lighthouse audit (aim for >90 on all metrics)
-
-### Deployment Configuration
-- [ ] Domain DNS configured in Porkbun
-- [ ] Domain added in Vercel
-- [ ] SSL certificate issued (automatic)
-- [ ] Environment variables set (Sentry DSN, etc.)
-- [ ] GitHub Actions passing
-
-### Monitoring Setup
-- [ ] Vercel Analytics enabled
-- [ ] Sentry error tracking configured
-- [ ] Sentry alerts configured for team
-- [ ] Analytics dashboard bookmarked
-
-### Post-Launch Verification
-- [ ] Test custom domain (cleanroomlabs.dev)
-- [ ] Test www redirect
-- [ ] Verify HTTPS working
-- [ ] Check Sentry for any errors
-- [ ] Verify analytics tracking
-- [ ] Test documentation search (if implemented)
-
-### Rollback Plan
-If critical issues are found:
-1. Identify the last working deployment in Vercel dashboard
-2. Click "..." menu → "Promote to Production"
-3. Investigate issues in preview deployment
-4. Redeploy when fixed
+**Rollback Plan:** If critical issues are found after launch, go to Vercel dashboard → find last working deployment → click "..." → "Promote to Production".
 
 ## Troubleshooting
 
