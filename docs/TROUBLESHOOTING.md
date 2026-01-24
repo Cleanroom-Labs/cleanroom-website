@@ -57,6 +57,25 @@ make html
 # Review warnings in output
 ```
 
+### Intersphinx Inventory Warnings (Safe to Ignore)
+
+During local development, you may see warnings like:
+
+```
+WARNING: failed to reach any of the inventories with the following issues:
+intersphinx inventory 'https://cleanroomlabs.dev/docs/airgap-deploy/objects.inv'
+not fetchable due to 404 Client Error
+```
+
+**This is expected behavior.** The subproject `conf.py` files have intersphinx mappings pointing to URLs that don't exist yet (e.g., `https://cleanroomlabs.dev/docs/airgap-deploy/`). These URLs will work once the documentation is deployed to cleanroomlabs.dev.
+
+Why this is safe to ignore:
+- **Warnings, not errors** - The build completes successfully
+- **Self-resolving** - Once docs are deployed, the URLs will work
+- **Local builds work** - The master docs use local relative paths during development
+
+The only impact is that cross-project `:ref:` links in subprojects won't resolve during local development. All other documentation features work normally.
+
 ## CI/CD Issues
 
 ### Workflow Not Triggering
