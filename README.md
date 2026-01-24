@@ -40,9 +40,21 @@ cleanroom-website/                    # This repo
 
 ## Build Commands
 
+### npm Scripts
+
 | Command | Description |
 |---------|-------------|
-| `node scripts/build-docs.mjs` | Build all documentation |
+| `npm run dev` | Start dev server (uses existing built docs) |
+| `npm run dev:clean` | Rebuild docs, then start dev server |
+| `npm run build` | Production build (rebuilds docs first) |
+| `npm run build-docs` | Build Sphinx documentation only |
+| `npm run start` | Start production server |
+| `npm run lint` | Run ESLint |
+
+### Shell Scripts
+
+| Command | Description |
+|---------|-------------|
 | `./scripts/check-submodules.sh` | Verify submodule health |
 | `./scripts/build-single-project.sh <project>` | Build single project docs |
 | `./scripts/update-project-docs.sh <project> <version>` | Update project to version |
