@@ -1,0 +1,185 @@
+---
+title: "Packaging Rust Applications for Air-Gapped Systems"
+date: "2026-01-13"
+author: "AirGap Team"
+tags: ["airgap-deploy", "rust", "packaging", "deployment", "demo"]
+excerpt: "Learn how AirGap Deploy automates the process of packaging Rust applications with all their dependencies for deployment to systems without internet access."
+slug: "demo-deploy-rust-app"
+---
+
+---
+
+## The Challenge: Deploying Software Without the Internet
+
+You've built a useful application—maybe a data analysis tool, a monitoring system, or a transcription app. It works perfectly on your development machine. Now you need to deploy it to a production environment that has no internet access.
+
+**The traditional approach looks like this:**
+
+1. Manually download every dependency listed in your project
+2. Download the correct version of the Rust toolchain
+3. Collect platform-specific build tools
+4. Copy everything to USB drives
+5. Transfer to the offline system
+6. Try to build from source
+7. Discover you forgot a dependency
+8. Start over
+
+Each iteration takes days. You discover missing pieces only after walking USB drives across the building. Your colleagues start to dread the phrase "just one more dependency."
+
+**Why is this so hard?**
+
+Modern software has complex dependency chains. A typical Rust application might depend on 50+ crates, each potentially pulling in its own dependencies. Some crates need C libraries. Some have build-time dependencies different from runtime dependencies. Manual tracking is error-prone and frustrating.
+
+For organizations working in:
+
+- **Government**: Classified environments with strict air-gap requirements
+- **Finance**: Isolated trading systems that can't connect to external networks
+- **Healthcare**: Systems processing Protected Health Information (PHI)
+- **Research**: Secure labs analyzing sensitive data
+
+This deployment challenge isn't just annoying—it's a blocker. Projects get delayed because deployment is too difficult.
+
+---
+
+## The Solution: AirGap Deploy
+
+AirGap Deploy automates the entire workflow. You describe what you want to package in a simple, human-readable manifest file. Run one command. It downloads everything needed, packages it into a single archive, and generates platform-specific installation scripts that build and install your application completely offline.
+
+**The workflow:**
+
+Create a deployment manifest → run the prep command → transfer the package → run the install script. Everything builds and installs automatically on the air-gapped system. No missing dependencies. No manual steps. No iteration.
+
+It's like having a deployment engineer who never forgets anything.
+
+For detailed technical specifications, see the [AirGap Deploy README](/docs/airgap-deploy/readme.html). This post focuses on the workflow.
+
+---
+
+## Packaging in Action
+
+**Scenario: Deploying Your Rust Application**
+
+You've built a data processing application in Rust. It needs to run on an air-gapped Linux server in your organization's secure environment.
+
+**Step 1: Create the Deployment Manifest**
+
+You create a simple manifest file that describes your application:
+
+- Your Rust project (with all its dependencies)
+- The Rust toolchain needed to build it
+- Any external tools or libraries required
+- The target platform (Linux, macOS, or Windows)
+
+The manifest uses a straightforward format—you're describing what you need, not writing complex deployment scripts. Think of it as a shopping list for your deployment.
+
+**Step 2: Run the Prep Command**
+
+On your internet-connected machine, you run one command. AirGap Deploy:
+
+- Reads your manifest
+- Downloads all Rust crate dependencies and vendors them (copies them locally)
+- Includes the Rust toolchain installer for your target platform
+- Collects any external binaries or libraries
+- Validates that everything is present
+- Creates a single compressed archive (tar.gz or zip)
+- Generates a platform-specific installation script
+
+This takes a few minutes depending on your project size. When it's done, you have one file containing everything needed.
+
+**Step 3: Transfer Across the Air Gap**
+
+Copy the archive to a USB drive. Walk it to the air-gapped system. (Or if the package is larger than your USB capacity, use [AirGap Transfer](/blog/demo-transfer-ollama) to chunk it across multiple drives.)
+
+**Step 4: Install on the Air-Gapped System**
+
+Extract the archive. Run the generated install script. It:
+
+- Installs the Rust toolchain (if needed)
+- Builds your application using the vendored dependencies
+- Runs tests (if specified)
+- Installs the binary to the appropriate location
+- Sets up configuration files
+- Verifies the installation
+
+No internet connection required. No missing dependencies. No manual intervention. Just a working application.
+
+---
+
+## Beyond Basic Deployment
+
+**Complex Applications with Multiple Components**
+
+What if your application depends on external tools? Maybe you're building an offline transcription system that needs both your Rust application and the whisper.cpp binary. AirGap Deploy handles this:
+
+Your manifest can specify:
+
+- Your Rust application
+- The whisper.cpp repository (cloned and built automatically)
+- Pre-trained model files (downloaded with checksum verification)
+- Any required system libraries
+
+One manifest. One package. One install command. Everything works together.
+
+**Cross-Platform Support**
+
+Need to deploy to both Linux servers and Windows workstations? Create separate manifests for each platform (or use conditional logic in a single manifest). Each package includes the right toolchain and generates the right install script for its target platform.
+
+**Reproducible Builds**
+
+Six months from now, you need to rebuild the exact same version. Your deployment manifest acts as documentation—it specifies exact version numbers, checksums, and build instructions. Reproducibility is built in, not bolted on.
+
+**Integration with CI/CD**
+
+AirGap Deploy fits naturally into continuous integration pipelines. Your CI system creates deployment packages automatically as part of the release process. When it's time to deploy to air-gapped production, the package is ready and validated.
+
+---
+
+## Why This Matters
+
+**Eliminates Human Error**
+
+Manual dependency tracking is error-prone. You forget packages. You download the wrong versions. You miss build-time dependencies. AirGap Deploy's manifest system ensures consistency—the same manifest produces the same package every time.
+
+**Saves Time and Frustration**
+
+No more iteration cycles. No more "just one more dependency" USB walks. Create the package once, install it once, done. What used to take days or weeks now takes hours.
+
+**Enables Secure Deployment**
+
+Air-gapped environments exist for a reason—they protect sensitive data and critical systems. But if deployment is too hard, people find workarounds that compromise security. AirGap Deploy makes secure deployment *easier* than insecure shortcuts.
+
+**Declarative and Transparent**
+
+The manifest file is human-readable. Anyone can review it and understand what's being deployed. This transparency is crucial for security reviews and compliance audits.
+
+**Open Source and Free**
+
+Unlike commercial deployment solutions that require expensive licenses and heavy infrastructure, AirGap Deploy is a simple, open-source tool. No vendor lock-in. No per-seat costs. No complex setup.
+
+---
+
+## Getting Started
+
+AirGap Deploy will be available as part of the v1.0.0 release of the AirGap suite. Once released, you'll be able to:
+
+1. Install AirGap Deploy (single binary, no dependencies)
+2. Create a manifest for your application
+3. Run the prep command on a connected system
+4. Transfer and install on air-gapped systems
+
+**Example manifests** will be provided for common scenarios:
+
+- Simple Rust CLI applications
+- Applications with C library dependencies
+- Multi-component systems (like AirGap Whisper + whisper.cpp)
+- Large ML deployments (see the [Ollama deployment post](/blog/demo-transfer-ollama))
+
+**Want to learn more?**
+
+- [AirGap Deploy README](/docs/airgap-deploy/readme.html) - Full project overview
+- [Ollama Deployment Workflow](/docs/airgap-deploy/use-cases/workflow-ollama.html) - Detailed technical example
+- [Introducing the AirGap Suite](/blog/introducing-airgap-suite) - How all three projects work together
+
+---
+
+*Package once. Deploy confidently. AirGap Deploy makes air-gapped deployment simple.*

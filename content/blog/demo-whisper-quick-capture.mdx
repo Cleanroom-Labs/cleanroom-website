@@ -1,0 +1,135 @@
+---
+title: "Capturing Meeting Notes with Your Voice—No Cloud Required"
+date: "2026-01-10"
+author: "AirGap Team"
+tags: ["airgap-whisper", "voice-transcription", "privacy", "demo"]
+excerpt: "Learn how AirGap Whisper enables quick voice capture workflows without sending your audio to external servers."
+slug: "demo-whisper-quick-capture"
+---
+
+---
+
+## The Challenge: Staying Focused While Taking Notes
+
+You're in a meeting. Someone says something important—an action item, a decision, a brilliant idea. You want to capture it before it's forgotten, but typing breaks your flow. You lose track of the conversation while your fingers hunt for keys. By the time you've typed the note, the discussion has moved on and you've missed the context.
+
+The modern solution? Cloud-based voice transcription tools like Otter.ai or the built-in dictation on your phone. Press a button, speak your thought, and text appears. It's convenient—until you remember where that audio is going.
+
+Your meeting might contain:
+
+- **Sensitive customer data**: Names, account numbers, project details
+- **Unreleased product plans**: Features still under NDA
+- **Internal discussions**: Personnel matters, strategic decisions
+- **Personal health information**: If you're in healthcare or research
+
+Every time you use cloud transcription, you're sending this audio to someone else's server. You're trusting their security, their policies, and their future business decisions. For many professionals—in government, healthcare, finance, or research—this simply isn't acceptable.
+
+And if you're working in an air-gapped environment? Cloud tools aren't even an option.
+
+---
+
+## The Solution: AirGap Whisper
+
+AirGap Whisper brings the convenience of voice transcription without the privacy compromise. It's a desktop application that runs completely offline, converting your voice to text using local processing. No network connection required. No data sent anywhere.
+
+**The workflow is simple:**
+
+Press a global hotkey → speak your thought → press the hotkey again → your transcription appears instantly. Copy it with another hotkey or click from the system tray menu. Everything stays on your machine.
+
+It's like having a private assistant that never leaves your computer.
+
+For detailed technical specifications, see the [AirGap Whisper README](/docs/airgap-whisper/readme.html). This post focuses on how it works in practice.
+
+---
+
+## Quick Capture in Action
+
+**Scenario: The Morning Standup**
+
+You're in your daily team standup. As each person shares their updates, you want to capture the key points. With AirGap Whisper running in your system tray, here's what you do:
+
+**Capture #1:**
+
+Press the hotkey. The tray icon changes color—recording has started. You speak: "Sarah blocked on API authentication. Needs Mark's input by Thursday." Press the hotkey again. Within seconds, a notification appears with your transcription. You press the copy hotkey and paste it into your notes document. Total time: 10 seconds. You never stopped listening to the meeting.
+
+**Capture #2:**
+
+The product manager mentions a deadline shift. Press hotkey: "Launch date moved to March 15th. Update roadmap and customer communications." Press hotkey. Copy. Paste. Done.
+
+**Capture #3:**
+
+An important action item for you. Press hotkey: "Follow up with design team about mobile mockups. Due Friday." Press hotkey. Copy. Paste into your task manager.
+
+The meeting ends. You have detailed notes without ever breaking eye contact or losing focus. Everything was captured accurately because you spoke it naturally—no abbreviated typing, no missed words.
+
+**What makes this work:**
+
+- **Global hotkeys**: Record from any application without switching windows
+- **Background operation**: No main window cluttering your screen
+- **Instant access**: Transcriptions available immediately in the tray menu
+- **Local history**: Review and copy past transcriptions anytime
+- **Complete privacy**: Audio never leaves your machine
+
+---
+
+## Beyond Meetings: Everyday Use Cases
+
+**Quick Task Capture**
+
+You're deep in focused work when you remember something: "Email Linda about Q2 budget by Monday." Press the hotkey, speak it, done. The thought is captured without breaking your concentration. Later, you review your transcription history and add it to your task list.
+
+**Documentation While Working**
+
+You're debugging a complex issue and discover the solution. Press hotkey: "Bug in database connection pool. Fixed by increasing timeout from 5 to 30 seconds. May need to document this for the team." Your future self thanks you for capturing this while it was fresh.
+
+**Accessibility**
+
+For users with mobility limitations or repetitive strain injuries, typing can be painful or impossible. Voice transcription becomes not just convenient but necessary. AirGap Whisper provides this capability without requiring cloud services that might not meet accessibility or privacy requirements.
+
+**Research and Interviews**
+
+Researchers conducting interviews in privacy-sensitive contexts (healthcare, legal, social services) need transcription that never exposes participant data to third parties. AirGap Whisper processes everything locally, making it suitable for environments where data protection regulations are strict.
+
+---
+
+## Why This Matters
+
+**Privacy Through Architecture**
+
+AirGap Whisper doesn't just promise privacy—it's architecturally impossible for it to violate privacy. There's no network code in the application. It can't send data to external servers because it doesn't know how. Your audio is processed locally by whisper.cpp (a well-established open-source transcription engine) and stored in a local SQLite database. Nothing leaves your machine.
+
+**No Subscriptions, No Accounts, No Dependencies**
+
+Once installed, AirGap Whisper works forever. No monthly fees. No account creation. No internet connection required. It's software you own and control.
+
+**Cross-Platform Consistency**
+
+Whether you're on macOS, Windows, or Linux, the experience is identical. The same hotkeys, the same interface, the same reliability. If you work across multiple machines, your workflow doesn't change.
+
+**Speed and Reliability**
+
+Local processing means no waiting for network requests. Your transcription appears in seconds, not "when the cloud decides." And it works consistently—no rate limits, no service outages, no throttling.
+
+---
+
+## Getting Started
+
+AirGap Whisper will be available as part of the v1.0.0 release of the AirGap suite. Once released, you'll need:
+
+1. The AirGap Whisper application (available as a pre-built binary for your platform)
+2. whisper.cpp (the open-source transcription engine)
+3. A trained model file (we recommend base.en for English, ~140MB)
+
+After installation, configure the paths to your whisper.cpp binary and model file in the settings dialog, set your preferred hotkeys, and you're ready to go.
+
+**For deployment to air-gapped systems**, see the companion post on using [AirGap Deploy](/blog/demo-deploy-rust-app) to package AirGap Whisper with all its dependencies for offline installation.
+
+**Want to learn more?**
+
+- [AirGap Whisper README](/docs/airgap-whisper/readme.html) - Full project overview
+- [AirGap Whisper Use Cases](/docs/airgap-whisper/use-cases/overview.html) - Detailed workflow scenarios
+- [Introducing the AirGap Suite](/blog/introducing-airgap-suite) - How all three projects work together
+
+---
+
+*Capture your thoughts. Keep your privacy. AirGap Whisper makes it simple.*
