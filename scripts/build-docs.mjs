@@ -2,12 +2,15 @@
 
 /**
  * Build Sphinx documentation with nested submodule support
- * 
+ *
  * This script:
  * 1. Checks for cleanroom-technical-docs submodule
  * 2. Verifies Python and Sphinx installation
- * 3. Builds documentation for all projects
+ * 3. Builds documentation for all projects (subprojects + master) via Makefile
  * 4. Copies output to public/docs
+ *
+ * Uses `make html` which builds all subprojects first, then master docs,
+ * ensuring consistent theming via the sphinx-theme submodule.
  */
 
 import { execSync } from 'child_process';
@@ -126,21 +129,29 @@ function installDependencies() {
 
 function buildDocs() {
   log('\n📚 Building Sphinx documentation...', colors.blue);
-  
-  const sphinxCmd = process.platform === 'win32'
-    ? '.venv\\Scripts\\sphinx-build'
-    : '.venv/bin/sphinx-build';
-  
+  log('   Building all subprojects and master docs...', colors.blue);
+
+  // Use the Makefile's html target which:
+  // 1. Builds all subprojects (airgap-whisper-docs, airgap-deploy-docs, airgap-transfer-docs)
+  // 2. Builds the master documentation
+  // 3. Copies subproject builds into master build/html/
+  // This ensures consistent theming across all docs
+
+  // Use absolute path so it works when Makefile cds into subdirectories
+  const sphinxBuild = process.platform === 'win32'
+    ? join(technicalDocsDir, '.venv', 'Scripts', 'sphinx-build')
+    : join(technicalDocsDir, '.venv', 'bin', 'sphinx-build');
+
   const result = exec(
-    `${sphinxCmd} -b html source build/html`,
+    `make html SPHINXBUILD="${sphinxBuild}"`,
     technicalDocsDir
   );
-  
+
   if (!result.success) {
     log('❌ Sphinx build failed', colors.red);
     return false;
   }
-  
+
   log('✓ Documentation built successfully', colors.green);
   return true;
 }
