@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export default function DocsIndex() {
   return (
-    <Layout title="Documentation - Cleanroom Labs">
+    <Layout title="Documentation - Cleanroom Labs" description="Browse the complete technical documentation for Cleanroom Labs">
       <main className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold">Documentation</h1>
         <p className="mt-4">View the complete technical documentation:</p>
