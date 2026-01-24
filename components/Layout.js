@@ -39,7 +39,7 @@ export default function Layout({ children, title, description }) {
           <Link href="/about" className="hover:underline">About</Link>
           <Link href="/donate" className="hover:underline">Donate</Link>
           <Link href="/blog" className="hover:underline">Blog</Link>
-          <Link href="/docs" className="hover:underline">Docs</Link>
+          <Link href="/docs/index.html" className="hover:underline">Docs</Link>
         </div>
       </nav>
       <div className="flex-grow">
