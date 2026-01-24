@@ -1,8 +1,9 @@
 import Head from 'next/head';
 import Link from 'next/link';
+import Footer from './Footer';
 
 const defaultTitle = 'Cleanroom Labs';
-const defaultDescription = 'Technical documentation and resources';
+const defaultDescription = 'Free and open source tools for air-gapped development';
 const siteUrl = 'https://cleanroomlabs.dev';
 
 export default function Layout({ children, title, description }) {
@@ -10,7 +11,7 @@ export default function Layout({ children, title, description }) {
   const pageDescription = description || defaultDescription;
 
   return (
-    <>
+    <div className="min-h-screen flex flex-col">
       <Head>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
@@ -35,10 +36,16 @@ export default function Layout({ children, title, description }) {
       <nav className="bg-gray-800 text-white p-4">
         <div className="container mx-auto flex gap-6">
           <Link href="/" className="font-bold">Cleanroom Labs</Link>
+          <Link href="/about" className="hover:underline">About</Link>
+          <Link href="/donate" className="hover:underline">Donate</Link>
+          <Link href="/blog" className="hover:underline">Blog</Link>
           <Link href="/docs" className="hover:underline">Docs</Link>
         </div>
       </nav>
-      {children}
-    </>
+      <div className="flex-grow">
+        {children}
+      </div>
+      <Footer />
+    </div>
   );
 }
