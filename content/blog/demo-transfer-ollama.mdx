@@ -1,0 +1,180 @@
+---
+title: "Deploying Ollama and Large Models Across the Air Gap"
+date: "2026-01-17"
+author: "AirGap Team"
+tags: ["airgap-transfer", "airgap-deploy", "ollama", "large-models", "demo"]
+excerpt: "Learn how AirGap Transfer handles multi-USB orchestration for deploying large ML models like Ollama to air-gapped systems."
+slug: "demo-transfer-ollama"
+---
+
+---
+
+## The Challenge: When One USB Drive Isn't Enough
+
+You're a data scientist working in a secure research environment. Your team needs to deploy Ollama—a local AI model runtime—along with the llama2-7b language model to an air-gapped analysis system. The combined package is about 20GB.
+
+There's one problem: your USB drives are 16GB each.
+
+**The traditional approach:**
+
+Use command-line tools to manually split the archive into chunks. Calculate sizes carefully so each chunk fits on a drive. Keep detailed notes about which chunk goes on which drive. Manually create checksum files. Transfer drives one by one. Reconstruct by hand on the other side. Verify checksums manually. Hope you didn't mix up any drives.
+
+It's tedious, error-prone, and nerve-wracking. One wrong checksum, one misplaced chunk, and you're starting over. Each mistake means another walk across the secure facility to get the right USB drive.
+
+For packages containing:
+
+- **Large ML models**: Multi-gigabyte weights that don't compress well
+- **Development environments**: Complete toolchains with all dependencies
+- **Dataset archives**: Research data, training sets, simulation results
+- **System images**: Virtual machines or container registries
+
+Manual chunking isn't just annoying—it's a deployment blocker.
+
+---
+
+## The Solution: AirGap Deploy + AirGap Transfer
+
+This is where the AirGap suite shines through integration. AirGap Deploy packages everything you need (application, dependencies, models) into a single deployment archive. AirGap Transfer handles the multi-USB orchestration automatically.
+
+**The workflow:**
+
+Package with Deploy → chunk with Transfer → physically transfer USB drives → reconstruct with Transfer → install with Deploy's generated script. Everything is automated. Nothing is manual. No human error.
+
+For technical details, see the [Ollama Deployment Workflow](/docs/airgap-deploy/use-cases/workflow-ollama.html) documentation. This post focuses on the end-to-end experience.
+
+---
+
+## Step 1: Package with AirGap Deploy
+
+On your internet-connected preparation machine, you create a deployment manifest that describes what you need:
+
+- **Ollama**: The AI runtime (cloned from its GitHub repository)
+- **llama2-7b model**: The pre-trained weights (~7GB, downloaded automatically)
+- **Build tools**: Everything needed to compile Ollama on the target platform
+- **Dependencies**: Required system libraries
+
+Run the AirGap Deploy prep command. It:
+
+- Clones the Ollama repository at the specified version
+- Downloads the llama2-7b model file from Ollama's model registry
+- Verifies the model's checksum (cryptographic integrity check)
+- Collects all build dependencies
+- Creates a complete deployment package
+
+The result: a single tar.gz archive (~20GB) containing everything needed to get Ollama running on your air-gapped system. No internet required on the target machine.
+
+But there's a problem—that 20GB archive won't fit on your 16GB USB drives.
+
+---
+
+## Step 2: Chunk with AirGap Transfer
+
+This is where AirGap Transfer solves the multi-USB challenge.
+
+On the same preparation machine, you run the pack command, specifying:
+
+- The source file (your 20GB deployment package)
+- The destination (your first USB drive)
+- The chunk size (16GB, or let it auto-detect from the USB capacity)
+
+**What AirGap Transfer does:**
+
+1. **Analyzes the package**: Determines how many chunks are needed (in this case: two 16GB drives will cover the 20GB package)
+
+2. **Creates chunks with metadata**: Splits the archive intelligently and creates a manifest file tracking:
+   - Total file size
+   - Number of chunks
+   - Chunk sizes
+   - SHA-256 checksums for each chunk
+   - Reconstruction instructions
+
+3. **Writes to USB #1**: Fills the first drive with chunk 1 (~16GB) plus the manifest
+
+4. **Prompts for USB #2**: When the first drive is full, tells you to insert the next drive
+
+5. **Writes to USB #2**: Writes the remaining data (~4GB) plus a copy of the manifest
+
+**Key features:**
+
+- **Automatic verification**: Each chunk's checksum is calculated and stored
+- **Resume capability**: If interrupted, you can continue without starting over
+- **No manual tracking**: The manifest handles everything automatically
+- **Platform-independent**: Works the same on Linux, macOS, and Windows
+
+When it's done, you have two USB drives that contain your complete deployment package, split intelligently with full integrity protection.
+
+---
+
+## Step 3: Reconstruct and Deploy
+
+You physically carry the two USB drives across the air-gap boundary. On the secure, isolated target system, you run the AirGap Transfer unpack command.
+
+**What happens:**
+
+1. **Reads the manifest**: Transfer finds the manifest on the first USB drive and understands the complete package structure
+
+2. **Locates all chunks**: Finds chunk 1 on USB #1 and prompts you to insert USB #2 for chunk 2
+
+3. **Verifies integrity**: Before reconstructing, verifies each chunk's checksum against the manifest. This ensures no corruption occurred during transfer.
+
+4. **Reconstructs the package**: Combines the chunks back into the original 20GB deployment archive
+
+5. **Verifies final integrity**: Checks the complete reconstructed file's checksum against the original
+
+If any chunk fails verification, Transfer tells you exactly which USB drive has a problem. No guessing. No detective work.
+
+Once reconstruction succeeds, you have the complete deployment package on your air-gapped system. Extract it and run the installation script that AirGap Deploy generated. It:
+
+- Builds Ollama from source (no internet needed—all dependencies are included)
+- Installs the llama2-7b model in the correct location
+- Configures Ollama to use the local model
+- Verifies the installation
+
+Minutes later, Ollama is running on your air-gapped system with the llama2-7b model available for inference. No manual dependency hunting. No missing files. No internet connection ever required.
+
+---
+
+## Why This Matters
+
+**Enterprise-Grade Reliability Without Enterprise Cost**
+
+Manual chunking and verification is what humans do wrong. AirGap Transfer automates it with cryptographic checksums, manifest tracking, and resume capability. You get the reliability of expensive commercial tools without the cost or complexity.
+
+**Eliminates the "Sneaker Net" Pain Points**
+
+The physical transfer of USB drives ("sneaker net") is a reality in secure environments. AirGap Transfer makes it reliable:
+
+- No lost chunks (manifest tracks everything)
+- No corruption anxiety (checksums verify integrity)
+- No manual record-keeping (automated manifest)
+- No wasted time (resume capability on interruption)
+
+**Enables Complex Deployments**
+
+Without automated chunking, large deployments become impractical. With AirGap Transfer, deploying 50GB packages or 100GB datasets is just as straightforward as 5GB. The workflow doesn't change—only the number of USB drives.
+
+**Reproducible and Auditable**
+
+The manifest file serves as a complete record of what was transferred. For compliance-heavy environments (government, healthcare, finance), this audit trail is crucial. You can prove exactly what was deployed and verify its integrity cryptographically.
+
+---
+
+## Next Steps
+
+AirGap Transfer and AirGap Deploy will be available as part of the v1.0.0 release of the AirGap suite. Once released, you'll be able to deploy Ollama and other large applications to air-gapped systems with confidence.
+
+**Want to learn more?**
+
+- [AirGap Transfer README](/docs/airgap-transfer/readme.html) - Full project overview and CLI reference
+- [AirGap Deploy README](/docs/airgap-deploy/readme.html) - Packaging system documentation
+- [Ollama Deployment Workflow](/docs/airgap-deploy/use-cases/workflow-ollama.html) - Detailed technical walkthrough
+- [Introducing the AirGap Suite](/blog/introducing-airgap-suite) - Complete suite overview
+
+**Other demo posts:**
+
+- [Capturing Meeting Notes with AirGap Whisper](/blog/demo-whisper-quick-capture)
+- [Packaging Rust Apps with AirGap Deploy](/blog/demo-deploy-rust-app)
+
+---
+
+*From many drives to one system. AirGap Transfer makes multi-USB deployment reliable.*

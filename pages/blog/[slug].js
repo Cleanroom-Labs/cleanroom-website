@@ -1,0 +1,79 @@
+import { MDXRemote } from 'next-mdx-remote';
+import { serialize } from 'next-mdx-remote/serialize';
+import Layout from '../../components/Layout';
+import MDXComponents from '../../components/MDXComponents';
+import { getPostBySlug, getAllSlugs } from '../../lib/blog';
+import Link from 'next/link';
+
+export default function BlogPost({ frontmatter, mdxSource }) {
+  const formattedDate = new Date(frontmatter.date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
+  return (
+    <Layout
+      title={`${frontmatter.title} - Cleanroom Labs Blog`}
+      description={frontmatter.excerpt || `Read ${frontmatter.title} on the Cleanroom Labs blog.`}
+    >
+      <main className="container mx-auto px-4 py-12 max-w-3xl">
+        <Link href="/blog" className="text-blue-600 hover:underline mb-6 inline-block">
+          &larr; Back to Blog
+        </Link>
+
+        <article>
+          <header className="mb-8">
+            <h1 className="text-4xl font-bold mb-4">{frontmatter.title}</h1>
+            <div className="flex items-center gap-4 text-gray-500 mb-4">
+              <time dateTime={frontmatter.date}>{formattedDate}</time>
+              {frontmatter.author && <span>by {frontmatter.author}</span>}
+            </div>
+            {frontmatter.tags && frontmatter.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {frontmatter.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-sm"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </header>
+
+          <div className="prose prose-lg max-w-none">
+            <MDXRemote {...mdxSource} components={MDXComponents} />
+          </div>
+        </article>
+
+        <div className="mt-12 pt-8 border-t">
+          <Link href="/blog" className="text-blue-600 hover:underline">
+            &larr; Back to Blog
+          </Link>
+        </div>
+      </main>
+    </Layout>
+  );
+}
+
+export async function getStaticPaths() {
+  const slugs = getAllSlugs();
+  return {
+    paths: slugs.map((slug) => ({ params: { slug } })),
+    fallback: false,
+  };
+}
+
+export async function getStaticProps({ params }) {
+  const { frontmatter, content } = getPostBySlug(params.slug);
+  const mdxSource = await serialize(content);
+
+  return {
+    props: {
+      frontmatter,
+      mdxSource,
+    },
+  };
+}
