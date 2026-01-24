@@ -261,7 +261,7 @@ Before going live, complete these verification steps:
 
 ## Related Documentation
 
-- [migration-plan.md](migration-plan.md) - Active migration steps to launch
+- [deployment-plan.md](deployment-plan.md) - Deployment checklist
 - [README.md](README.md) - Getting started and current build commands
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - Design decisions and rationale
 - [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) - Common issues and solutions
