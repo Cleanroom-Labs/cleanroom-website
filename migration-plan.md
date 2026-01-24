@@ -11,7 +11,6 @@ Project setup, build integration, and core pages are done. See git history for d
 
 ### Phase 4: SEO & Performance ✅ Complete
 - [x] Configure robots.txt and sitemap (Section 3)
-- [ ] Run Lighthouse audit (aim for >90) — manual verification after deployment
 
 ### Phase 5: CI/CD ❌ Not Started
 - [ ] Set up GitHub Actions quality-checks workflow (Section 6)
