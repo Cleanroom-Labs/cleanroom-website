@@ -27,7 +27,7 @@ The AirGap suite was built to fill this gap.
 
 The AirGap suite is a collection of three foundation projects designed specifically for computing in isolated, offline environments—with room for future expansion as the air-gapped computing ecosystem grows:
 
-**AirGap Whisper** converts your voice to text completely offline, using no cloud services. Press a hotkey, speak your thoughts, and get instant transcription—perfect for quick notes, meeting documentation, or accessibility needs.
+**Cleanroom Whisper** converts your voice to text completely offline, using no cloud services. Press a hotkey, speak your thoughts, and get instant transcription—perfect for quick notes, meeting documentation, or accessibility needs.
 
 **AirGap Deploy** packages applications and all their dependencies into a single bundle that can be installed on air-gapped systems. No more hunting down missing libraries or trying to compile software without internet access.
 
@@ -41,21 +41,21 @@ These three projects form the **core foundation** we're actively developing in t
 
 ---
 
-## AirGap Whisper: Your Private Voice Assistant
+## Cleanroom Whisper: Your Private Voice Assistant
 
 Have you ever been in a meeting where you wanted to capture a quick thought but didn't want to break your focus by typing? Or perhaps you've conducted interviews that needed transcription but couldn't use cloud services for privacy reasons?
 
-AirGap Whisper solves this elegantly. It's a system tray application that listens for a global hotkey (like `Ctrl+Alt+R`). Press the hotkey once to start recording, speak your memo, then press it again to stop. Within seconds, you have accurate text transcription—completely offline.
+Cleanroom Whisper solves this elegantly. It's a system tray application that listens for a global hotkey (like `Ctrl+Alt+R`). Press the hotkey once to start recording, speak your memo, then press it again to stop. Within seconds, you have accurate text transcription—completely offline.
 
 **Real-world example**: A healthcare researcher conducting patient interviews can transcribe recordings locally, keeping sensitive health information on their secure machine. A productivity enthusiast can capture task ideas by voice while keeping hands on the keyboard. Someone with mobility limitations can use it as an accessibility tool for hands-free text input.
 
-Unlike cloud-based tools like Otter.ai or Fireflies that require subscriptions and send your audio to external servers, AirGap Whisper processes everything locally using whisper.cpp. Unlike macOS-only tools like MacWhisper or Superwhisper, it works consistently across all major platforms.
+Unlike cloud-based tools like Otter.ai or Fireflies that require subscriptions and send your audio to external servers, Cleanroom Whisper processes everything locally using whisper.cpp. Unlike macOS-only tools like MacWhisper or Superwhisper, it works consistently across all major platforms.
 
 The application runs silently in your system tray with no main window cluttering your screen. Your transcription history is stored locally in SQLite, and you can access recent transcriptions with a click or copy the latest one instantly with another hotkey (`Ctrl+Alt+C`).
 
 It's the only cross-platform, open-source, air-gap-ready voice transcription tool designed specifically for quick capture workflows in privacy-sensitive environments.
 
-**Learn more**: [AirGap Whisper README](/docs/airgap-whisper/readme.html)
+**Learn more**: [Cleanroom Whisper README](/docs/airgap-whisper/readme.html)
 
 ---
 
@@ -71,7 +71,7 @@ Now imagine you've built a useful application—perhaps a data analysis tool or 
 
 AirGap Deploy automates this entire workflow. You create a simple TOML manifest file that describes your application, its dependencies, and how to build it. Run one command (`airgap-deploy prep`), and it downloads everything needed, packages it into a single archive, and generates platform-specific installation scripts.
 
-**Real-world example**: A developer building an offline voice transcription app (like AirGap Whisper itself!) can create a manifest that includes the Rust application, whisper.cpp binary, pre-trained model files, and all required build tools. Transfer the package via USB, run the install script on the air-gapped machine, and everything builds and installs automatically—no internet required.
+**Real-world example**: A developer building an offline voice transcription app (like Cleanroom Whisper itself!) can create a manifest that includes the Rust application, whisper.cpp binary, pre-trained model files, and all required build tools. Transfer the package via USB, run the install script on the air-gapped machine, and everything builds and installs automatically—no internet required.
 
 This is fundamentally different from existing tools. Kubernetes-based solutions like Zarf and UDS are excellent for containerized server workloads but require heavy infrastructure. Docker provides containers but needs a daemon running on the target system. Language-specific tools like `pip download` or `cargo-vendor` handle only one component type. Enterprise tools like JFrog Artifactory require expensive licenses and complex setup.
 
@@ -105,7 +105,7 @@ AirGap Transfer provides enterprise-grade verification and resume capability wit
 
 While each tool solves a specific problem, the real power comes from their integration:
 
-**Complete offline workflow**: A developer uses AirGap Deploy to package AirGap Whisper with all dependencies and model files (20GB total). The package is too large for a single USB drive, so they use AirGap Transfer to chunk it across multiple drives with verification. On the air-gapped machine, they use AirGap Transfer to reconstruct the package, then run the installation script generated by AirGap Deploy. Once installed, AirGap Whisper provides offline voice transcription capability.
+**Complete offline workflow**: A developer uses AirGap Deploy to package Cleanroom Whisper with all dependencies and model files (20GB total). The package is too large for a single USB drive, so they use AirGap Transfer to chunk it across multiple drives with verification. On the air-gapped machine, they use AirGap Transfer to reconstruct the package, then run the installation script generated by AirGap Deploy. Once installed, Cleanroom Whisper provides offline voice transcription capability.
 
 No other tool suite provides this integrated experience. You can:
 
@@ -113,9 +113,9 @@ No other tool suite provides this integrated experience. You can:
 - **Package** them with AirGap Deploy's declarative manifests
 - **Transfer** them safely with AirGap Transfer's chunking and verification
 - **Deploy** automatically with generated install scripts
-- **Use** privacy-respecting tools like AirGap Whisper
+- **Use** privacy-respecting tools like Cleanroom Whisper
 
-Each tool works independently—you can use AirGap Transfer without AirGap Deploy, or AirGap Whisper without either—but together they form a complete solution for air-gapped computing.
+Each tool works independently—you can use AirGap Transfer without AirGap Deploy, or Cleanroom Whisper without either—but together they form a complete solution for air-gapped computing.
 
 The technical foundation is consistent across all three: pure Rust for reliability and cross-platform support, minimal dependencies to avoid complexity, and zero network code to guarantee privacy. Everything is open source (MIT/Apache-2.0) with no vendor lock-in.
 
@@ -149,7 +149,7 @@ If you've ever thought "I wish I could do this without sending my data to someon
 
 Ready to try it out? Each tool is available as source code and will be available as pre-built binaries once development is complete.
 
-**AirGap Whisper** (in development): Build from source with Cargo, configure whisper.cpp path, and start transcribing with global hotkeys. Perfect for anyone who takes notes by voice or needs accessibility features. [Get started](/docs/airgap-whisper/readme.html)
+**Cleanroom Whisper** (in development): Build from source with Cargo, configure whisper.cpp path, and start transcribing with global hotkeys. Perfect for anyone who takes notes by voice or needs accessibility features. [Get started](/docs/airgap-whisper/readme.html)
 
 **AirGap Deploy** (planned): Create a TOML manifest, run `airgap-deploy prep`, and generate deployment packages for air-gapped systems. Essential for releasing applications to offline environments. [Learn more](/docs/airgap-deploy/readme.html)
 
@@ -157,7 +157,7 @@ Ready to try it out? Each tool is available as source code and will be available
 
 All three projects are open source and welcome contributions. These foundation tools represent our near-term development focus, but we have ideas for additional air-gapped projects and we're eager to collaborate with others who share the vision of privacy-first computing.
 
-**Have ideas for air-gapped tools? Want to build on this foundation?** Whether you're interested in contributing to these three projects, proposing new tools that fit the ecosystem, or building your own projects on these principles—the community is here to help. The patterns established by AirGap Whisper, Deploy, and Transfer can serve as a foundation for a broader ecosystem of offline-capable tools.
+**Have ideas for air-gapped tools? Want to build on this foundation?** Whether you're interested in contributing to these three projects, proposing new tools that fit the ecosystem, or building your own projects on these principles—the community is here to help. The patterns established by Cleanroom Whisper, Deploy, and Transfer can serve as a foundation for a broader ecosystem of offline-capable tools.
 
 **Questions? Ideas? Contributions?** Reach out on GitHub or through email. Together, we're building the future of privacy-first, offline-capable computing—one foundation project at a time.
 

@@ -39,7 +39,7 @@ export default function Layout({ children, title, description }) {
       {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-slate-800 border-b border-slate-700 text-white">
         <div className="container mx-auto px-4 py-4 flex items-center gap-8">
-          <Link href={nav.brand.href} className="font-bold text-lg hover:text-emerald-light transition-colors">
+          <Link href={nav.brand.href} className="font-bold text-lg hover:text-emerald transition-colors">
             {nav.brand.text}
           </Link>
           <div className="flex gap-6">
@@ -47,7 +47,7 @@ export default function Layout({ children, title, description }) {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-text-secondary hover:text-emerald-light transition-colors"
+                className="text-text-secondary hover:text-emerald transition-colors"
               >
                 {link.text}
               </Link>
