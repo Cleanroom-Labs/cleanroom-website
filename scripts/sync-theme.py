@@ -484,7 +484,7 @@ changes, to prevent repository divergence. Use --force to skip this check.
         print(Colors.yellow("Skipping push (--no-push specified)"))
         print()
         print(Colors.blue("Next steps:"))
-        print("  1. Verify: ./scripts/check-submodules.sh")
+        print("  1. Verify: ./scripts/check-submodules.py")
         print("  2. Build:  node scripts/build-docs.mjs")
         print("  3. Push:   ./scripts/push-submodules.py")
         return 0
@@ -555,7 +555,7 @@ changes, to prevent repository divergence. Use --force to skip this check.
         print(f"  Repos pushed: {pushed_count}")
         print()
         print(Colors.blue("Next steps:"))
-        print("  1. Verify: ./scripts/check-submodules.sh")
+        print("  1. Verify: ./scripts/check-submodules.py")
         print("  2. Build:  node scripts/build-docs.mjs")
 
     return 0

@@ -143,7 +143,7 @@ The script validates that each repo:
         print(Colors.green(f"Successfully pushed {pushed_count} repositories."))
         print()
         print(Colors.blue("Next steps:"))
-        print("  1. Verify: ./scripts/check-submodules.sh")
+        print("  1. Verify: ./scripts/check-submodules.py")
         print("  2. Check CI status on GitHub")
 
     return 0

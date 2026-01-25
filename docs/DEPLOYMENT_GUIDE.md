@@ -5,7 +5,7 @@ This guide covers deploying the documentation to GitHub Pages.
 ## Prerequisites
 
 - All builds passing locally (`./scripts/test-ci-locally.sh`)
-- Submodules in healthy state (`./scripts/check-submodules.sh`)
+- Submodules in healthy state (`./scripts/check-submodules.py`)
 - All changes committed and pushed
 
 ## Deployment Overview

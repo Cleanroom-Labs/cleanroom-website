@@ -13,7 +13,7 @@
       "Bash(git remote get-url:*)",
       "Bash(make clean:*)",
       "Bash(make:*)",
-      "Bash(./scripts/check-submodules.sh:*)",
+      "Bash(./scripts/check-submodules.py:*)",
       "Bash(./scripts/test-ci-locally.sh:*)",
       "Bash(./scripts/build-single-project.sh:*)",
       "Bash(node scripts/build-docs.mjs:*)",

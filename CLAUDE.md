@@ -8,7 +8,7 @@ See [README.md](README.md) for complete documentation including build commands, 
 
 **Build docs:** `node scripts/build-docs.mjs`
 
-**Check submodules:** `./scripts/check-submodules.sh`
+**Check submodules:** `./scripts/check-submodules.py`
 
 **Sync theme:** `./scripts/sync-theme.py`
 
@@ -39,7 +39,7 @@ See [README.md](README.md) for complete documentation including build commands, 
 ## Working in This Repo
 
 When modifying documentation:
-1. Run `./scripts/check-submodules.sh` to verify health
+1. Run `./scripts/check-submodules.py` to verify health
 2. Make changes in the appropriate submodule (checkout a branch first)
 3. Build with `node scripts/build-docs.mjs` to verify no warnings
 4. Propagate commits through all three levels
