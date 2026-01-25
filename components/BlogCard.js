@@ -10,20 +10,20 @@ export default function BlogCard({ post }) {
   });
 
   return (
-    <article className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+    <article className="bg-slate-900 border border-slate-700 rounded-xl p-6 hover:border-emerald/50 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-glow">
       <Link href={`/blog/${slug}`} className="block group">
-        <h2 className="text-2xl font-semibold mb-2 group-hover:text-blue-600 transition-colors">
+        <h2 className="text-2xl font-semibold text-text-primary mb-2 group-hover:text-emerald transition-colors">
           {title}
         </h2>
       </Link>
 
-      <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
+      <div className="flex items-center gap-4 text-sm text-text-muted mb-3">
         <time dateTime={date}>{formattedDate}</time>
         {author && <span>by {author}</span>}
       </div>
 
       {excerpt && (
-        <p className="text-gray-600 mb-4">{excerpt}</p>
+        <p className="text-text-secondary mb-4">{excerpt}</p>
       )}
 
       {tags && tags.length > 0 && (
@@ -31,7 +31,7 @@ export default function BlogCard({ post }) {
           {tags.map((tag) => (
             <span
               key={tag}
-              className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-sm"
+              className="bg-slate-800 text-text-muted px-2 py-1 rounded text-sm border border-slate-700"
             >
               {tag}
             </span>

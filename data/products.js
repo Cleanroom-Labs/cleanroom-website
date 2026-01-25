@@ -1,22 +1,17 @@
 export const products = [
   {
     name: 'AirGap Transfer',
-    description: 'Secure data transfer utility for moving files between air-gapped systems without network connectivity.',
-    color: '#E8453C'
+    description: 'Secure data transfer for moving files between air-gapped systems.',
+    docsUrl: '/docs/airgap-transfer/readme.html',
   },
   {
     name: 'AirGap Deploy',
-    description: 'Universal air-gap deployment framework for installing and updating software in isolated environments.',
-    color: '#1A1A1A'
+    description: 'Universal deployment framework for isolated environments.',
+    docsUrl: '/docs/airgap-deploy/readme.html',
   },
   {
-    name: 'AirGap Whisper',
-    description: 'Minimalist offline audio transcription powered by local AI models. No cloud, no network, just your voice.',
-    color: '#F97316'
+    name: 'Cleanroom Whisper',
+    description: 'Private voice transcription powered by local AI. Your words stay on your machine—no cloud, no network, complete privacy.',
+    docsUrl: '/docs/airgap-whisper/readme.html',
   },
-  {
-    name: 'AirGap Vibe',
-    description: 'Vibe coding interface for local LLMs. Natural language programming without internet dependency.',
-    color: '#4A3728'
-  }
 ];

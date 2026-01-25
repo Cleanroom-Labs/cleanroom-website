@@ -5,7 +5,7 @@ const MDXComponents = {
     <h1 className="text-4xl font-bold mt-8 mb-4" {...props} />
   ),
   h2: (props) => (
-    <h2 className="text-2xl font-semibold mt-8 mb-4 border-b pb-2" {...props} />
+    <h2 className="text-2xl font-semibold mt-8 mb-4" {...props} />
   ),
   h3: (props) => (
     <h3 className="text-xl font-semibold mt-6 mb-3" {...props} />
@@ -14,19 +14,19 @@ const MDXComponents = {
     <p className="mb-4 leading-relaxed" {...props} />
   ),
   ul: (props) => (
-    <ul className="list-disc list-inside mb-4 space-y-2 ml-4" {...props} />
+    <ul className="list-disc pl-6 mb-4 space-y-2" {...props} />
   ),
   ol: (props) => (
-    <ol className="list-decimal list-inside mb-4 space-y-2 ml-4" {...props} />
+    <ol className="list-decimal pl-6 mb-4 space-y-2" {...props} />
   ),
   li: (props) => (
-    <li className="leading-relaxed" {...props} />
+    <li className="leading-relaxed pl-2" {...props} />
   ),
   a: ({ href, children, ...props }) => {
     const isInternal = href && (href.startsWith('/') || href.startsWith('#'));
     if (isInternal) {
       return (
-        <Link href={href} className="text-blue-600 hover:underline" {...props}>
+        <Link href={href} className="text-emerald hover:text-emerald-light transition-colors" {...props}>
           {children}
         </Link>
       );
@@ -34,7 +34,7 @@ const MDXComponents = {
     return (
       <a
         href={href}
-        className="text-blue-600 hover:underline"
+        className="text-emerald hover:text-emerald-light transition-colors"
         target="_blank"
         rel="noopener noreferrer"
         {...props}
@@ -51,19 +51,23 @@ const MDXComponents = {
   ),
   code: ({ className, children, ...props }) => {
     const isInline = !className;
+    // Strip any stray backticks that might pass through
+    const cleanChildren = typeof children === 'string'
+      ? children.replace(/^`|`$/g, '')
+      : children;
     if (isInline) {
       return (
         <code
-          className="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono"
+          className="bg-slate-800 text-slate-200 px-1.5 py-0.5 rounded text-sm font-mono border border-slate-700"
           {...props}
         >
-          {children}
+          {cleanChildren}
         </code>
       );
     }
     return (
       <code className={className} {...props}>
-        {children}
+        {cleanChildren}
       </code>
     );
   },
@@ -74,7 +78,7 @@ const MDXComponents = {
     />
   ),
   hr: () => (
-    <hr className="my-8 border-t border-gray-300" />
+    <hr className="my-8 border-t border-slate-700" />
   ),
   strong: (props) => (
     <strong className="font-semibold" {...props} />

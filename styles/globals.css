@@ -1,3 +1,9 @@
+/* Cleanroom Website - Global Styles
+ * Base styles imported from design system
+ */
+
+@import '../cleanroom-design-system/css/base.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

@@ -3,7 +3,7 @@ title: "Capturing Meeting Notes with Your Voice—No Cloud Required"
 date: "2026-01-10"
 author: "AirGap Team"
 tags: ["airgap-whisper", "voice-transcription", "privacy", "demo"]
-excerpt: "Learn how AirGap Whisper enables quick voice capture workflows without sending your audio to external servers."
+excerpt: "Learn how Cleanroom Whisper enables quick voice capture workflows without sending your audio to external servers."
 slug: "demo-whisper-quick-capture"
 ---
 
@@ -28,9 +28,9 @@ And if you're working in an air-gapped environment? Cloud tools aren't even an o
 
 ---
 
-## The Solution: AirGap Whisper
+## The Solution: Cleanroom Whisper
 
-AirGap Whisper brings the convenience of voice transcription without the privacy compromise. It's a desktop application that runs completely offline, converting your voice to text using local processing. No network connection required. No data sent anywhere.
+Cleanroom Whisper brings the convenience of voice transcription without the privacy compromise. It's a desktop application that runs completely offline, converting your voice to text using local processing. No network connection required. No data sent anywhere.
 
 **The workflow is simple:**
 
@@ -38,7 +38,7 @@ Press a global hotkey → speak your thought → press the hotkey again → your
 
 It's like having a private assistant that never leaves your computer.
 
-For detailed technical specifications, see the [AirGap Whisper README](/docs/airgap-whisper/readme.html). This post focuses on how it works in practice.
+For detailed technical specifications, see the [Cleanroom Whisper README](/docs/airgap-whisper/readme.html). This post focuses on how it works in practice.
 
 ---
 
@@ -46,7 +46,7 @@ For detailed technical specifications, see the [AirGap Whisper README](/docs/air
 
 **Scenario: The Morning Standup**
 
-You're in your daily team standup. As each person shares their updates, you want to capture the key points. With AirGap Whisper running in your system tray, here's what you do:
+You're in your daily team standup. As each person shares their updates, you want to capture the key points. With Cleanroom Whisper running in your system tray, here's what you do:
 
 **Capture #1:**
 
@@ -84,11 +84,11 @@ You're debugging a complex issue and discover the solution. Press hotkey: "Bug i
 
 **Accessibility**
 
-For users with mobility limitations or repetitive strain injuries, typing can be painful or impossible. Voice transcription becomes not just convenient but necessary. AirGap Whisper provides this capability without requiring cloud services that might not meet accessibility or privacy requirements.
+For users with mobility limitations or repetitive strain injuries, typing can be painful or impossible. Voice transcription becomes not just convenient but necessary. Cleanroom Whisper provides this capability without requiring cloud services that might not meet accessibility or privacy requirements.
 
 **Research and Interviews**
 
-Researchers conducting interviews in privacy-sensitive contexts (healthcare, legal, social services) need transcription that never exposes participant data to third parties. AirGap Whisper processes everything locally, making it suitable for environments where data protection regulations are strict.
+Researchers conducting interviews in privacy-sensitive contexts (healthcare, legal, social services) need transcription that never exposes participant data to third parties. Cleanroom Whisper processes everything locally, making it suitable for environments where data protection regulations are strict.
 
 ---
 
@@ -96,11 +96,11 @@ Researchers conducting interviews in privacy-sensitive contexts (healthcare, leg
 
 **Privacy Through Architecture**
 
-AirGap Whisper doesn't just promise privacy—it's architecturally impossible for it to violate privacy. There's no network code in the application. It can't send data to external servers because it doesn't know how. Your audio is processed locally by whisper.cpp (a well-established open-source transcription engine) and stored in a local SQLite database. Nothing leaves your machine.
+Cleanroom Whisper doesn't just promise privacy—it's architecturally impossible for it to violate privacy. There's no network code in the application. It can't send data to external servers because it doesn't know how. Your audio is processed locally by whisper.cpp (a well-established open-source transcription engine) and stored in a local SQLite database. Nothing leaves your machine.
 
 **No Subscriptions, No Accounts, No Dependencies**
 
-Once installed, AirGap Whisper works forever. No monthly fees. No account creation. No internet connection required. It's software you own and control.
+Once installed, Cleanroom Whisper works forever. No monthly fees. No account creation. No internet connection required. It's software you own and control.
 
 **Cross-Platform Consistency**
 
@@ -114,22 +114,22 @@ Local processing means no waiting for network requests. Your transcription appea
 
 ## Getting Started
 
-AirGap Whisper will be available as part of the v1.0.0 release of the AirGap suite. Once released, you'll need:
+Cleanroom Whisper will be available as part of the v1.0.0 release of the AirGap suite. Once released, you'll need:
 
-1. The AirGap Whisper application (available as a pre-built binary for your platform)
+1. The Cleanroom Whisper application (available as a pre-built binary for your platform)
 2. whisper.cpp (the open-source transcription engine)
 3. A trained model file (we recommend base.en for English, ~140MB)
 
 After installation, configure the paths to your whisper.cpp binary and model file in the settings dialog, set your preferred hotkeys, and you're ready to go.
 
-**For deployment to air-gapped systems**, see the companion post on using [AirGap Deploy](/blog/demo-deploy-rust-app) to package AirGap Whisper with all its dependencies for offline installation.
+**For deployment to air-gapped systems**, see the companion post on using [AirGap Deploy](/blog/demo-deploy-rust-app) to package Cleanroom Whisper with all its dependencies for offline installation.
 
 **Want to learn more?**
 
-- [AirGap Whisper README](/docs/airgap-whisper/readme.html) - Full project overview
-- [AirGap Whisper Use Cases](/docs/airgap-whisper/use-cases/overview.html) - Detailed workflow scenarios
+- [Cleanroom Whisper README](/docs/airgap-whisper/readme.html) - Full project overview
+- [Cleanroom Whisper Use Cases](/docs/airgap-whisper/use-cases/overview.html) - Detailed workflow scenarios
 - [Introducing the AirGap Suite](/blog/introducing-airgap-suite) - How all three projects work together
 
 ---
 
-*Capture your thoughts. Keep your privacy. AirGap Whisper makes it simple.*
+*Capture your thoughts. Keep your privacy. Cleanroom Whisper makes it simple.*
