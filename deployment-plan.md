@@ -28,6 +28,24 @@
 | CI/CD | [docs/CI_CD_GUIDE.md](docs/CI_CD_GUIDE.md) |
 | Deployment | [docs/DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) |
 
+## Pending Git Pushes
+
+Local commits need force-pushing (amended commits for list spacing CSS fix):
+
+```bash
+# sphinx-theme repo
+cd /home/user/Projects/sphinx-theme
+git push --force-with-lease
+
+# technical-docs submodule
+cd /home/user/Projects/cleanroom-website/cleanroom-technical-docs
+git push --force-with-lease
+
+# website repo
+cd /home/user/Projects/cleanroom-website
+git push --force-with-lease
+```
+
 ## Rollback
 
 Vercel dashboard → find working deployment → "..." → "Promote to Production"
