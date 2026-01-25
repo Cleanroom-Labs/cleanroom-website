@@ -1,3 +1,6 @@
 [submodule "cleanroom-technical-docs"]
 	path = cleanroom-technical-docs
 	url = /Users/andfranklin/Projects/cleanroom-technical-docs
+[submodule "cleanroom-design-system"]
+	path = cleanroom-design-system
+	url = /Users/andfranklin/Projects/cleanroom-design-system
