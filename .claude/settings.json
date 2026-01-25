@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git submodule:*)",
+      "Bash(git pull:*)",
+      "Bash(git fetch:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(git remote get-url:*)",
+      "Bash(make clean:*)",
+      "Bash(make:*)",
+      "Bash(./scripts/check-submodules.sh:*)",
+      "Bash(./scripts/test-ci-locally.sh:*)",
+      "Bash(./scripts/build-single-project.sh:*)",
+      "Bash(node scripts/build-docs.mjs:*)",
+      "Bash(source .venv/bin/activate)",
+      "Bash(pip install:*)",
+      "Bash(pip show:*)",
+      "Bash(sphinx-build:*)",
+      "Bash(.venv/bin/sphinx-build:*)",
+      "Bash(.venv/bin/pip install:*)",
+      "Bash(../.venv/bin/sphinx-build:*)",
+      "Bash(npm init:*)",
+      "Bash(npm install:*)",
+      "Bash(npm ls:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx tailwindcss:*)",
+      "Bash(npx next build)",
+      "Bash(./node_modules/.bin/tailwindcss:*)",
+      "Bash(test:*)",
+      "WebFetch(domain:www.cleanroomlabs.dev)",
+      "Skill(commit)"
+    ]
+  }
+}
