@@ -203,8 +203,9 @@ commit_submodule_update() {
 # This ensures project-docs are committed before technical-docs
 IFS=$'\n' SORTED_PATHS=($(printf '%s\n' "${UPDATED_PATHS[@]}" | awk -F/ '{print NF-1, $0}' | sort -rn | cut -d' ' -f2-))
 
-# Track which parent repos need commits
-declare -A PARENTS_TO_COMMIT
+# Track which parent repos need commits (bash 3-compatible parallel arrays)
+PARENT_DIRS=()
+PARENT_SUBPATHS=()
 
 for path in "${SORTED_PATHS[@]}"; do
     parent_dir="$(dirname "$path")"
@@ -218,12 +219,14 @@ for path in "${SORTED_PATHS[@]}"; do
         submodule_rel_path="$submodule_name"
     fi
 
-    PARENTS_TO_COMMIT["$parent_dir"]="$submodule_rel_path"
+    PARENT_DIRS+=("$parent_dir")
+    PARENT_SUBPATHS+=("$submodule_rel_path")
 done
 
-# Commit in each parent, from deepest to shallowest
-for parent_dir in $(printf '%s\n' "${!PARENTS_TO_COMMIT[@]}" | awk -F/ '{print NF-1, $0}' | sort -rn | cut -d' ' -f2-); do
-    submodule_rel_path="${PARENTS_TO_COMMIT[$parent_dir]}"
+# Commit in each parent (SORTED_PATHS is already sorted deepest-first)
+for i in "${!PARENT_DIRS[@]}"; do
+    parent_dir="${PARENT_DIRS[$i]}"
+    submodule_rel_path="${PARENT_SUBPATHS[$i]}"
     commit_submodule_update "$parent_dir" "$submodule_rel_path" "chore: update theme submodule"
 done
 
