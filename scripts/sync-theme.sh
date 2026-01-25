@@ -1,11 +1,11 @@
 #!/bin/bash
-# scripts/sync-design-system.sh
-# Synchronizes cleanroom-design-system submodule across all locations
+# scripts/sync-theme.sh
+# Synchronizes cleanroom-theme submodule across all locations
 #
 # Usage:
-#   ./scripts/sync-design-system.sh           # Sync to latest main from standalone repo
-#   ./scripts/sync-design-system.sh abc1234   # Sync to specific commit
-#   ./scripts/sync-design-system.sh --dry-run # Show what would happen
+#   ./scripts/sync-theme.sh           # Sync to latest main from standalone repo
+#   ./scripts/sync-theme.sh abc1234   # Sync to specific commit
+#   ./scripts/sync-theme.sh --dry-run # Show what would happen
 
 set -e
 
@@ -40,7 +40,7 @@ for arg in "$@"; do
         -h|--help)
             echo "Usage: $0 [OPTIONS] [COMMIT]"
             echo ""
-            echo "Synchronizes cleanroom-design-system submodule to all locations."
+            echo "Synchronizes cleanroom-theme submodule to all locations."
             echo ""
             echo "Arguments:"
             echo "  COMMIT     Target commit SHA (defaults to latest main from standalone repo)"
@@ -63,17 +63,17 @@ for arg in "$@"; do
     esac
 done
 
-# Standalone design-system repo location
-STANDALONE_REPO="/Users/andfranklin/Projects/cleanroom-design-system"
+# Standalone theme repo location
+STANDALONE_REPO="/Users/andfranklin/Projects/cleanroom-theme"
 
 # Get target commit
 if [[ -z "$TARGET_COMMIT" ]]; then
     if [[ ! -d "$STANDALONE_REPO" ]]; then
-        echo -e "${RED}Error: Standalone design-system repo not found at $STANDALONE_REPO${NC}"
+        echo -e "${RED}Error: Standalone theme repo not found at $STANDALONE_REPO${NC}"
         echo "Please specify a commit SHA explicitly."
         exit 1
     fi
-    echo -e "${BLUE}Getting latest from standalone design-system repo...${NC}"
+    echo -e "${BLUE}Getting latest from standalone theme repo...${NC}"
     # Try to fetch from origin if available, otherwise use local main
     cd "$STANDALONE_REPO"
     if git remote get-url origin &>/dev/null; then
@@ -91,23 +91,23 @@ if [[ ! "$TARGET_COMMIT" =~ ^[a-f0-9]{7,40}$ ]]; then
     exit 1
 fi
 
-echo -e "${BLUE}Target design-system commit: ${GREEN}$TARGET_COMMIT${NC}"
+echo -e "${BLUE}Target theme commit: ${GREEN}$TARGET_COMMIT${NC}"
 echo ""
 
-# Find all cleanroom-design-system submodules by searching .gitmodules files
-find_design_system_submodules() {
+# Find all cleanroom-theme submodules by searching .gitmodules files
+find_theme_submodules() {
     local search_dir="$1"
     local results=()
 
     # Find all .gitmodules files
     while IFS= read -r gitmodules; do
         local repo_dir="$(dirname "$gitmodules")"
-        # Extract paths where submodule URL contains "cleanroom-design-system"
+        # Extract paths where submodule URL contains "cleanroom-theme"
         while IFS= read -r subpath; do
             if [[ -n "$subpath" ]]; then
                 results+=("$repo_dir/$subpath")
             fi
-        done < <(grep -A2 'cleanroom-design-system' "$gitmodules" 2>/dev/null | \
+        done < <(grep -A2 'cleanroom-theme' "$gitmodules" 2>/dev/null | \
             grep 'path' | \
             sed 's/.*path = //')
     done < <(find "$search_dir" -name ".gitmodules" -type f 2>/dev/null)
@@ -115,19 +115,19 @@ find_design_system_submodules() {
     printf '%s\n' "${results[@]}"
 }
 
-# Discover all design-system submodule locations
-echo -e "${BLUE}Discovering design-system submodule locations...${NC}"
+# Discover all theme submodule locations
+echo -e "${BLUE}Discovering theme submodule locations...${NC}"
 SUBMODULE_PATHS=()
 while IFS= read -r path; do
     [[ -n "$path" ]] && SUBMODULE_PATHS+=("$path")
-done < <(find_design_system_submodules "$REPO_ROOT")
+done < <(find_theme_submodules "$REPO_ROOT")
 
 if [[ ${#SUBMODULE_PATHS[@]} -eq 0 ]]; then
-    echo -e "${RED}Error: No design-system submodules found${NC}"
+    echo -e "${RED}Error: No theme submodules found${NC}"
     exit 1
 fi
 
-echo -e "Found ${GREEN}${#SUBMODULE_PATHS[@]}${NC} design-system submodule locations:"
+echo -e "Found ${GREEN}${#SUBMODULE_PATHS[@]}${NC} theme submodule locations:"
 for path in "${SUBMODULE_PATHS[@]}"; do
     # Show relative path from repo root
     rel_path="${path#$REPO_ROOT/}"
@@ -210,10 +210,10 @@ for path in "${SORTED_PATHS[@]}"; do
     parent_dir="$(dirname "$path")"
     submodule_name="$(basename "$path")"
 
-    # For design-system in source/, the parent is the repo containing source/
-    if [[ "$submodule_name" == "cleanroom-design-system" && "$(basename "$parent_dir")" == "source" ]]; then
+    # For theme in source/, the parent is the repo containing source/
+    if [[ "$submodule_name" == "cleanroom-theme" && "$(basename "$parent_dir")" == "source" ]]; then
         parent_dir="$(dirname "$parent_dir")"
-        submodule_rel_path="source/cleanroom-design-system"
+        submodule_rel_path="source/cleanroom-theme"
     else
         submodule_rel_path="$submodule_name"
     fi
@@ -224,7 +224,7 @@ done
 # Commit in each parent, from deepest to shallowest
 for parent_dir in $(printf '%s\n' "${!PARENTS_TO_COMMIT[@]}" | awk -F/ '{print NF-1, $0}' | sort -rn | cut -d' ' -f2-); do
     submodule_rel_path="${PARENTS_TO_COMMIT[$parent_dir]}"
-    commit_submodule_update "$parent_dir" "$submodule_rel_path" "chore: update design-system submodule"
+    commit_submodule_update "$parent_dir" "$submodule_rel_path" "chore: update theme submodule"
 done
 
 # Now commit project-docs updates in technical-docs if any project-docs were updated
@@ -238,7 +238,7 @@ for project_dir in cleanroom-whisper-docs airgap-deploy-docs airgap-transfer-doc
 done
 
 if ! git diff --cached --quiet 2>/dev/null; then
-    git commit -m "chore: update project-docs submodules (design-system sync)" --quiet
+    git commit -m "chore: update project-docs submodules (theme sync)" --quiet
     echo -e "  ${GREEN}✓${NC} Committed in technical-docs: project-docs updates"
 fi
 
@@ -246,19 +246,19 @@ fi
 cd "$REPO_ROOT"
 if ! git diff --quiet cleanroom-technical-docs 2>/dev/null; then
     git add cleanroom-technical-docs
-    git commit -m "chore: update technical-docs submodule (design-system sync)" --quiet
+    git commit -m "chore: update technical-docs submodule (theme sync)" --quiet
     echo -e "  ${GREEN}✓${NC} Committed in website: technical-docs update"
 fi
 
-# Commit direct design-system update in website if present
-if ! git diff --quiet cleanroom-design-system 2>/dev/null; then
-    git add cleanroom-design-system
-    git commit -m "chore: update design-system submodule" --quiet
-    echo -e "  ${GREEN}✓${NC} Committed in website: direct design-system update"
+# Commit direct theme update in website if present
+if ! git diff --quiet cleanroom-theme 2>/dev/null; then
+    git add cleanroom-theme
+    git commit -m "chore: update theme submodule" --quiet
+    echo -e "  ${GREEN}✓${NC} Committed in website: direct theme update"
 fi
 
 echo ""
-echo -e "${GREEN}✓ Design system sync complete!${NC}"
+echo -e "${GREEN}✓ Theme sync complete!${NC}"
 echo ""
 echo -e "${BLUE}Summary:${NC}"
 echo "  Target commit: ${TARGET_COMMIT:0:7}"
@@ -268,3 +268,4 @@ echo -e "${BLUE}Next steps:${NC}"
 echo "  1. Verify: ./scripts/check-submodules.sh"
 echo "  2. Build:  node scripts/build-docs.mjs"
 echo "  3. Push:   git push (and push each modified repo)"
+

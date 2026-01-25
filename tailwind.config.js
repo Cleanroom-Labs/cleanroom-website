@@ -1,8 +1,8 @@
 /** @type {import('tailwindcss').Config} */
-const designPreset = require('./cleanroom-design-system/tailwind/preset');
+const themePreset = require('./cleanroom-theme/tailwind/preset');
 
 module.exports = {
-  presets: [designPreset],
+  presets: [themePreset],
   content: [
     './pages/**/*.{js,jsx}',
     './components/**/*.{js,jsx}',

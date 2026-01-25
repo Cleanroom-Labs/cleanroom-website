@@ -2,7 +2,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import Footer from './Footer';
 
-const nav = require('../cleanroom-design-system/tokens/navigation');
+const nav = require('../cleanroom-theme/tokens/navigation');
 
 const defaultTitle = 'Cleanroom Labs';
 const defaultDescription = 'Free and open source tools for air-gapped development';

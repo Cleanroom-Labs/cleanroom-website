@@ -10,7 +10,7 @@ See [README.md](README.md) for complete documentation including build commands, 
 
 **Check submodules:** `./scripts/check-submodules.sh`
 
-**Sync design system:** `./scripts/sync-design-system.sh`
+**Sync theme:** `./scripts/sync-theme.sh`
 
 ## Key Concepts
 
@@ -24,7 +24,7 @@ See [README.md](README.md) for complete documentation including build commands, 
 | File | Purpose |
 |------|---------|
 | `scripts/build-docs.mjs` | Main build orchestrator |
-| `scripts/sync-design-system.sh` | Propagate design-system changes to all submodules |
+| `scripts/sync-theme.sh` | Propagate theme changes to all submodules |
 | `cleanroom-technical-docs/source/conf.py` | Master Sphinx configuration |
 | `cleanroom-technical-docs/CLAUDE.md` | Guidance for working with Sphinx docs |
 
@@ -48,10 +48,10 @@ When modifying build scripts:
 1. Test locally with `./scripts/test-ci-locally.sh`
 2. Check that `public/docs/` is generated correctly
 
-When updating the design system:
-1. Make changes in `/Users/andfranklin/Projects/cleanroom-design-system`
+When updating the theme:
+1. Make changes in `/Users/andfranklin/Projects/cleanroom-theme`
 2. Run `npm run build` to regenerate outputs
 3. Commit and push changes in the standalone repo
-4. Run `./scripts/sync-design-system.sh` to propagate to all 5 submodule locations
+4. Run `./scripts/sync-theme.sh` to propagate to all 5 submodule locations
 5. Build with `node scripts/build-docs.mjs` to verify
 6. Push changes in website (and any modified project repos)
