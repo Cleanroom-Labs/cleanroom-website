@@ -2,6 +2,8 @@ import Head from 'next/head';
 import Link from 'next/link';
 import Footer from './Footer';
 
+const nav = require('../cleanroom-design-system/tokens/navigation');
+
 const defaultTitle = 'Cleanroom Labs';
 const defaultDescription = 'Free and open source tools for air-gapped development';
 const siteUrl = 'https://cleanroomlabs.dev';
@@ -11,7 +13,7 @@ export default function Layout({ children, title, description }) {
   const pageDescription = description || defaultDescription;
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-slate-950">
       <Head>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
@@ -33,18 +35,31 @@ export default function Layout({ children, title, description }) {
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/site.webmanifest" />
       </Head>
-      <nav className="bg-gray-800 text-white p-4">
-        <div className="container mx-auto flex gap-6">
-          <Link href="/" className="font-bold">Cleanroom Labs</Link>
-          <Link href="/about" className="hover:underline">About</Link>
-          <Link href="/donate" className="hover:underline">Donate</Link>
-          <Link href="/blog" className="hover:underline">Blog</Link>
-          <Link href="/docs/index.html" className="hover:underline">Docs</Link>
+
+      {/* Navigation */}
+      <nav className="sticky top-0 z-50 bg-slate-800 border-b border-slate-700 text-white">
+        <div className="container mx-auto px-4 py-4 flex items-center gap-8">
+          <Link href={nav.brand.href} className="font-bold text-lg hover:text-emerald-light transition-colors">
+            {nav.brand.text}
+          </Link>
+          <div className="flex gap-6">
+            {nav.links.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-text-secondary hover:text-emerald-light transition-colors"
+              >
+                {link.text}
+              </Link>
+            ))}
+          </div>
         </div>
       </nav>
+
       <div className="flex-grow">
         {children}
       </div>
+
       <Footer />
     </div>
   );
