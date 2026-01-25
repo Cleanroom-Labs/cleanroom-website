@@ -441,7 +441,7 @@ Add notification step:
 All helper scripts are in `scripts/`:
 
 - **test-ci-locally.sh** - Simulate CI build locally
-- **check-submodules.sh** - Verify submodule health
+- **check-submodules.py** - Verify submodule health
 - **update-project-docs.sh** - Update project to specific version
 - **add-new-project.sh** - Add new project as submodule
 - **deploy-release.sh** - Deploy specific release

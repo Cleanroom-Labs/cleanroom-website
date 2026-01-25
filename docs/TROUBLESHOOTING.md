@@ -205,7 +205,7 @@ node scripts/build-docs.mjs
 
 ```bash
 # Check submodule health
-./scripts/check-submodules.sh
+./scripts/check-submodules.py
 
 # Test CI locally
 ./scripts/test-ci-locally.sh

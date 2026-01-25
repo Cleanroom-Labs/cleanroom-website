@@ -55,7 +55,7 @@ cleanroom-website/                    # This repo
 
 | Command | Description |
 |---------|-------------|
-| `./scripts/check-submodules.sh` | Verify submodule health |
+| `./scripts/check-submodules.py` | Verify submodule health |
 | `./scripts/build-single-project.sh <project>` | Build single project docs |
 | `./scripts/update-project-docs.sh <project> <version>` | Update project to version |
 | `./scripts/add-new-project.sh <project> <repo-url>` | Add new project |
