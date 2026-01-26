@@ -8,19 +8,24 @@ export default function About() {
     >
       <main className="bg-slate-950 min-h-screen">
         {/* Hero section with background */}
-        <section className="relative py-16 overflow-hidden">
+        <section className="relative py-24 overflow-hidden">
           {/* Background decoration */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
             <div className="absolute top-0 right-0 w-96 h-96 translate-x-1/2 -translate-y-1/2 opacity-30">
               <img src="/shield-bg.svg" alt="" className="w-full h-full" />
             </div>
             <div className="absolute inset-0 opacity-5" style={{ backgroundImage: "url('/grid.svg')", backgroundRepeat: 'repeat' }} />
+
+            {/* Floating particles */}
+            <div className="absolute top-[20%] right-[25%] w-3 h-3 bg-emerald/30 rounded-full animate-drift" />
+            <div className="absolute top-[60%] left-[20%] w-2 h-2 bg-emerald/25 rounded-full animate-wander" />
+            <div className="absolute top-[40%] right-[15%] w-2 h-2 bg-emerald/35 rounded-full animate-float" />
+            <div className="absolute bottom-[30%] left-[30%] w-1.5 h-1.5 bg-emerald/40 rounded-full animate-pulse-slow" />
           </div>
 
-          <div className="container mx-auto px-4 max-w-4xl relative z-10">
-            <h1 className="text-4xl font-bold text-text-primary mb-8">About Us</h1>
-
-            <p className="text-xl text-text-secondary leading-relaxed">
+          <div className="container mx-auto px-4 max-w-4xl relative z-10 text-center">
+            <h1 className="text-5xl font-bold text-text-primary mb-6">About Us</h1>
+            <p className="text-xl text-text-secondary leading-relaxed max-w-2xl mx-auto">
               Cleanroom Labs builds free, open-source tools for air-gapped development.
               Our mission is to make privacy-preserving software accessible to everyone,
               not just security experts.
