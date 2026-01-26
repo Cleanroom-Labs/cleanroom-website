@@ -101,6 +101,9 @@ class PDFBuilder:
         # Build screenshots section (after TOC)
         screenshots_html = self._build_screenshots_html(screenshots)
 
+        # Build intro sections (About and Our Tools)
+        intro_html = self._build_intro_html()
+
         # Build content sections HTML
         blog_html = self._build_content_html("Blog Posts", blog_sections) if blog_sections else ""
         docs_html = self._build_content_html("Technical Documentation", docs_sections) if docs_sections else ""
@@ -120,6 +123,7 @@ class PDFBuilder:
             {cover_html}
             {toc_html}
             {screenshots_html}
+            {intro_html}
             {blog_html}
             {docs_html}
         </body>
@@ -181,6 +185,7 @@ class PDFBuilder:
             color: {colors.docs_text_primary};
             margin: 1.2em 0 0.4em 0;
             page-break-after: avoid;
+            text-align: left;
         }}
 
         h2 {{
@@ -191,6 +196,7 @@ class PDFBuilder:
             page-break-after: avoid;
             border-bottom: 1px solid {colors.docs_border};
             padding-bottom: 0.2em;
+            text-align: left;
         }}
 
         h3 {{
@@ -199,6 +205,7 @@ class PDFBuilder:
             color: {colors.docs_text_primary};
             margin: 1.0em 0 0.3em 0;
             page-break-after: avoid;
+            text-align: left;
         }}
 
         h4, h5, h6 {{
@@ -207,6 +214,7 @@ class PDFBuilder:
             color: {colors.docs_text_primary};
             margin: 0.8em 0 0.2em 0;
             page-break-after: avoid;
+            text-align: left;
         }}
 
         p {{
@@ -406,13 +414,13 @@ class PDFBuilder:
             background: {colors.docs_content_bg};
             display: flex;
             flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }}
 
         .cover-title-section {{
             text-align: center;
-            margin-bottom: 15mm;
-            padding-bottom: 10mm;
-            border-bottom: 3px solid {colors.emerald};
+            max-width: 400px;
         }}
 
         .cover-subtitle {{
@@ -528,6 +536,52 @@ class PDFBuilder:
         </div>
         """
 
+    def _build_intro_html(self) -> str:
+        """Build HTML for introduction sections (About and Our Tools)."""
+        return """
+        <div class="main-content-section section-break">
+            <h1 id="intro-about" class="main-section-title">About Cleanroom Labs</h1>
+
+            <p>Cleanroom Labs builds free, open-source tools for air-gapped development. Our mission is to make privacy-preserving software accessible to everyone, not just security experts.</p>
+
+            <h2 id="intro-principles">Core Principles</h2>
+
+            <h3 id="intro-privacy">Privacy by Default</h3>
+            <p>Every tool we build works without network connectivity. Your data stays on your machine, under your control. We don't collect telemetry, require accounts, or phone home.</p>
+
+            <h3 id="intro-accessibility">Accessibility over Expertise</h3>
+            <p>Security shouldn't require a PhD. Our tools are designed for developers who want privacy without becoming security experts. Simple interfaces, sensible defaults, comprehensive documentation.</p>
+
+            <h3 id="intro-minimalism">Minimalism</h3>
+            <p>We build focused tools that do one thing well. No feature bloat, no unnecessary complexity. Each tool solves a specific problem in the air-gapped development workflow.</p>
+
+            <h3 id="intro-transparency">Transparency</h3>
+            <p>All our code is open source under permissive licenses. You can audit every line, build from source, and verify that our tools do exactly what they claim.</p>
+
+            <h2 id="intro-tools">Our Tools</h2>
+
+            <h3 id="intro-airgap-transfer">AirGap Transfer</h3>
+            <p>Secure data transfer for air-gapped systems. Move files between isolated networks using QR codes, with cryptographic verification ensuring data integrity. No USB drives, no network bridges, no compromises.</p>
+
+            <h3 id="intro-airgap-deploy">AirGap Deploy</h3>
+            <p>Universal deployment framework for isolated environments. Package applications with all dependencies, deploy to air-gapped systems, and manage updates without network access.</p>
+
+            <h3 id="intro-cleanroom-whisper">Cleanroom Whisper</h3>
+            <p>Private voice transcription powered by local AI. Convert speech to text using OpenAI's Whisper model running entirely on your hardware. No cloud uploads, no API calls, no recordings leaving your machine.</p>
+
+            <h2 id="intro-philosophy">Technical Philosophy</h2>
+
+            <h3 id="intro-rust">Rust-First Approach</h3>
+            <p>We build our core tools in Rust for memory safety, performance, and standalone binaries. No runtime dependencies, no garbage collection pauses, no security vulnerabilities from memory corruption.</p>
+
+            <h3 id="intro-offline">Offline-First Architecture</h3>
+            <p>Every feature works without network connectivity. We design for the air-gapped case first, then add optional network features. If it requires internet, it's not a core feature.</p>
+
+            <h3 id="intro-local-ai">Local AI Models</h3>
+            <p>Our AI-powered tools run entirely on user hardware. We package optimized models, handle hardware detection, and provide the same quality as cloud services without the privacy tradeoffs.</p>
+        </div>
+        """
+
     def _get_toc_css(self) -> str:
         """Generate CSS for table of contents with page numbers."""
         colors = self.config.colors
@@ -627,6 +681,25 @@ class PDFBuilder:
     ) -> str:
         """Build HTML for table of contents with working links."""
         toc_items = []
+
+        # Introduction sections
+        toc_items.append('<h2 class="toc-section-heading">About Cleanroom Labs</h2>')
+        toc_items.append('<ul class="toc-list">')
+        intro_entries = [
+            ("intro-about", "About Cleanroom Labs"),
+            ("intro-principles", "Core Principles"),
+            ("intro-tools", "Our Tools"),
+            ("intro-philosophy", "Technical Philosophy"),
+        ]
+        for anchor_id, title in intro_entries:
+            toc_items.append(f'''
+                <li class="toc-entry">
+                    <a href="#{anchor_id}" class="toc-entry-title">{title}</a>
+                    <span class="toc-leader"></span>
+                    <span class="toc-page-num"></span>
+                </li>
+            ''')
+        toc_items.append('</ul>')
 
         # Blog section
         if blog_sections:
@@ -765,6 +838,19 @@ class PDFBuilder:
         # Add top-level bookmarks
         writer.add_outline_item("Cover", 0)
         writer.add_outline_item("Table of Contents", 1)
+
+        # Add intro section bookmarks
+        intro_page = get_page_for_anchor("intro-about") or 2
+        intro_parent = writer.add_outline_item("About Cleanroom Labs", intro_page)
+        intro_subsections = [
+            ("intro-principles", "Core Principles"),
+            ("intro-tools", "Our Tools"),
+            ("intro-philosophy", "Technical Philosophy"),
+        ]
+        for anchor_id, title in intro_subsections:
+            page = get_page_for_anchor(anchor_id)
+            if page is not None:
+                writer.add_outline_item(title, page, parent=intro_parent)
 
         if blog_sections:
             # Find first blog page from actual anchor
