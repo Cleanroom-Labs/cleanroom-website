@@ -61,6 +61,32 @@ cleanroom-website/                    # This repo
 | `./scripts/add-new-project.sh <project> <repo-url>` | Add new project |
 | `./scripts/deploy-release.sh <project> <version>` | Deploy tagged release |
 | `./scripts/test-ci-locally.sh` | Simulate CI locally |
+| `python -m scripts.generate-pdf` | Generate comprehensive PDF from website |
+
+## PDF Generation
+
+Generate a comprehensive PDF report from the website content:
+
+```bash
+# Prerequisites: build docs and start dev server
+npm run build-docs
+npm run dev  # In a separate terminal
+
+# Generate PDF
+python -m scripts.generate-pdf
+
+# Options
+python -m scripts.generate-pdf --output custom-output.pdf
+python -m scripts.generate-pdf --skip-screenshots  # Use cached screenshots
+```
+
+The PDF includes:
+- Cover page with hero section screenshot
+- Table of contents with clickable navigation
+- All blog posts (sorted by date)
+- Complete technical documentation
+
+See [scripts/generate-pdf/README.md](scripts/generate-pdf/README.md) for details.
 
 ## Working with Submodules
 

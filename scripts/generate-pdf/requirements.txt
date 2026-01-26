@@ -1,0 +1,22 @@
+# PDF Generation Tool Dependencies
+#
+# Install with: pip install -r scripts/generate-pdf/requirements.txt
+# For screenshot support: playwright install chromium
+
+# HTML parsing and content extraction
+beautifulsoup4>=4.12.0
+
+# HTML-to-PDF conversion with CSS support
+weasyprint>=60.0
+
+# PDF merging and bookmark generation
+pypdf>=4.0.0
+
+# MDX blog post parsing
+python-frontmatter>=1.0.0
+
+# Markdown rendering
+markdown>=3.5.0
+
+# Screenshot capture (optional, for cover page)
+playwright>=1.40.0
