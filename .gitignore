@@ -14,6 +14,9 @@ out/
 # Claude Code (local settings only - shared settings.json is committed)
 .claude/settings.local.json
 
+# Personal scratch files
+scratch.txt
+
 # Python
 __pycache__/
 *.pyc
