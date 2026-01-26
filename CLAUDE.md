@@ -12,6 +12,8 @@ See [README.md](README.md) for complete documentation including build commands, 
 
 **Sync theme:** `./scripts/sync-theme.py`
 
+**Generate PDF:** `python -m scripts.generate-pdf`
+
 ## Key Concepts
 
 - **Three-level nested submodules**: website → technical-docs → project-docs
@@ -25,6 +27,7 @@ See [README.md](README.md) for complete documentation including build commands, 
 |------|---------|
 | `scripts/build-docs.mjs` | Main build orchestrator |
 | `scripts/sync-theme.py` | Propagate theme changes to all submodules |
+| `scripts/generate-pdf/` | PDF report generator for website content |
 | `cleanroom-technical-docs/source/conf.py` | Master Sphinx configuration |
 | `cleanroom-technical-docs/CLAUDE.md` | Guidance for working with Sphinx docs |
 
@@ -55,3 +58,9 @@ When updating the theme:
 4. Run `./scripts/sync-theme.py` to propagate to all 5 submodule locations
 5. Build with `node scripts/build-docs.mjs` to verify
 6. Push changes in website (and any modified project repos)
+
+When generating PDF reports:
+1. Build docs: `npm run build-docs`
+2. Start dev server: `npm run dev`
+3. Generate PDF: `python -m scripts.generate-pdf`
+4. Output: `output/cleanroom-labs.pdf`

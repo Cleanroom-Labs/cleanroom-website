@@ -20,3 +20,6 @@ scratch.txt
 # Python
 __pycache__/
 *.pyc
+
+# PDF generation output
+/output/
