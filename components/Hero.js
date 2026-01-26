@@ -55,7 +55,7 @@ export default function Hero() {
           <div className="flex flex-wrap gap-4">
             <Link
               href="#products"
-              className="inline-flex items-center px-6 py-3 bg-emerald text-white font-semibold rounded-lg hover:bg-emerald-light transition-all duration-200 hover:scale-105"
+              className="inline-flex items-center px-6 py-3 bg-emerald text-white font-semibold rounded-lg hover:bg-emerald-light transition-all duration-150 ease-out hover:scale-105"
             >
               Explore Our Tools
               <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -64,7 +64,7 @@ export default function Hero() {
             </Link>
             <Link
               href="/docs/index.html"
-              className="inline-flex items-center px-6 py-3 border border-slate-700 text-text-primary font-semibold rounded-lg hover:border-emerald hover:text-emerald transition-all duration-200"
+              className="inline-flex items-center px-6 py-3 border border-slate-700 bg-slate-800/50 backdrop-blur-md text-text-primary font-semibold rounded-lg hover:border-emerald hover:text-emerald hover:bg-slate-800/70 transition-all duration-150 ease-out"
             >
               Documentation
               <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
