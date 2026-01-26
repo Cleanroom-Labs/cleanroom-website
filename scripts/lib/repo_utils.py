@@ -216,6 +216,96 @@ class RepoInfo:
 
         return result.returncode == 0
 
+    def fetch(self, all_remotes: bool = True) -> bool:
+        """
+        Fetch from remote(s). Returns True on success.
+
+        Args:
+            all_remotes: If True, fetch from all remotes (--all flag)
+        """
+        args = ["fetch"]
+        if all_remotes:
+            args.append("--all")
+        result = self.git(*args, check=False, capture=True)
+        return result.returncode == 0
+
+    def checkout(self, branch: str) -> tuple[bool, str]:
+        """
+        Checkout a branch. Returns (success, error_message).
+
+        Args:
+            branch: Branch name to checkout
+        """
+        result = self.git("checkout", branch, check=False, capture=True)
+        if result.returncode == 0:
+            self.branch = branch
+            return (True, "")
+        return (False, result.stderr.strip())
+
+    def get_local_branches(self) -> list[str]:
+        """Get list of local branch names."""
+        result = self.git("branch", "--format=%(refname:short)", check=False)
+        if result.returncode != 0:
+            return []
+        return [line.strip() for line in result.stdout.strip().split('\n') if line.strip()]
+
+    def get_remote_branches(self) -> list[str]:
+        """Get list of remote tracking branch names (without 'origin/' prefix)."""
+        result = self.git("branch", "-r", "--format=%(refname:short)", check=False)
+        if result.returncode != 0:
+            return []
+        branches = []
+        for line in result.stdout.strip().split('\n'):
+            line = line.strip()
+            if line and not line.endswith('/HEAD'):
+                # Remove 'origin/' prefix
+                if line.startswith('origin/'):
+                    branches.append(line[7:])
+                else:
+                    branches.append(line)
+        return branches
+
+    def get_commit_sha(self, short: bool = True) -> str:
+        """
+        Get current commit SHA.
+
+        Args:
+            short: If True, return short SHA (7 chars), else full SHA
+        """
+        args = ["rev-parse"]
+        if short:
+            args.append("--short")
+        args.append("HEAD")
+        result = self.git(*args, check=False)
+        if result.returncode != 0:
+            return "unknown"
+        return result.stdout.strip()
+
+    def get_remote_commit_sha(self, branch: str, short: bool = True) -> Optional[str]:
+        """
+        Get the commit SHA of the remote branch.
+
+        Args:
+            branch: Branch name (without 'origin/' prefix)
+            short: If True, return short SHA (7 chars), else full SHA
+
+        Returns:
+            Commit SHA or None if remote branch doesn't exist
+        """
+        args = ["rev-parse"]
+        if short:
+            args.append("--short")
+        args.append(f"origin/{branch}")
+        result = self.git(*args, check=False)
+        if result.returncode != 0:
+            return None
+        return result.stdout.strip()
+
+    @property
+    def name(self) -> str:
+        """Get the repository directory name."""
+        return self.path.name
+
 
 def discover_repos(repo_root: Path, exclude_theme: bool = True) -> list[RepoInfo]:
     """
@@ -265,6 +355,26 @@ def build_dependency_graph(repos: list[RepoInfo]) -> dict[Path, set[Path]]:
                 break
 
     return graph
+
+
+def set_parent_relationships(repos: list[RepoInfo]) -> None:
+    """
+    Set the parent attribute on each repo based on directory hierarchy.
+    Modifies repos in place.
+    """
+    path_to_repo = {repo.path: repo for repo in repos}
+
+    for repo in repos:
+        # Walk up the directory tree to find parent repo
+        for parent_path in repo.path.parents:
+            if parent_path in path_to_repo:
+                repo.parent = path_to_repo[parent_path]
+                break
+
+
+def get_children(repo: RepoInfo, repos: list[RepoInfo]) -> list[RepoInfo]:
+    """Get direct children of a repo."""
+    return [r for r in repos if r.parent is repo]
 
 
 def topological_sort_repos(repos: list[RepoInfo]) -> list[RepoInfo]:
