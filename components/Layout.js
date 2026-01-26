@@ -37,7 +37,7 @@ export default function Layout({ children, title, description }) {
       </Head>
 
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-slate-800 border-b border-slate-700 text-white">
+      <nav className="sticky top-0 z-50 bg-slate-800 border-b border-slate-700 text-white flex-shrink-0">
         <div className="container mx-auto px-4 py-4 flex items-center gap-8">
           <Link href={nav.brand.href} className="font-bold text-lg hover:text-emerald transition-colors">
             {nav.brand.text}
