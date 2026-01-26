@@ -98,15 +98,12 @@ class PDFBuilder:
         # Build TOC HTML
         toc_html = self._build_toc_html(blog_sections, docs_sections)
 
-        # Build screenshots section (after TOC)
-        screenshots_html = self._build_screenshots_html(screenshots)
-
         # Build intro sections (About and Our Tools)
         intro_html = self._build_intro_html()
 
-        # Build content sections HTML
-        blog_html = self._build_content_html("Blog Posts", blog_sections) if blog_sections else ""
+        # Build content sections HTML (Technical Documentation before Blog Posts)
         docs_html = self._build_content_html("Technical Documentation", docs_sections) if docs_sections else ""
+        blog_html = self._build_content_html("Blog Posts", blog_sections) if blog_sections else ""
 
         return f"""
         <!DOCTYPE html>
@@ -122,10 +119,9 @@ class PDFBuilder:
         <body>
             {cover_html}
             {toc_html}
-            {screenshots_html}
             {intro_html}
-            {blog_html}
             {docs_html}
+            {blog_html}
         </body>
         </html>
         """
@@ -398,6 +394,15 @@ class PDFBuilder:
             text-align: center;
             page-break-after: avoid;
         }}
+
+        /* Hide Sphinx toctree navigation from extracted content */
+        .toctree-wrapper,
+        div.toctree-wrapper,
+        nav.contents,
+        .contents.local,
+        ul.simple {{
+            display: none !important;
+        }}
         """
 
     def _get_cover_css(self) -> str:
@@ -418,9 +423,21 @@ class PDFBuilder:
             align-items: center;
         }}
 
+        .cover-icon {{
+            margin-bottom: 15mm;
+        }}
+
+        .cover-icon svg {{
+            width: 80px;
+            height: 80px;
+        }}
+
         .cover-title-section {{
             text-align: center;
             max-width: 400px;
+            padding: 10mm 15mm;
+            border-top: 3px solid {colors.emerald};
+            border-bottom: 3px solid {colors.emerald};
         }}
 
         .cover-subtitle {{
@@ -469,40 +486,23 @@ class PDFBuilder:
             border-radius: 6px;
             border: 1px solid {colors.docs_border};
         }}
-
-        /* Screenshots page styles */
-        .screenshots-page {{
-            page: cover;
-            page-break-after: always;
-            min-height: 297mm;
-            padding: 20mm;
-            background: {colors.docs_content_bg};
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 15mm;
-        }}
-
-        .screenshot-hero {{
-            max-width: 100%;
-            max-height: 120mm;
-            border-radius: 6px;
-            border: 1px solid {colors.docs_border};
-        }}
-
-        .screenshot-products {{
-            max-width: 100%;
-            max-height: 100mm;
-            border-radius: 6px;
-            border: 1px solid {colors.docs_border};
-        }}
         """
 
     def _build_cover_html(self, screenshots: dict[str, Path]) -> str:
-        """Build HTML for print-friendly cover page."""
+        """Build HTML for print-friendly cover page with icon."""
         return """
         <div class="cover-page">
+            <div class="cover-icon">
+                <svg width="80" height="80" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="64" height="64" rx="12" fill="#111827"/>
+                    <circle cx="32" cy="32" r="20" fill="none" stroke="#10b981"
+                            stroke-width="4" stroke-dasharray="8 6" opacity="0.7"/>
+                    <path d="M24 26L32 18L40 26" stroke="#10b981" stroke-width="5"
+                          stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M40 38L32 46L24 38" stroke="#10b981" stroke-width="5"
+                          stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
             <div class="cover-title-section">
                 <p class="cover-subtitle">Privacy-First Development Tools</p>
                 <h1 class="cover-main-title">Cleanroom Labs</h1>
@@ -511,28 +511,6 @@ class PDFBuilder:
                     that work without network dependency.
                 </p>
             </div>
-        </div>
-        """
-
-    def _build_screenshots_html(self, screenshots: dict[str, Path]) -> str:
-        """Build HTML for screenshots section after TOC."""
-        # Build hero image reference
-        hero_img = ""
-        if "hero" in screenshots and screenshots["hero"].exists():
-            hero_img = f'<img src="file://{screenshots["hero"]}" class="screenshot-hero" />'
-
-        # Build products image reference
-        products_img = ""
-        if "products" in screenshots and screenshots["products"].exists():
-            products_img = f'<img src="file://{screenshots["products"]}" class="screenshot-products" />'
-
-        if not hero_img and not products_img:
-            return ""
-
-        return f"""
-        <div class="screenshots-page">
-            {hero_img}
-            {products_img}
         </div>
         """
 
@@ -701,21 +679,7 @@ class PDFBuilder:
             ''')
         toc_items.append('</ul>')
 
-        # Blog section
-        if blog_sections:
-            toc_items.append('<h2 class="toc-section-heading">Blog Posts</h2>')
-            toc_items.append('<ul class="toc-list">')
-            for section in blog_sections:
-                toc_items.append(f'''
-                    <li class="toc-entry">
-                        <a href="#{section.anchor_id}" class="toc-entry-title">{section.title}</a>
-                        <span class="toc-leader"></span>
-                        <span class="toc-page-num"></span>
-                    </li>
-                ''')
-            toc_items.append('</ul>')
-
-        # Documentation section
+        # Documentation section (before Blog Posts)
         if docs_sections:
             toc_items.append('<h2 class="toc-section-heading">Technical Documentation</h2>')
             toc_items.append('<ul class="toc-list">')
@@ -746,6 +710,20 @@ class PDFBuilder:
 
             if current_project is not None:
                 toc_items.append('</ul></div>')
+            toc_items.append('</ul>')
+
+        # Blog section (after Technical Documentation)
+        if blog_sections:
+            toc_items.append('<h2 class="toc-section-heading">Blog Posts</h2>')
+            toc_items.append('<ul class="toc-list">')
+            for section in blog_sections:
+                toc_items.append(f'''
+                    <li class="toc-entry">
+                        <a href="#{section.anchor_id}" class="toc-entry-title">{section.title}</a>
+                        <span class="toc-leader"></span>
+                        <span class="toc-page-num"></span>
+                    </li>
+                ''')
             toc_items.append('</ul>')
 
         toc_html = "\n".join(toc_items)
@@ -852,27 +830,10 @@ class PDFBuilder:
             if page is not None:
                 writer.add_outline_item(title, page, parent=intro_parent)
 
-        if blog_sections:
-            # Find first blog page from actual anchor
-            first_blog_page = get_page_for_anchor(blog_sections[0].anchor_id) or 2
-            blog_parent = writer.add_outline_item("Blog Posts", first_blog_page)
-
-            # Add each blog post as child bookmark
-            for section in blog_sections:
-                page = get_page_for_anchor(section.anchor_id)
-                if page is not None:
-                    writer.add_outline_item(section.title, page, parent=blog_parent)
-
+        # Technical Documentation (before Blog Posts)
         if docs_sections:
             # Find first docs page
-            first_docs_page = get_page_for_anchor(docs_sections[0].anchor_id)
-            if first_docs_page is None:
-                # Fallback: estimate based on last blog section
-                if blog_sections:
-                    last_blog_page = get_page_for_anchor(blog_sections[-1].anchor_id) or 2
-                    first_docs_page = last_blog_page + 1
-                else:
-                    first_docs_page = 2
+            first_docs_page = get_page_for_anchor(docs_sections[0].anchor_id) or 2
             docs_parent = writer.add_outline_item("Technical Documentation", first_docs_page)
 
             # Group by project with nested hierarchy
@@ -892,6 +853,25 @@ class PDFBuilder:
 
                 if page is not None and project_parent:
                     writer.add_outline_item(section.title, page, parent=project_parent)
+
+        # Blog Posts (after Technical Documentation)
+        if blog_sections:
+            # Find first blog page from actual anchor
+            first_blog_page = get_page_for_anchor(blog_sections[0].anchor_id)
+            if first_blog_page is None:
+                # Fallback: estimate based on last docs section
+                if docs_sections:
+                    last_docs_page = get_page_for_anchor(docs_sections[-1].anchor_id) or 2
+                    first_blog_page = last_docs_page + 1
+                else:
+                    first_blog_page = 2
+            blog_parent = writer.add_outline_item("Blog Posts", first_blog_page)
+
+            # Add each blog post as child bookmark
+            for section in blog_sections:
+                page = get_page_for_anchor(section.anchor_id)
+                if page is not None:
+                    writer.add_outline_item(section.title, page, parent=blog_parent)
 
         # Write final PDF
         with open(output_path, "wb") as f:
