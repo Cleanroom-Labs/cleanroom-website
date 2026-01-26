@@ -98,6 +98,9 @@ class PDFBuilder:
         # Build TOC HTML
         toc_html = self._build_toc_html(blog_sections, docs_sections)
 
+        # Build screenshots section (after TOC)
+        screenshots_html = self._build_screenshots_html(screenshots)
+
         # Build content sections HTML
         blog_html = self._build_content_html("Blog Posts", blog_sections) if blog_sections else ""
         docs_html = self._build_content_html("Technical Documentation", docs_sections) if docs_sections else ""
@@ -116,6 +119,7 @@ class PDFBuilder:
         <body>
             {cover_html}
             {toc_html}
+            {screenshots_html}
             {blog_html}
             {docs_html}
         </body>
@@ -206,7 +210,7 @@ class PDFBuilder:
         }}
 
         p {{
-            margin: 0.5em 0;
+            margin: 0.8em 0;
             orphans: 3;
             widows: 3;
             text-align: justify;
@@ -416,7 +420,7 @@ class PDFBuilder:
             color: {colors.emerald};
             text-transform: uppercase;
             letter-spacing: 3px;
-            margin: 0 0 5mm 0;
+            margin: 0 0 12mm 0;
             font-weight: 500;
         }}
 
@@ -458,29 +462,38 @@ class PDFBuilder:
             border: 1px solid {colors.docs_border};
         }}
 
-        .cover-footer {{
-            text-align: center;
-            margin-top: 15mm;
-            padding-top: 8mm;
-            border-top: 1px solid {colors.docs_border};
-            font-size: 10pt;
-            color: {colors.docs_text_muted};
+        /* Screenshots page styles */
+        .screenshots-page {{
+            page: cover;
+            page-break-after: always;
+            min-height: 297mm;
+            padding: 20mm;
+            background: {colors.docs_content_bg};
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 15mm;
+        }}
+
+        .screenshot-hero {{
+            max-width: 100%;
+            max-height: 120mm;
+            border-radius: 6px;
+            border: 1px solid {colors.docs_border};
+        }}
+
+        .screenshot-products {{
+            max-width: 100%;
+            max-height: 100mm;
+            border-radius: 6px;
+            border: 1px solid {colors.docs_border};
         }}
         """
 
     def _build_cover_html(self, screenshots: dict[str, Path]) -> str:
         """Build HTML for print-friendly cover page."""
-        # Build hero image reference
-        hero_img = ""
-        if "hero" in screenshots and screenshots["hero"].exists():
-            hero_img = f'<img src="file://{screenshots["hero"]}" class="cover-hero-image" />'
-
-        # Build products image reference
-        products_img = ""
-        if "products" in screenshots and screenshots["products"].exists():
-            products_img = f'<img src="file://{screenshots["products"]}" class="cover-products-image" />'
-
-        return f"""
+        return """
         <div class="cover-page">
             <div class="cover-title-section">
                 <p class="cover-subtitle">Privacy-First Development Tools</p>
@@ -490,14 +503,28 @@ class PDFBuilder:
                     that work without network dependency.
                 </p>
             </div>
+        </div>
+        """
 
-            {f'<div class="cover-hero-section">{hero_img}</div>' if hero_img else ''}
+    def _build_screenshots_html(self, screenshots: dict[str, Path]) -> str:
+        """Build HTML for screenshots section after TOC."""
+        # Build hero image reference
+        hero_img = ""
+        if "hero" in screenshots and screenshots["hero"].exists():
+            hero_img = f'<img src="file://{screenshots["hero"]}" class="screenshot-hero" />'
 
-            {f'<div class="cover-products-section">{products_img}</div>' if products_img else ''}
+        # Build products image reference
+        products_img = ""
+        if "products" in screenshots and screenshots["products"].exists():
+            products_img = f'<img src="file://{screenshots["products"]}" class="screenshot-products" />'
 
-            <div class="cover-footer">
-                <p>Generated from cleanroomlabs.dev</p>
-            </div>
+        if not hero_img and not products_img:
+            return ""
+
+        return f"""
+        <div class="screenshots-page">
+            {hero_img}
+            {products_img}
         </div>
         """
 
@@ -540,16 +567,17 @@ class PDFBuilder:
 
         .toc-entry {{
             display: flex;
+            justify-content: space-between;
             align-items: baseline;
-            margin: 0.4em 0;
-            font-size: 11pt;
+            margin: 0.3em 0;
+            font-size: 9pt;
         }}
 
         .toc-entry-title {{
             color: {colors.docs_text_secondary};
             text-decoration: none;
-            flex-shrink: 0;
-            max-width: 80%;
+            flex: 1;
+            padding-right: 1em;
         }}
 
         .toc-entry-title:hover {{
@@ -557,16 +585,16 @@ class PDFBuilder:
         }}
 
         .toc-leader {{
-            flex-grow: 1;
-            border-bottom: 1px dotted {colors.docs_text_muted};
-            margin: 0 0.5em;
-            min-width: 2em;
+            flex-shrink: 0;
+            width: 1em;
         }}
 
         .toc-page-num {{
             color: {colors.docs_text_muted};
-            font-size: 10pt;
+            font-size: 8pt;
             flex-shrink: 0;
+            text-align: right;
+            min-width: 2em;
         }}
 
         /* Use CSS target-counter for page numbers */
@@ -583,7 +611,7 @@ class PDFBuilder:
         .toc-project-title {{
             font-weight: 600;
             color: {colors.docs_text_primary};
-            font-size: 11pt;
+            font-size: 10pt;
             margin: 0.8em 0 0.3em 0;
         }}
 
@@ -622,7 +650,7 @@ class PDFBuilder:
             current_project = None
             for section in docs_sections:
                 # Detect project from ID
-                project = section.id.split("-")[0] if "-" in section.id else "meta"
+                project = self._extract_project_from_id(section.id)
 
                 if project != current_project:
                     if current_project is not None:
@@ -667,6 +695,20 @@ class PDFBuilder:
             "cleanroom-whisper": "Cleanroom Whisper",
         }
         return titles.get(project, project.replace("-", " ").title())
+
+    def _extract_project_from_id(self, section_id: str) -> str:
+        """Extract project name from section ID."""
+        # Known two-part project prefixes
+        two_part_prefixes = ["airgap-transfer", "airgap-deploy", "cleanroom-whisper"]
+
+        for prefix in two_part_prefixes:
+            if section_id.startswith(prefix):
+                return prefix
+
+        # Fall back to first segment or "meta"
+        if "-" in section_id:
+            return section_id.split("-")[0]
+        return "meta"
 
     def _build_content_html(
         self,
@@ -751,7 +793,7 @@ class PDFBuilder:
             current_project = None
             project_parent = None
             for section in docs_sections:
-                project = section.id.split("-")[0] if "-" in section.id else "meta"
+                project = self._extract_project_from_id(section.id)
                 page = get_page_for_anchor(section.anchor_id)
 
                 if project != current_project:
