@@ -681,12 +681,13 @@ class PDFBuilder:
 
     def _build_intro_html(self) -> str:
         """Build HTML for introduction sections (About and Our Tools)."""
-        # Use section divider for "About Cleanroom Labs"
-        section_divider = self._build_section_divider_html("About Cleanroom Labs")
+        # Use section divider for Introduction
+        section_divider = self._build_section_divider_html("Introduction")
 
         return f"""
         {section_divider}
         <div id="intro-about" class="main-content-section">
+            <h1 id="intro-about-heading">About Cleanroom Labs</h1>
             <p>Cleanroom Labs builds free, open-source tools for air-gapped development. Our mission is to make privacy-preserving software accessible to everyone, not just security experts.</p>
 
             <h2 id="intro-principles">Core Principles</h2>
@@ -828,7 +829,7 @@ class PDFBuilder:
         toc_items = []
 
         # Introduction sections
-        toc_items.append('<h2 class="toc-section-heading">About Cleanroom Labs</h2>')
+        toc_items.append('<h2 class="toc-section-heading">Introduction</h2>')
         toc_items.append('<ul class="toc-list">')
         intro_entries = [
             ("intro-about", "About Cleanroom Labs"),
@@ -1126,7 +1127,7 @@ class PDFBuilder:
 
         # Add intro section bookmarks
         intro_page = get_page_for_anchor("intro-about") or 2
-        intro_parent = writer.add_outline_item("About Cleanroom Labs", intro_page)
+        intro_parent = writer.add_outline_item("Introduction", intro_page)
         intro_subsections = [
             ("intro-principles", "Core Principles"),
             ("intro-tools", "Our Tools"),
