@@ -90,52 +90,45 @@ export function DeployIcon({ className = "w-12 h-12" }) {
 export function WhisperIcon({ className = "w-12 h-12" }) {
   return (
     <svg className={className} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Head silhouette */}
+      {/* Central circle - sound source */}
+      <circle
+        cx="18"
+        cy="24"
+        r="6"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        fill="none"
+      />
+      {/* Inner dot */}
+      <circle
+        cx="18"
+        cy="24"
+        r="2"
+        fill="currentColor"
+      />
+      {/* Concentric sound wave arcs */}
       <path
-        d="M16 36V28C16 20 20 14 28 14C28 14 32 14 32 20V24C32 28 30 32 26 34L24 36"
+        d="M26 16a12 12 0 0 1 0 16"
         stroke="currentColor"
         strokeWidth="2.5"
         strokeLinecap="round"
-        strokeLinejoin="round"
-        opacity="0.8"
-      />
-      {/* Ear area */}
-      <circle
-        cx="14"
-        cy="24"
-        r="3"
-        stroke="currentColor"
-        strokeWidth="2"
         fill="none"
       />
-      {/* Sound waves - shifted left to fit in viewBox */}
       <path
-        d="M34 18C36 20 37 22 37 24C37 26 36 28 34 30"
+        d="M32 12a18 18 0 0 1 0 24"
         stroke="currentColor"
-        strokeWidth="2"
+        strokeWidth="2.5"
         strokeLinecap="round"
+        fill="none"
         opacity="0.7"
       />
       <path
-        d="M38 15C40 18 41 21 41 24C41 27 40 30 38 33"
+        d="M38 8a24 24 0 0 1 0 32"
         stroke="currentColor"
-        strokeWidth="2"
+        strokeWidth="2.5"
         strokeLinecap="round"
-        opacity="0.5"
-      />
-      <path
-        d="M42 12C44 15 45 19 45 24C45 29 44 33 42 36"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        opacity="0.3"
-      />
-      {/* Microphone dot */}
-      <circle
-        cx="20"
-        cy="26"
-        r="2"
-        fill="currentColor"
+        fill="none"
+        opacity="0.4"
       />
     </svg>
   );
