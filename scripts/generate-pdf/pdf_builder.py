@@ -399,8 +399,67 @@ class PDFBuilder:
         .toctree-wrapper,
         div.toctree-wrapper,
         nav.contents,
-        .contents.local,
-        ul.simple {{
+        .contents.local {{
+            display: none !important;
+        }}
+
+        /* Requirement card header layout */
+        .needs_head {{
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 0.5em;
+        }}
+
+        /* Put ID on its own line, right-aligned as a badge */
+        .needs-id {{
+            display: block;
+            width: 100%;
+            text-align: right;
+            margin-top: 0.3em;
+        }}
+
+        .needs-id a {{
+            background: {colors.docs_code_bg};
+            padding: 0.2em 0.5em;
+            border-radius: 4px;
+            font-size: 9pt;
+            font-family: {fonts.mono};
+            color: {colors.docs_text_muted};
+        }}
+
+        /* Metadata section spacing */
+        .needs_meta {{
+            font-size: 9pt;
+            color: {colors.docs_text_muted};
+            margin-top: 0.5em;
+            padding-top: 0.5em;
+            border-top: 1px solid {colors.docs_border};
+        }}
+
+        .needs_meta .line {{
+            margin: 0.2em 0;
+        }}
+
+        /* Table text alignment - disable justification in cells */
+        td, td p {{
+            text-align: left;
+            hyphens: none;
+        }}
+
+        /* Requirements table ID column - prevent wrapping */
+        .needstable td:first-child,
+        td.needs_id,
+        .needs_id {{
+            white-space: nowrap;
+            min-width: 130px;
+        }}
+
+        /* Hide Sphinx-needs collapse/navigation buttons */
+        .needs_collapse,
+        span.needs_collapse,
+        .need svg.feather,
+        .need_container svg.feather {{
             display: none !important;
         }}
         """
@@ -427,18 +486,41 @@ class PDFBuilder:
             margin-bottom: 15mm;
         }}
 
+        .cover-icon-backdrop {{
+            background: {colors.slate_800};
+            border-radius: 16px;
+            padding: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2),
+                        0 4px 10px rgba(0, 0, 0, 0.15);
+        }}
+
         .cover-icon svg {{
             width: 80px;
             height: 80px;
+            display: block;
         }}
 
         .cover-title-section {{
             text-align: center;
             max-width: 400px;
             padding: 10mm 15mm;
-            border-top: 3px solid {colors.emerald};
-            border-bottom: 3px solid {colors.emerald};
+            position: relative;
+            border-top: none;
+            border-bottom: none;
         }}
+
+        .cover-title-section::before,
+        .cover-title-section::after {{
+            content: '';
+            position: absolute;
+            left: -30mm;
+            right: -30mm;
+            height: 3px;
+            background: {colors.emerald};
+        }}
+
+        .cover-title-section::before {{ top: 0; }}
+        .cover-title-section::after {{ bottom: 0; }}
 
         .cover-subtitle {{
             font-size: 12pt;
@@ -447,6 +529,7 @@ class PDFBuilder:
             letter-spacing: 3px;
             margin: 0 0 12mm 0;
             font-weight: 500;
+            text-align: center;
         }}
 
         .cover-main-title {{
@@ -455,6 +538,7 @@ class PDFBuilder:
             color: {colors.docs_text_primary};
             margin: 0;
             line-height: 1.1;
+            text-align: center;
         }}
 
         .cover-tagline {{
@@ -463,6 +547,7 @@ class PDFBuilder:
             margin: 8mm auto 0 auto;
             max-width: 350px;
             line-height: 1.5;
+            text-align: center;
         }}
 
         .cover-hero-section {{
@@ -486,22 +571,102 @@ class PDFBuilder:
             border-radius: 6px;
             border: 1px solid {colors.docs_border};
         }}
+
+        /* Section divider page styles */
+        .section-divider-page {{
+            page: cover;
+            page-break-before: always;
+            page-break-after: always;
+            min-height: 250mm;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }}
+
+        .section-divider-content {{
+            text-align: center;
+        }}
+
+        .section-divider-decoration {{
+            margin-bottom: 20mm;
+        }}
+
+        .section-divider-decoration svg {{
+            width: 120px;
+            height: 120px;
+        }}
+
+        .section-divider-title {{
+            font-size: 36pt;
+            font-weight: 700;
+            color: {colors.docs_text_primary};
+            margin: 0 0 15mm 0;
+            text-align: center;
+        }}
+
+        .section-divider-line {{
+            width: 80mm;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, {colors.emerald}, transparent);
+            margin: 0 auto;
+        }}
+
+        /* Project cover page styles */
+        .project-cover-page {{
+            page: cover;
+            page-break-before: always;
+            page-break-after: always;
+            min-height: 200mm;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }}
+
+        .project-cover-content {{
+            text-align: center;
+        }}
+
+        .project-cover-icon {{
+            margin-bottom: 15mm;
+        }}
+
+        .project-cover-icon svg {{
+            width: 100px;
+            height: 100px;
+        }}
+
+        .project-cover-title {{
+            font-size: 32pt;
+            font-weight: 700;
+            color: {colors.docs_text_primary};
+            margin: 0 0 8mm 0;
+            text-align: center;
+        }}
+
+        .project-cover-subtitle {{
+            font-size: 14pt;
+            color: {colors.docs_text_secondary};
+            margin: 0;
+            text-align: center;
+        }}
         """
 
     def _build_cover_html(self, screenshots: dict[str, Path]) -> str:
         """Build HTML for print-friendly cover page with icon."""
+        _ = screenshots  # Screenshots not used in current design
         return """
         <div class="cover-page">
             <div class="cover-icon">
-                <svg width="80" height="80" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="64" height="64" rx="12" fill="#111827"/>
-                    <circle cx="32" cy="32" r="20" fill="none" stroke="#10b981"
-                            stroke-width="4" stroke-dasharray="8 6" opacity="0.7"/>
-                    <path d="M24 26L32 18L40 26" stroke="#10b981" stroke-width="5"
-                          stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M40 38L32 46L24 38" stroke="#10b981" stroke-width="5"
-                          stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+                <div class="cover-icon-backdrop">
+                    <svg width="80" height="80" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="32" cy="32" r="20" fill="none" stroke="#10b981"
+                                stroke-width="4" stroke-dasharray="8 6" opacity="0.7"/>
+                        <path d="M24 26L32 18L40 26" stroke="#10b981" stroke-width="5"
+                              stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M40 38L32 46L24 38" stroke="#10b981" stroke-width="5"
+                              stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
             </div>
             <div class="cover-title-section">
                 <p class="cover-subtitle">Privacy-First Development Tools</p>
@@ -516,10 +681,12 @@ class PDFBuilder:
 
     def _build_intro_html(self) -> str:
         """Build HTML for introduction sections (About and Our Tools)."""
-        return """
-        <div class="main-content-section section-break">
-            <h1 id="intro-about" class="main-section-title">About Cleanroom Labs</h1>
+        # Use section divider for "About Cleanroom Labs"
+        section_divider = self._build_section_divider_html("About Cleanroom Labs")
 
+        return f"""
+        {section_divider}
+        <div id="intro-about" class="main-content-section">
             <p>Cleanroom Labs builds free, open-source tools for air-gapped development. Our mission is to make privacy-preserving software accessible to everyone, not just security experts.</p>
 
             <h2 id="intro-principles">Core Principles</h2>
@@ -747,6 +914,135 @@ class PDFBuilder:
         }
         return titles.get(project, project.replace("-", " ").title())
 
+    def _get_project_subtitle(self, project: str) -> str:
+        """Get subtitle/description for a project."""
+        subtitles = {
+            "meta": "Shared documentation across all projects",
+            "airgap-transfer": "Secure data transfer for air-gapped systems",
+            "airgap-deploy": "Universal deployment framework for isolated environments",
+            "cleanroom-whisper": "Private voice transcription powered by local AI",
+        }
+        return subtitles.get(project, "")
+
+    def _get_project_icon_svg(self, project: str) -> str:
+        """Get SVG icon for a project from cleanroom-theme."""
+        import sys
+
+        # Try to import from theme icons
+        theme_icons = self.config.repo_root / "cleanroom-theme" / "icons"
+
+        if theme_icons.exists():
+            if str(theme_icons) not in sys.path:
+                sys.path.insert(0, str(theme_icons))
+
+            try:
+                # Import and use the theme icons module
+                from index import get_project_icon_svg
+                return get_project_icon_svg(
+                    project,
+                    color=self.config.colors.emerald,
+                    size=100,
+                )
+            except ImportError:
+                pass  # Fall back to inline icons
+
+        # Fallback: inline icons (for backwards compatibility)
+        colors = self.config.colors
+        icons = {
+            "airgap-transfer": f'''
+                <svg width="100" height="100" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="24" cy="24" r="20" fill="none" stroke="{colors.emerald}"
+                            stroke-width="2.5" stroke-dasharray="4 3" opacity="0.4"/>
+                    <path d="M16 18L24 10L32 18" stroke="{colors.emerald}" stroke-width="2.5"
+                          stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                    <path d="M24 10V28" stroke="{colors.emerald}" stroke-width="2.5" stroke-linecap="round"/>
+                    <path d="M32 30L24 38L16 30" stroke="{colors.emerald}" stroke-width="2.5"
+                          stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                    <path d="M24 38V20" stroke="{colors.emerald}" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+            ''',
+            "airgap-deploy": f'''
+                <svg width="100" height="100" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="24" cy="24" r="20" fill="none" stroke="{colors.emerald}"
+                            stroke-width="2.5" stroke-dasharray="4 3" opacity="0.4"/>
+                    <path d="M10 18L24 10L38 18" stroke="{colors.emerald}" stroke-width="2.5"
+                          stroke-linejoin="round" opacity="0.7"/>
+                    <path d="M10 18V32L24 40V26" stroke="{colors.emerald}" stroke-width="2.5"
+                          stroke-linejoin="round" opacity="0.7"/>
+                    <path d="M24 26L38 18V32L24 40" stroke="{colors.emerald}" stroke-width="2.5"
+                          stroke-linejoin="round"/>
+                    <path d="M10 18L24 26L38 18" stroke="{colors.emerald}" stroke-width="2.5"
+                          stroke-linejoin="round"/>
+                </svg>
+            ''',
+            "cleanroom-whisper": f'''
+                <svg width="100" height="100" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="24" cy="24" r="20" fill="none" stroke="{colors.emerald}"
+                            stroke-width="2.5" stroke-dasharray="4 3" opacity="0.4"/>
+                    <circle cx="16" cy="24" r="5" stroke="{colors.emerald}" stroke-width="2.5" fill="none"/>
+                    <path d="M24 17a10 10 0 0 1 0 14" stroke="{colors.emerald}" stroke-width="2.5"
+                          stroke-linecap="round" fill="none"/>
+                    <path d="M30 13a16 16 0 0 1 0 22" stroke="{colors.emerald}" stroke-width="2.5"
+                          stroke-linecap="round" fill="none" opacity="0.7"/>
+                </svg>
+            ''',
+            "meta": f'''
+                <svg width="100" height="100" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="24" cy="24" r="20" fill="none" stroke="{colors.emerald}"
+                            stroke-width="2.5" stroke-dasharray="4 3" opacity="0.4"/>
+                    <rect x="16" y="12" width="16" height="24" rx="2" fill="none"
+                          stroke="{colors.emerald}" stroke-width="2.5"/>
+                    <line x1="20" y1="18" x2="28" y2="18" stroke="{colors.emerald}" stroke-width="2"/>
+                    <line x1="20" y1="24" x2="28" y2="24" stroke="{colors.emerald}" stroke-width="2"/>
+                    <line x1="20" y1="30" x2="25" y2="30" stroke="{colors.emerald}" stroke-width="2"/>
+                </svg>
+            ''',
+        }
+
+        return icons.get(project, icons["meta"])
+
+    def _build_project_cover_html(self, project: str) -> str:
+        """Build HTML for a project cover page."""
+        icon_svg = self._get_project_icon_svg(project)
+        title = self._get_project_title(project)
+        subtitle = self._get_project_subtitle(project)
+
+        return f'''
+            <div class="project-cover-page section-break">
+                <div class="project-cover-content">
+                    <div class="project-cover-icon">{icon_svg}</div>
+                    <h1 class="project-cover-title">{title}</h1>
+                    <p class="project-cover-subtitle">{subtitle}</p>
+                </div>
+            </div>
+        '''
+
+    def _build_section_divider_html(self, title: str) -> str:
+        """Build HTML for a section divider page."""
+        colors = self.config.colors
+
+        # Concentric dotted circles decoration
+        decoration_svg = f'''
+            <svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="60" cy="60" r="50" fill="none" stroke="{colors.emerald}"
+                        stroke-width="2" stroke-dasharray="6 4" opacity="0.4"/>
+                <circle cx="60" cy="60" r="35" fill="none" stroke="{colors.emerald}"
+                        stroke-width="2" stroke-dasharray="6 4" opacity="0.6"/>
+                <circle cx="60" cy="60" r="20" fill="none" stroke="{colors.emerald}"
+                        stroke-width="3" stroke-dasharray="6 4" opacity="0.8"/>
+            </svg>
+        '''
+
+        return f'''
+            <div class="section-divider-page section-break">
+                <div class="section-divider-content">
+                    <div class="section-divider-decoration">{decoration_svg}</div>
+                    <h1 class="section-divider-title">{title}</h1>
+                    <div class="section-divider-line"></div>
+                </div>
+            </div>
+        '''
+
     def _extract_project_from_id(self, section_id: str) -> str:
         """Extract project name from section ID."""
         # Known two-part project prefixes
@@ -769,12 +1065,24 @@ class PDFBuilder:
         """Build HTML for a content section (blog or docs)."""
         content_parts = []
 
-        for i, section in enumerate(sections):
-            # Add section break for all but first
-            section_class = "section-break" if i > 0 else ""
+        # Add section divider for the main section
+        section_divider = self._build_section_divider_html(section_title)
+        content_parts.append(section_divider)
+
+        # Track current project for docs to insert project cover pages
+        current_project = None
+        is_docs = section_title == "Technical Documentation"
+
+        for section in sections:
+            if is_docs:
+                # Detect project from ID and add project cover when it changes
+                project = self._extract_project_from_id(section.id)
+                if project != current_project:
+                    content_parts.append(self._build_project_cover_html(project))
+                    current_project = project
 
             content_parts.append(f'''
-                <div id="{section.anchor_id}" class="content-section {section_class}">
+                <div id="{section.anchor_id}" class="content-section">
                     {section.html_content}
                 </div>
             ''')
@@ -782,8 +1090,7 @@ class PDFBuilder:
         content_html = "\n".join(content_parts)
 
         return f"""
-        <div class="main-content-section section-break">
-            <h1 class="main-section-title">{section_title}</h1>
+        <div class="main-content-section">
             {content_html}
         </div>
         """
