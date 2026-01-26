@@ -150,6 +150,9 @@ class SphinxExtractor(BaseExtractor):
         content_soup = BeautifulSoup(str(content), "html.parser")
         content_soup = self.transform_links(content_soup, html_file)
 
+        # Clean HTML to remove empty paragraphs and excessive whitespace
+        cleaned_html = self.clean_html(str(content_soup))
+
         # Generate unique ID based on file path
         relative_path = html_file.relative_to(self.config.paths.docs_dir)
         section_id = str(relative_path).replace("/", "-").replace(".html", "")
@@ -163,7 +166,7 @@ class SphinxExtractor(BaseExtractor):
         return ContentSection(
             id=section_id,
             title=title,
-            html_content=str(content_soup),
+            html_content=cleaned_html,
             level=level,
             source_path=html_file,
             anchor=section_id,

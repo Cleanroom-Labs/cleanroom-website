@@ -1,12 +1,14 @@
 """
 PDF assembly and styling with WeasyPrint.
+
+Generates a single-document PDF with working internal links and page numbers.
 """
 
 from pathlib import Path
 from typing import Optional
 
 try:
-    from weasyprint import HTML, CSS
+    from weasyprint import HTML
     from weasyprint.text.fonts import FontConfiguration
     WEASYPRINT_AVAILABLE = True
 except ImportError:
@@ -23,7 +25,7 @@ from extractors.base import ContentSection
 
 
 class PDFBuilder:
-    """Build PDF from extracted content."""
+    """Build PDF from extracted content using single-document approach."""
 
     def __init__(self, config: Optional[Config] = None):
         self.config = config or default_config
@@ -36,7 +38,7 @@ class PDFBuilder:
 
         if not PYPDF_AVAILABLE:
             raise ImportError(
-                "pypdf is required for PDF merging. "
+                "pypdf is required for PDF bookmarks. "
                 "Install with: pip install pypdf"
             )
 
@@ -49,63 +51,79 @@ class PDFBuilder:
         screenshots: dict[str, Path],
         output_path: Optional[Path] = None,
     ) -> Path:
-        """Build the complete PDF."""
+        """Build the complete PDF as a single document."""
         output_path = output_path or self.config.paths.output_path
 
         # Ensure output directory exists
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
         if self.config.verbose:
-            print("\nBuilding PDF...")
+            print("\nBuilding PDF as single document...")
 
-        # Build individual sections
-        temp_dir = self.config.paths.output_dir / "temp_pdf"
-        temp_dir.mkdir(parents=True, exist_ok=True)
+        # Build complete HTML document
+        html_content = self._build_complete_document(
+            blog_sections, docs_sections, screenshots
+        )
 
-        pdf_paths = []
+        # Generate PDF from single HTML
+        temp_path = self.config.paths.output_dir / "temp_combined.pdf"
+        document = HTML(string=html_content)
+        document.write_pdf(str(temp_path), font_config=self.font_config)
 
-        # 1. Cover page
-        cover_path = temp_dir / "01_cover.pdf"
-        self._build_cover_page(screenshots, cover_path)
-        pdf_paths.append(cover_path)
+        if self.config.verbose:
+            print("  Generated combined PDF")
 
-        # 2. Table of contents
-        toc_path = temp_dir / "02_toc.pdf"
-        self._build_toc(blog_sections, docs_sections, toc_path)
-        pdf_paths.append(toc_path)
+        # Add bookmarks using pypdf
+        self._add_bookmarks(temp_path, output_path, blog_sections, docs_sections)
 
-        # 3. Blog posts
-        if blog_sections:
-            blog_path = temp_dir / "03_blog.pdf"
-            self._build_content_section("Blog Posts", blog_sections, blog_path)
-            pdf_paths.append(blog_path)
-
-        # 4. Technical documentation
-        if docs_sections:
-            docs_path = temp_dir / "04_docs.pdf"
-            self._build_content_section("Technical Documentation", docs_sections, docs_path)
-            pdf_paths.append(docs_path)
-
-        # Merge all PDFs
-        self._merge_pdfs(pdf_paths, output_path, blog_sections, docs_sections)
-
-        # Clean up temp files
-        for pdf_path in pdf_paths:
-            if pdf_path.exists():
-                pdf_path.unlink()
-        if temp_dir.exists():
-            try:
-                temp_dir.rmdir()
-            except OSError:
-                pass  # Directory not empty, leave it
+        # Clean up temp file
+        if temp_path.exists():
+            temp_path.unlink()
 
         if self.config.verbose:
             print(f"\nPDF generated: {output_path}")
 
         return output_path
 
+    def _build_complete_document(
+        self,
+        blog_sections: list[ContentSection],
+        docs_sections: list[ContentSection],
+        screenshots: dict[str, Path],
+    ) -> str:
+        """Build complete HTML document with all content."""
+        # Build cover page HTML
+        cover_html = self._build_cover_html(screenshots)
+
+        # Build TOC HTML
+        toc_html = self._build_toc_html(blog_sections, docs_sections)
+
+        # Build content sections HTML
+        blog_html = self._build_content_html("Blog Posts", blog_sections) if blog_sections else ""
+        docs_html = self._build_content_html("Technical Documentation", docs_sections) if docs_sections else ""
+
+        return f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                {self._get_base_css()}
+                {self._get_cover_css()}
+                {self._get_toc_css()}
+            </style>
+        </head>
+        <body>
+            {cover_html}
+            {toc_html}
+            {blog_html}
+            {docs_html}
+        </body>
+        </html>
+        """
+
     def _get_base_css(self) -> str:
-        """Generate base CSS for all pages."""
+        """Generate base CSS for all pages with reduced whitespace."""
         colors = self.config.colors
         fonts = self.config.fonts
         layout = self.config.page_layout
@@ -125,9 +143,16 @@ class PDFBuilder:
             }}
         }}
 
-        @page :first {{
+        @page cover {{
+            margin: 0;
             @bottom-center {{
                 content: none;
+            }}
+        }}
+
+        @page toc {{
+            @bottom-center {{
+                content: counter(page, lower-roman);
             }}
         }}
 
@@ -138,7 +163,7 @@ class PDFBuilder:
         body {{
             font-family: {fonts.sans};
             font-size: 11pt;
-            line-height: 1.6;
+            line-height: 1.5;
             color: {colors.docs_text_secondary};
             background: {colors.docs_content_bg};
             margin: 0;
@@ -149,7 +174,7 @@ class PDFBuilder:
             font-size: 24pt;
             font-weight: 700;
             color: {colors.docs_text_primary};
-            margin: 1em 0 0.5em 0;
+            margin: 0.6em 0 0.3em 0;
             page-break-after: avoid;
         }}
 
@@ -157,17 +182,17 @@ class PDFBuilder:
             font-size: 18pt;
             font-weight: 600;
             color: {colors.docs_text_primary};
-            margin: 1.5em 0 0.5em 0;
+            margin: 0.8em 0 0.3em 0;
             page-break-after: avoid;
             border-bottom: 1px solid {colors.docs_border};
-            padding-bottom: 0.3em;
+            padding-bottom: 0.2em;
         }}
 
         h3 {{
             font-size: 14pt;
             font-weight: 600;
             color: {colors.docs_text_primary};
-            margin: 1.2em 0 0.4em 0;
+            margin: 0.6em 0 0.2em 0;
             page-break-after: avoid;
         }}
 
@@ -175,12 +200,12 @@ class PDFBuilder:
             font-size: 12pt;
             font-weight: 600;
             color: {colors.docs_text_primary};
-            margin: 1em 0 0.3em 0;
+            margin: 0.5em 0 0.2em 0;
             page-break-after: avoid;
         }}
 
         p {{
-            margin: 0.8em 0;
+            margin: 0.4em 0;
             orphans: 3;
             widows: 3;
         }}
@@ -195,12 +220,12 @@ class PDFBuilder:
         }}
 
         ul, ol {{
-            margin: 0.8em 0;
+            margin: 0.4em 0;
             padding-left: 1.5em;
         }}
 
         li {{
-            margin: 0.3em 0;
+            margin: 0.15em 0;
         }}
 
         code {{
@@ -208,7 +233,7 @@ class PDFBuilder:
             font-size: 0.9em;
             background: {colors.docs_code_bg};
             color: {colors.docs_code_text};
-            padding: 0.2em 0.4em;
+            padding: 0.15em 0.3em;
             border-radius: 3px;
         }}
 
@@ -217,11 +242,12 @@ class PDFBuilder:
             font-size: 9pt;
             background: {colors.docs_code_bg};
             color: {colors.docs_code_text};
-            padding: 1em;
+            padding: 0.75em;
             border-radius: 6px;
             overflow-x: auto;
             page-break-inside: avoid;
             border: 1px solid {colors.docs_border};
+            margin: 0.5em 0;
         }}
 
         pre code {{
@@ -232,8 +258,8 @@ class PDFBuilder:
 
         blockquote {{
             border-left: 4px solid {colors.emerald};
-            margin: 1em 0;
-            padding: 0.5em 1em;
+            margin: 0.5em 0;
+            padding: 0.3em 0.75em;
             background: {colors.docs_code_bg};
             font-style: italic;
         }}
@@ -241,14 +267,14 @@ class PDFBuilder:
         table {{
             width: 100%;
             border-collapse: collapse;
-            margin: 1em 0;
+            margin: 0.5em 0;
             font-size: 10pt;
             page-break-inside: avoid;
         }}
 
         th, td {{
             border: 1px solid {colors.docs_border};
-            padding: 0.5em 0.75em;
+            padding: 0.35em 0.5em;
             text-align: left;
         }}
 
@@ -261,7 +287,7 @@ class PDFBuilder:
         hr {{
             border: none;
             border-top: 1px solid {colors.docs_border};
-            margin: 2em 0;
+            margin: 1em 0;
         }}
 
         img {{
@@ -281,37 +307,37 @@ class PDFBuilder:
         .blog-meta {{
             color: {colors.docs_text_muted};
             font-size: 10pt;
-            margin: 0.5em 0;
+            margin: 0.3em 0 0.5em 0;
         }}
 
         .blog-tags {{
-            margin: 0.5em 0 1em 0;
+            display: inline;
         }}
 
         .blog-tag {{
             display: inline-block;
             background: {colors.emerald};
             color: white;
-            font-size: 9pt;
-            padding: 0.2em 0.6em;
+            font-size: 8pt;
+            padding: 0.1em 0.4em;
             border-radius: 3px;
-            margin-right: 0.5em;
+            margin-right: 0.3em;
         }}
 
         .blog-excerpt {{
             font-style: italic;
             color: {colors.docs_text_muted};
             border-left: 3px solid {colors.emerald};
-            padding-left: 1em;
-            margin: 1em 0;
+            padding-left: 0.75em;
+            margin: 0.5em 0;
         }}
 
         /* Sphinx-needs styles */
         .need {{
             border: 1px solid {colors.docs_border};
             border-radius: 6px;
-            padding: 1em;
-            margin: 1em 0;
+            padding: 0.75em;
+            margin: 0.5em 0;
             page-break-inside: avoid;
         }}
 
@@ -323,8 +349,8 @@ class PDFBuilder:
         /* Admonition styles */
         .admonition {{
             border-radius: 6px;
-            padding: 1em;
-            margin: 1em 0;
+            padding: 0.75em;
+            margin: 0.5em 0;
             page-break-inside: avoid;
         }}
 
@@ -345,163 +371,249 @@ class PDFBuilder:
 
         .admonition-title {{
             font-weight: 600;
-            margin-bottom: 0.5em;
+            margin-bottom: 0.3em;
+        }}
+
+        /* Content section spacing */
+        .content-section {{
+            margin-bottom: 1em;
+        }}
+
+        .main-section-title {{
+            text-align: center;
+            page-break-after: avoid;
         }}
         """
 
-    def _build_cover_page(self, screenshots: dict[str, Path], output_path: Path) -> None:
-        """Build the cover page with screenshots."""
+    def _get_cover_css(self) -> str:
+        """Generate CSS for print-friendly cover page."""
         colors = self.config.colors
-        fonts = self.config.fonts
 
+        return f"""
+        /* Cover page styles - print-friendly with white background */
+        .cover-page {{
+            page: cover;
+            page-break-after: always;
+            min-height: 297mm;
+            padding: 25mm 20mm;
+            background: {colors.docs_content_bg};
+            display: flex;
+            flex-direction: column;
+        }}
+
+        .cover-title-section {{
+            text-align: center;
+            margin-bottom: 15mm;
+            padding-bottom: 10mm;
+            border-bottom: 3px solid {colors.emerald};
+        }}
+
+        .cover-subtitle {{
+            font-size: 12pt;
+            color: {colors.emerald};
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin: 0 0 5mm 0;
+            font-weight: 500;
+        }}
+
+        .cover-main-title {{
+            font-size: 42pt;
+            font-weight: 700;
+            color: {colors.docs_text_primary};
+            margin: 0;
+            line-height: 1.1;
+        }}
+
+        .cover-tagline {{
+            font-size: 12pt;
+            color: {colors.docs_text_secondary};
+            margin: 8mm auto 0 auto;
+            max-width: 350px;
+            line-height: 1.5;
+        }}
+
+        .cover-hero-section {{
+            text-align: center;
+            margin: 10mm 0;
+        }}
+
+        .cover-hero-image {{
+            max-width: 100%;
+            border-radius: 6px;
+            border: 1px solid {colors.docs_border};
+        }}
+
+        .cover-products-section {{
+            text-align: center;
+            margin-top: auto;
+        }}
+
+        .cover-products-image {{
+            max-width: 100%;
+            border-radius: 6px;
+            border: 1px solid {colors.docs_border};
+        }}
+
+        .cover-footer {{
+            text-align: center;
+            margin-top: 15mm;
+            padding-top: 8mm;
+            border-top: 1px solid {colors.docs_border};
+            font-size: 10pt;
+            color: {colors.docs_text_muted};
+        }}
+        """
+
+    def _build_cover_html(self, screenshots: dict[str, Path]) -> str:
+        """Build HTML for print-friendly cover page."""
         # Build hero image reference
         hero_img = ""
         if "hero" in screenshots and screenshots["hero"].exists():
-            hero_img = f'<img src="file://{screenshots["hero"]}" class="hero-image" />'
+            hero_img = f'<img src="file://{screenshots["hero"]}" class="cover-hero-image" />'
 
         # Build products image reference
         products_img = ""
         if "products" in screenshots and screenshots["products"].exists():
-            products_img = f'<img src="file://{screenshots["products"]}" class="products-image" />'
+            products_img = f'<img src="file://{screenshots["products"]}" class="cover-products-image" />'
 
-        html = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <style>
-                @page {{
-                    size: A4;
-                    margin: 0;
-                }}
-
-                body {{
-                    font-family: {fonts.sans};
-                    margin: 0;
-                    padding: 0;
-                    background: {colors.slate_950};
-                    color: {colors.text_primary};
-                    min-height: 100vh;
-                }}
-
-                .cover {{
-                    display: flex;
-                    flex-direction: column;
-                    min-height: 297mm;
-                    padding: 20mm;
-                }}
-
-                .hero-section {{
-                    text-align: center;
-                    margin-bottom: 30mm;
-                }}
-
-                .hero-image {{
-                    max-width: 100%;
-                    border-radius: 8px;
-                    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-                }}
-
-                .title-section {{
-                    text-align: center;
-                    margin: 20mm 0;
-                }}
-
-                .main-title {{
-                    font-size: 36pt;
-                    font-weight: 700;
-                    color: {colors.text_primary};
-                    margin: 0 0 10mm 0;
-                }}
-
-                .subtitle {{
-                    font-size: 14pt;
-                    color: {colors.emerald};
-                    text-transform: uppercase;
-                    letter-spacing: 2px;
-                    margin: 0;
-                }}
-
-                .tagline {{
-                    font-size: 12pt;
-                    color: {colors.text_secondary};
-                    margin: 10mm 0 0 0;
-                    max-width: 400px;
-                    margin-left: auto;
-                    margin-right: auto;
-                }}
-
-                .products-section {{
-                    margin-top: auto;
-                    text-align: center;
-                }}
-
-                .products-image {{
-                    max-width: 100%;
-                    border-radius: 8px;
-                }}
-
-                .footer {{
-                    text-align: center;
-                    margin-top: 20mm;
-                    font-size: 10pt;
-                    color: {colors.text_muted};
-                }}
-            </style>
-        </head>
-        <body>
-            <div class="cover">
-                <div class="title-section">
-                    <p class="subtitle">Privacy-First Development Tools</p>
-                    <h1 class="main-title">Cleanroom Labs</h1>
-                    <p class="tagline">
-                        Build software that respects privacy. Free and open source tools
-                        that work without network dependency.
-                    </p>
-                </div>
-
-                {f'<div class="hero-section">{hero_img}</div>' if hero_img else ''}
-
-                {f'<div class="products-section">{products_img}</div>' if products_img else ''}
-
-                <div class="footer">
-                    <p>Generated from cleanroomlabs.dev</p>
-                </div>
+        return f"""
+        <div class="cover-page">
+            <div class="cover-title-section">
+                <p class="cover-subtitle">Privacy-First Development Tools</p>
+                <h1 class="cover-main-title">Cleanroom Labs</h1>
+                <p class="cover-tagline">
+                    Build software that respects privacy. Free and open source tools
+                    that work without network dependency.
+                </p>
             </div>
-        </body>
-        </html>
+
+            {f'<div class="cover-hero-section">{hero_img}</div>' if hero_img else ''}
+
+            {f'<div class="cover-products-section">{products_img}</div>' if products_img else ''}
+
+            <div class="cover-footer">
+                <p>Generated from cleanroomlabs.dev</p>
+            </div>
+        </div>
         """
 
-        document = HTML(string=html)
-        document.write_pdf(str(output_path), font_config=self.font_config)
+    def _get_toc_css(self) -> str:
+        """Generate CSS for table of contents with page numbers."""
+        colors = self.config.colors
 
-        if self.config.verbose:
-            print(f"  Built cover page: {output_path}")
+        return f"""
+        /* Table of contents styles */
+        .toc-page {{
+            page: toc;
+            page-break-after: always;
+        }}
 
-    def _build_toc(
+        .toc-container {{
+            padding: 10mm 0;
+        }}
+
+        .toc-title {{
+            text-align: center;
+            color: {colors.docs_text_primary};
+            margin-bottom: 1.5em;
+            font-size: 28pt;
+        }}
+
+        .toc-section-heading {{
+            font-size: 14pt;
+            font-weight: 600;
+            color: {colors.docs_text_primary};
+            margin: 1.2em 0 0.5em 0;
+            padding-bottom: 0.3em;
+            border-bottom: 1px solid {colors.docs_border};
+        }}
+
+        .toc-list {{
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }}
+
+        .toc-entry {{
+            display: flex;
+            align-items: baseline;
+            margin: 0.4em 0;
+            font-size: 11pt;
+        }}
+
+        .toc-entry-title {{
+            color: {colors.docs_text_secondary};
+            text-decoration: none;
+            flex-shrink: 0;
+            max-width: 80%;
+        }}
+
+        .toc-entry-title:hover {{
+            color: {colors.emerald};
+        }}
+
+        .toc-leader {{
+            flex-grow: 1;
+            border-bottom: 1px dotted {colors.docs_text_muted};
+            margin: 0 0.5em;
+            min-width: 2em;
+        }}
+
+        .toc-page-num {{
+            color: {colors.docs_text_muted};
+            font-size: 10pt;
+            flex-shrink: 0;
+        }}
+
+        /* Use CSS target-counter for page numbers */
+        .toc-entry-title::after {{
+            content: target-counter(attr(href), page);
+            position: absolute;
+            right: 0;
+        }}
+
+        .toc-project-group {{
+            margin-left: 1em;
+        }}
+
+        .toc-project-title {{
+            font-weight: 600;
+            color: {colors.docs_text_primary};
+            font-size: 11pt;
+            margin: 0.8em 0 0.3em 0;
+        }}
+
+        .toc-project-entries {{
+            margin-left: 1em;
+        }}
+        """
+
+    def _build_toc_html(
         self,
         blog_sections: list[ContentSection],
         docs_sections: list[ContentSection],
-        output_path: Path,
-    ) -> None:
-        """Build the table of contents page."""
-        colors = self.config.colors
-
+    ) -> str:
+        """Build HTML for table of contents with working links."""
         toc_items = []
 
         # Blog section
         if blog_sections:
-            toc_items.append('<h2>Blog Posts</h2>')
+            toc_items.append('<h2 class="toc-section-heading">Blog Posts</h2>')
             toc_items.append('<ul class="toc-list">')
             for section in blog_sections:
-                toc_items.append(
-                    f'<li><a href="#{section.anchor_id}">{section.title}</a></li>'
-                )
+                toc_items.append(f'''
+                    <li class="toc-entry">
+                        <a href="#{section.anchor_id}" class="toc-entry-title">{section.title}</a>
+                        <span class="toc-leader"></span>
+                        <span class="toc-page-num"></span>
+                    </li>
+                ''')
             toc_items.append('</ul>')
 
         # Documentation section
         if docs_sections:
-            toc_items.append('<h2>Technical Documentation</h2>')
+            toc_items.append('<h2 class="toc-section-heading">Technical Documentation</h2>')
             toc_items.append('<ul class="toc-list">')
 
             current_project = None
@@ -511,78 +623,37 @@ class PDFBuilder:
 
                 if project != current_project:
                     if current_project is not None:
-                        toc_items.append('</ul></li>')
+                        toc_items.append('</ul></div>')
                     project_title = self._get_project_title(project)
-                    toc_items.append(f'<li><strong>{project_title}</strong><ul>')
+                    toc_items.append(f'''
+                        <div class="toc-project-group">
+                            <div class="toc-project-title">{project_title}</div>
+                            <ul class="toc-list toc-project-entries">
+                    ''')
                     current_project = project
 
-                toc_items.append(
-                    f'<li><a href="#{section.anchor_id}">{section.title}</a></li>'
-                )
+                toc_items.append(f'''
+                    <li class="toc-entry">
+                        <a href="#{section.anchor_id}" class="toc-entry-title">{section.title}</a>
+                        <span class="toc-leader"></span>
+                        <span class="toc-page-num"></span>
+                    </li>
+                ''')
 
             if current_project is not None:
-                toc_items.append('</ul></li>')
+                toc_items.append('</ul></div>')
             toc_items.append('</ul>')
 
         toc_html = "\n".join(toc_items)
 
-        html = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <style>
-                {self._get_base_css()}
-
-                .toc-container {{
-                    padding: 20mm 0;
-                }}
-
-                .toc-title {{
-                    text-align: center;
-                    color: {colors.docs_text_primary};
-                    margin-bottom: 2em;
-                }}
-
-                .toc-list {{
-                    list-style: none;
-                    padding: 0;
-                }}
-
-                .toc-list li {{
-                    margin: 0.5em 0;
-                }}
-
-                .toc-list ul {{
-                    list-style: none;
-                    padding-left: 1.5em;
-                    margin: 0.5em 0;
-                }}
-
-                .toc-list a {{
-                    color: {colors.docs_text_secondary};
-                    text-decoration: none;
-                }}
-
-                .toc-list a:hover {{
-                    color: {colors.emerald};
-                }}
-            </style>
-        </head>
-        <body>
+        return f"""
+        <div class="toc-page">
             <div class="toc-container">
                 <h1 class="toc-title">Table of Contents</h1>
                 {toc_html}
             </div>
-        </body>
-        </html>
+        </div>
         """
-
-        document = HTML(string=html)
-        document.write_pdf(str(output_path), font_config=self.font_config)
-
-        if self.config.verbose:
-            print(f"  Built table of contents: {output_path}")
 
     def _get_project_title(self, project: str) -> str:
         """Get display title for a project."""
@@ -594,13 +665,12 @@ class PDFBuilder:
         }
         return titles.get(project, project.replace("-", " ").title())
 
-    def _build_content_section(
+    def _build_content_html(
         self,
         section_title: str,
         sections: list[ContentSection],
-        output_path: Path,
-    ) -> None:
-        """Build a content section (blog or docs)."""
+    ) -> str:
+        """Build HTML for a content section (blog or docs)."""
         content_parts = []
 
         for i, section in enumerate(sections):
@@ -615,83 +685,54 @@ class PDFBuilder:
 
         content_html = "\n".join(content_parts)
 
-        html = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <style>
-                {self._get_base_css()}
-
-                .main-section-title {{
-                    text-align: center;
-                    page-break-after: avoid;
-                }}
-
-                .content-section {{
-                    margin-bottom: 2em;
-                }}
-            </style>
-        </head>
-        <body>
+        return f"""
+        <div class="main-content-section section-break">
             <h1 class="main-section-title">{section_title}</h1>
             {content_html}
-        </body>
-        </html>
+        </div>
         """
 
-        document = HTML(string=html)
-        document.write_pdf(str(output_path), font_config=self.font_config)
-
-        if self.config.verbose:
-            print(f"  Built section: {section_title} ({len(sections)} items)")
-
-    def _merge_pdfs(
+    def _add_bookmarks(
         self,
-        pdf_paths: list[Path],
+        input_path: Path,
         output_path: Path,
         blog_sections: list[ContentSection],
         docs_sections: list[ContentSection],
     ) -> None:
-        """Merge all PDFs and add bookmarks."""
+        """Add bookmarks to the generated PDF."""
+        reader = PdfReader(str(input_path))
         writer = PdfWriter()
 
-        page_offset = 0
-        bookmarks = []
+        # Copy all pages
+        for page in reader.pages:
+            writer.add_page(page)
 
-        for pdf_path in pdf_paths:
-            if not pdf_path.exists():
-                continue
+        # Add top-level bookmarks
+        # Note: Page numbers are estimates since we can't know exact page
+        # positions without re-parsing. These provide reasonable navigation.
+        writer.add_outline_item("Cover", 0)
+        writer.add_outline_item("Table of Contents", 1)
 
-            reader = PdfReader(str(pdf_path))
-            num_pages = len(reader.pages)
+        # Estimate where content sections start (after cover + toc pages)
+        content_start = 2
 
-            # Add pages
-            for page in reader.pages:
-                writer.add_page(page)
+        if blog_sections:
+            writer.add_outline_item("Blog Posts", content_start)
 
-            # Track bookmarks based on section
-            if "cover" in pdf_path.name:
-                bookmarks.append(("Cover", page_offset))
-            elif "toc" in pdf_path.name:
-                bookmarks.append(("Table of Contents", page_offset))
-            elif "blog" in pdf_path.name:
-                bookmarks.append(("Blog Posts", page_offset))
-            elif "docs" in pdf_path.name:
-                bookmarks.append(("Technical Documentation", page_offset))
-
-            page_offset += num_pages
-
-        # Add bookmarks to PDF
-        for title, page_num in bookmarks:
-            writer.add_outline_item(title, page_num)
+        if docs_sections:
+            # Estimate docs start after blog (rough calculation)
+            docs_start = content_start
+            if blog_sections:
+                # Rough estimate: 1-2 pages per blog post
+                docs_start += max(len(blog_sections), 1)
+            writer.add_outline_item("Technical Documentation", docs_start)
 
         # Write final PDF
         with open(output_path, "wb") as f:
             writer.write(f)
 
         if self.config.verbose:
-            print(f"  Merged {len(pdf_paths)} sections into final PDF")
+            print(f"  Added bookmarks to PDF")
 
 
 def build_pdf(

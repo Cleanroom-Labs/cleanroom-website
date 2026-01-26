@@ -121,10 +121,10 @@ class BlogExtractor(BaseExtractor):
         tags: list[str],
         excerpt: str,
     ) -> str:
-        """Build HTML for post metadata header."""
+        """Build HTML for post metadata header with compact spacing."""
         parts = [f'<h1 class="blog-title">{title}</h1>']
 
-        # Date and author line
+        # Consolidated meta line: date, author, and tags together
         meta_parts = []
         if date:
             # Format date nicely
@@ -138,18 +138,16 @@ class BlogExtractor(BaseExtractor):
         if author:
             meta_parts.append(f'<span class="blog-author">by {author}</span>')
 
+        # Add tags inline with date/author
+        if tags:
+            tag_html = " ".join(f'<span class="blog-tag">{tag}</span>' for tag in tags)
+            meta_parts.append(f'<span class="blog-tags">{tag_html}</span>')
+
         if meta_parts:
             parts.append(f'<p class="blog-meta">{" · ".join(meta_parts)}</p>')
 
-        # Tags
-        if tags:
-            tag_html = " ".join(f'<span class="blog-tag">{tag}</span>' for tag in tags)
-            parts.append(f'<p class="blog-tags">{tag_html}</p>')
-
-        # Excerpt/summary
+        # Excerpt/summary (if present)
         if excerpt:
             parts.append(f'<p class="blog-excerpt">{excerpt}</p>')
-
-        parts.append("<hr/>")
 
         return "\n".join(parts)
