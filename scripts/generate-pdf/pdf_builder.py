@@ -168,13 +168,14 @@ class PDFBuilder:
             background: {colors.docs_content_bg};
             margin: 0;
             padding: 0;
+            text-align: justify;
         }}
 
         h1 {{
             font-size: 24pt;
             font-weight: 700;
             color: {colors.docs_text_primary};
-            margin: 0.6em 0 0.3em 0;
+            margin: 1.2em 0 0.4em 0;
             page-break-after: avoid;
         }}
 
@@ -182,7 +183,7 @@ class PDFBuilder:
             font-size: 18pt;
             font-weight: 600;
             color: {colors.docs_text_primary};
-            margin: 0.8em 0 0.3em 0;
+            margin: 1.4em 0 0.4em 0;
             page-break-after: avoid;
             border-bottom: 1px solid {colors.docs_border};
             padding-bottom: 0.2em;
@@ -192,7 +193,7 @@ class PDFBuilder:
             font-size: 14pt;
             font-weight: 600;
             color: {colors.docs_text_primary};
-            margin: 0.6em 0 0.2em 0;
+            margin: 1.0em 0 0.3em 0;
             page-break-after: avoid;
         }}
 
@@ -200,14 +201,16 @@ class PDFBuilder:
             font-size: 12pt;
             font-weight: 600;
             color: {colors.docs_text_primary};
-            margin: 0.5em 0 0.2em 0;
+            margin: 0.8em 0 0.2em 0;
             page-break-after: avoid;
         }}
 
         p {{
-            margin: 0.4em 0;
+            margin: 0.5em 0;
             orphans: 3;
             widows: 3;
+            text-align: justify;
+            hyphens: auto;
         }}
 
         a {{
@@ -699,7 +702,7 @@ class PDFBuilder:
         blog_sections: list[ContentSection],
         docs_sections: list[ContentSection],
     ) -> None:
-        """Add bookmarks to the generated PDF."""
+        """Add bookmarks to the generated PDF using named destinations."""
         reader = PdfReader(str(input_path))
         writer = PdfWriter()
 
@@ -707,25 +710,60 @@ class PDFBuilder:
         for page in reader.pages:
             writer.add_page(page)
 
+        # Get named destinations from PDF (WeasyPrint creates these from HTML id attributes)
+        destinations = reader.named_destinations
+
+        def get_page_for_anchor(anchor_id: str) -> int | None:
+            """Find page number for a named destination."""
+            dest = destinations.get(anchor_id)
+            if dest:
+                return reader.get_destination_page_number(dest)
+            return None
+
         # Add top-level bookmarks
-        # Note: Page numbers are estimates since we can't know exact page
-        # positions without re-parsing. These provide reasonable navigation.
         writer.add_outline_item("Cover", 0)
         writer.add_outline_item("Table of Contents", 1)
 
-        # Estimate where content sections start (after cover + toc pages)
-        content_start = 2
-
         if blog_sections:
-            writer.add_outline_item("Blog Posts", content_start)
+            # Find first blog page from actual anchor
+            first_blog_page = get_page_for_anchor(blog_sections[0].anchor_id) or 2
+            blog_parent = writer.add_outline_item("Blog Posts", first_blog_page)
+
+            # Add each blog post as child bookmark
+            for section in blog_sections:
+                page = get_page_for_anchor(section.anchor_id)
+                if page is not None:
+                    writer.add_outline_item(section.title, page, parent=blog_parent)
 
         if docs_sections:
-            # Estimate docs start after blog (rough calculation)
-            docs_start = content_start
-            if blog_sections:
-                # Rough estimate: 1-2 pages per blog post
-                docs_start += max(len(blog_sections), 1)
-            writer.add_outline_item("Technical Documentation", docs_start)
+            # Find first docs page
+            first_docs_page = get_page_for_anchor(docs_sections[0].anchor_id)
+            if first_docs_page is None:
+                # Fallback: estimate based on last blog section
+                if blog_sections:
+                    last_blog_page = get_page_for_anchor(blog_sections[-1].anchor_id) or 2
+                    first_docs_page = last_blog_page + 1
+                else:
+                    first_docs_page = 2
+            docs_parent = writer.add_outline_item("Technical Documentation", first_docs_page)
+
+            # Group by project with nested hierarchy
+            current_project = None
+            project_parent = None
+            for section in docs_sections:
+                project = section.id.split("-")[0] if "-" in section.id else "meta"
+                page = get_page_for_anchor(section.anchor_id)
+
+                if project != current_project:
+                    project_title = self._get_project_title(project)
+                    project_page = page if page is not None else first_docs_page
+                    project_parent = writer.add_outline_item(
+                        project_title, project_page, parent=docs_parent
+                    )
+                    current_project = project
+
+                if page is not None and project_parent:
+                    writer.add_outline_item(section.title, page, parent=project_parent)
 
         # Write final PDF
         with open(output_path, "wb") as f:
