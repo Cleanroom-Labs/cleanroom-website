@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ChevronIcon, DashedCircle } from './icons';
 
 export default function Hero() {
   return (
@@ -52,18 +53,10 @@ export default function Hero() {
         <div className="absolute top-[90%] right-[25%] w-1 h-1 bg-emerald/40 rounded-full animate-float-delayed" />
 
         {/* Dashed circle decorations (air gap visualization) */}
-        <svg className="absolute top-1/4 right-10 w-32 h-32 opacity-20 animate-pulse-slow" viewBox="0 0 100 100">
-          <circle cx="50" cy="50" r="40" fill="none" stroke="#10b981" strokeWidth="1" strokeDasharray="4 4" />
-        </svg>
-        <svg className="absolute bottom-1/3 left-10 w-24 h-24 opacity-15 animate-pulse-slow" viewBox="0 0 100 100">
-          <circle cx="50" cy="50" r="40" fill="none" stroke="#10b981" strokeWidth="1" strokeDasharray="6 6" />
-        </svg>
-        <svg className="absolute top-[10%] left-[35%] w-20 h-20 opacity-10 animate-drift-reverse" viewBox="0 0 100 100">
-          <circle cx="50" cy="50" r="35" fill="none" stroke="#10b981" strokeWidth="1" strokeDasharray="3 5" />
-        </svg>
-        <svg className="absolute bottom-[15%] right-[30%] w-28 h-28 opacity-12 animate-drift-slow" viewBox="0 0 100 100">
-          <circle cx="50" cy="50" r="45" fill="none" stroke="#10b981" strokeWidth="0.8" strokeDasharray="2 4" />
-        </svg>
+        <DashedCircle preset="large" className="absolute top-1/4 right-10 w-32 h-32 opacity-20 animate-pulse-slow" />
+        <DashedCircle preset="medium" className="absolute bottom-1/3 left-10 w-24 h-24 opacity-15 animate-pulse-slow" />
+        <DashedCircle preset="small" className="absolute top-[10%] left-[35%] w-20 h-20 opacity-10 animate-drift-reverse" />
+        <DashedCircle preset="extraLarge" className="absolute bottom-[15%] right-[30%] w-28 h-28 opacity-12 animate-drift-slow" />
       </div>
 
       {/* Content */}
@@ -93,18 +86,14 @@ export default function Hero() {
               className="inline-flex items-center px-6 py-3 bg-emerald text-white font-semibold rounded-lg hover:bg-emerald-light transition-all duration-150 ease-out hover:scale-105"
             >
               Explore Our Tools
-              <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+              <ChevronIcon direction="down" className="ml-2 w-4 h-4" />
             </Link>
             <Link
               href="/docs/index.html"
               className="inline-flex items-center px-6 py-3 border border-slate-700 bg-slate-800/50 backdrop-blur-sm text-text-primary font-semibold rounded-lg hover:border-emerald hover:text-emerald hover:bg-slate-800/70 transition-all duration-150 ease-out"
             >
               Documentation
-              <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
+              <ChevronIcon direction="right" className="ml-2 w-4 h-4" />
             </Link>
           </div>
         </div>
