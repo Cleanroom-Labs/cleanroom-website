@@ -101,6 +101,7 @@ class Selectors:
         "nav",
         "script",
         "style",
+        "#quality-bar",  # Remove Quality Bar section from PDF
     )
 
     # Main content selectors
