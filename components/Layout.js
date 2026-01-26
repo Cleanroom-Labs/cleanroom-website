@@ -60,7 +60,7 @@ export default function Layout({ children, title, description }) {
           </div>
           <Link
             href={nav.donate.href}
-            className="bg-emerald hover:bg-emerald-light text-white px-4 py-2 rounded-md font-medium transition-colors"
+            className="bg-emerald hover:bg-emerald-light text-white px-4 py-2 rounded-md font-semibold transition-colors"
           >
             {nav.donate.text}
           </Link>
