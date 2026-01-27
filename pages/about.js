@@ -160,7 +160,7 @@ export default function About() {
             {/* Philosophy & Overview */}
             <h3 className="text-lg font-semibold text-text-primary mb-4">Philosophy & Overview</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mb-10">
-              <Link href="/blog/why-air-gapping" className="group">
+              <Link href="/blog/why-air-gapping" className="group block rounded-lg px-3 py-2 -mx-3 hover:bg-slate-800/30 transition-all duration-150">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="font-semibold text-emerald group-hover:text-emerald-light transition-colors">Why Air-Gapping?</span>
                   <svg className="w-4 h-4 text-emerald group-hover:text-emerald-light group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -169,7 +169,7 @@ export default function About() {
                 </div>
                 <p className="text-text-secondary text-sm">The security philosophy behind offline-first development.</p>
               </Link>
-              <Link href="/blog/introducing-airgap-suite" className="group">
+              <Link href="/blog/introducing-airgap-suite" className="group block rounded-lg px-3 py-2 -mx-3 hover:bg-slate-800/30 transition-all duration-150">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="font-semibold text-emerald group-hover:text-emerald-light transition-colors">Introducing the AirGap Suite</span>
                   <svg className="w-4 h-4 text-emerald group-hover:text-emerald-light group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -183,7 +183,7 @@ export default function About() {
             {/* See It In Action */}
             <h3 className="text-lg font-semibold text-text-primary mb-4">See It In Action</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6 mb-10">
-              <Link href="/blog/demo-whisper-quick-capture" className="group">
+              <Link href="/blog/demo-whisper-quick-capture" className="group block rounded-lg px-3 py-2 -mx-3 hover:bg-slate-800/30 transition-all duration-150">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="font-semibold text-emerald group-hover:text-emerald-light transition-colors">Capturing Meeting Notes</span>
                   <svg className="w-4 h-4 text-emerald group-hover:text-emerald-light group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -192,7 +192,7 @@ export default function About() {
                 </div>
                 <p className="text-text-secondary text-sm">Voice transcription without the cloud.</p>
               </Link>
-              <Link href="/blog/demo-deploy-rust-app" className="group">
+              <Link href="/blog/demo-deploy-rust-app" className="group block rounded-lg px-3 py-2 -mx-3 hover:bg-slate-800/30 transition-all duration-150">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="font-semibold text-emerald group-hover:text-emerald-light transition-colors">Packaging Rust Apps</span>
                   <svg className="w-4 h-4 text-emerald group-hover:text-emerald-light group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -201,7 +201,7 @@ export default function About() {
                 </div>
                 <p className="text-text-secondary text-sm">Bundle applications for air-gapped deployment.</p>
               </Link>
-              <Link href="/blog/demo-transfer-ollama" className="group">
+              <Link href="/blog/demo-transfer-ollama" className="group block rounded-lg px-3 py-2 -mx-3 hover:bg-slate-800/30 transition-all duration-150">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="font-semibold text-emerald group-hover:text-emerald-light transition-colors">Transferring Large Models</span>
                   <svg className="w-4 h-4 text-emerald group-hover:text-emerald-light group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -215,7 +215,7 @@ export default function About() {
             {/* Resources */}
             <h3 className="text-lg font-semibold text-text-primary mb-4">Resources</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-              <Link href="/docs/meta/principles.html" className="group">
+              <Link href="/docs/meta/principles.html" className="group block rounded-lg px-3 py-2 -mx-3 hover:bg-slate-800/30 transition-all duration-150">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="font-semibold text-emerald group-hover:text-emerald-light transition-colors">Design Principles</span>
                   <svg className="w-4 h-4 text-emerald group-hover:text-emerald-light group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -224,7 +224,7 @@ export default function About() {
                 </div>
                 <p className="text-text-secondary text-sm">The technical philosophy behind our tools.</p>
               </Link>
-              <Link href="/docs/meta/release-roadmap.html" className="group">
+              <Link href="/docs/meta/release-roadmap.html" className="group block rounded-lg px-3 py-2 -mx-3 hover:bg-slate-800/30 transition-all duration-150">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="font-semibold text-emerald group-hover:text-emerald-light transition-colors">Roadmap</span>
                   <svg className="w-4 h-4 text-emerald group-hover:text-emerald-light group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -233,7 +233,7 @@ export default function About() {
                 </div>
                 <p className="text-text-secondary text-sm">What we're building next.</p>
               </Link>
-              <Link href="/docs/index.html" className="group">
+              <Link href="/docs/index.html" className="group block rounded-lg px-3 py-2 -mx-3 hover:bg-slate-800/30 transition-all duration-150">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="font-semibold text-emerald group-hover:text-emerald-light transition-colors">Technical Documentation</span>
                   <svg className="w-4 h-4 text-emerald group-hover:text-emerald-light group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -242,7 +242,7 @@ export default function About() {
                 </div>
                 <p className="text-text-secondary text-sm">Requirements, design specs, and API references.</p>
               </Link>
-              <a href="https://github.com/Cleanroom-Labs" target="_blank" rel="noopener noreferrer" className="group">
+              <a href="https://github.com/Cleanroom-Labs" target="_blank" rel="noopener noreferrer" className="group block rounded-lg px-3 py-2 -mx-3 hover:bg-slate-800/30 transition-all duration-150">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="font-semibold text-emerald group-hover:text-emerald-light transition-colors">GitHub</span>
                   <svg className="w-4 h-4 text-emerald group-hover:text-emerald-light group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
