@@ -12,6 +12,8 @@ See [README.md](README.md) for complete documentation including build commands, 
 
 **Sync theme:** `./scripts/sync-theme.py`
 
+**Check theme staleness:** `cd cleanroom-theme && npm run check-staleness`
+
 **Generate PDF:** `python -m scripts.generate-pdf`
 
 ## Key Concepts
@@ -53,11 +55,15 @@ When modifying build scripts:
 
 When updating the theme:
 1. Make changes in `/Users/andfranklin/Projects/cleanroom-theme`
-2. Run `npm run build` to regenerate outputs
-3. Commit and push changes in the standalone repo
-4. Run `./scripts/sync-theme.py` to propagate to all 5 submodule locations
-5. Build with `node scripts/build-docs.mjs` to verify
-6. Push changes in website (and any modified project repos)
+2. Run `npm run build` to regenerate outputs (required after token changes)
+3. Run `npm run check-staleness` to verify generated files are up-to-date
+4. Commit and push changes in the standalone repo
+5. Run `./scripts/sync-theme.py` to propagate to all 5 submodule locations
+6. Build with `node scripts/build-docs.mjs` to verify
+7. Push changes in website (and any modified project repos)
+
+Note: Use `./scripts/sync-theme.py --verify` to check for stale files after syncing,
+or `--rebuild` to auto-regenerate them. CI will warn on PRs if theme files are stale.
 
 When generating PDF reports:
 1. Build docs: `npm run build-docs`
