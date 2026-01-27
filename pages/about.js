@@ -1,5 +1,6 @@
 import Layout from '../components/Layout';
 import Link from 'next/link';
+import { DashedCircle } from '../components/icons';
 
 export default function About() {
   return (
@@ -7,23 +8,61 @@ export default function About() {
       title="About Us - Cleanroom Labs"
       description="Learn about Cleanroom Labs' mission to build free, open-source tools for air-gapped development."
     >
-      <main className="bg-slate-950 min-h-screen">
-        {/* Hero section with background */}
-        <section className="relative py-24 overflow-hidden">
-          {/* Background decoration */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            <div className="absolute top-0 right-0 w-96 h-96 translate-x-1/2 -translate-y-1/2 opacity-30">
-              <img src="/shield-bg.svg" alt="" className="w-full h-full" />
-            </div>
-            <div className="absolute inset-0 opacity-5" style={{ backgroundImage: "url('/grid.svg')", backgroundRepeat: 'repeat' }} />
+      {/* Fixed background decoration - visible across all sections */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        {/* Large gradient orbs */}
+        <div className="absolute -top-20 -right-32 w-[500px] h-[500px] bg-emerald/30 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 -left-40 w-[450px] h-[450px] bg-emerald/25 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 -right-20 w-[400px] h-[400px] bg-emerald/25 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 -left-32 w-[350px] h-[350px] bg-emerald-glow rounded-full blur-3xl opacity-30" />
 
-            {/* Floating particles */}
-            <div className="absolute top-[20%] right-[25%] w-3 h-3 bg-emerald/30 rounded-full animate-drift" />
-            <div className="absolute top-[60%] left-[20%] w-2 h-2 bg-emerald/25 rounded-full animate-wander" />
-            <div className="absolute top-[40%] right-[15%] w-2 h-2 bg-emerald/35 rounded-full animate-float" />
-            <div className="absolute bottom-[30%] left-[30%] w-1.5 h-1.5 bg-emerald/40 rounded-full animate-pulse-slow" />
-          </div>
+        {/* Medium gradient orbs */}
+        <div className="absolute top-1/2 right-[5%] w-72 h-72 bg-emerald/20 rounded-full blur-3xl" />
+        <div className="absolute top-[15%] left-[10%] w-64 h-64 bg-emerald/18 rounded-full blur-3xl" />
+        <div className="absolute bottom-[35%] right-[8%] w-56 h-56 bg-emerald-glow rounded-full blur-3xl opacity-25" />
+        <div className="absolute top-[70%] left-[5%] w-80 h-80 bg-emerald/22 rounded-full blur-3xl" />
 
+        {/* Smaller accent orbs */}
+        <div className="absolute top-[40%] right-[12%] w-40 h-40 bg-emerald/30 rounded-full blur-2xl" />
+        <div className="absolute bottom-[20%] left-[15%] w-36 h-36 bg-emerald/25 rounded-full blur-2xl" />
+
+        {/* Grid pattern */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "url('/grid.svg')", backgroundRepeat: 'repeat' }} />
+
+        {/* Large particles */}
+        <div className="absolute top-[15%] right-[10%] w-4 h-4 bg-emerald/35 rounded-full animate-drift" />
+        <div className="absolute top-[50%] left-[8%] w-4 h-4 bg-emerald/30 rounded-full animate-drift-reverse" />
+        <div className="absolute bottom-[30%] right-[15%] w-4 h-4 bg-emerald/32 rounded-full animate-wander" />
+
+        {/* Medium particles */}
+        <div className="absolute top-[20%] right-[15%] w-3 h-3 bg-emerald/40 rounded-full animate-drift" />
+        <div className="absolute top-[60%] left-[12%] w-3 h-3 bg-emerald/35 rounded-full animate-drift-reverse" />
+        <div className="absolute bottom-[25%] right-[20%] w-3 h-3 bg-emerald/38 rounded-full animate-wander" />
+        <div className="absolute top-[75%] right-[8%] w-3 h-3 bg-emerald/32 rounded-full animate-float" />
+        <div className="absolute top-[35%] left-[6%] w-3 h-3 bg-emerald/30 rounded-full animate-float-delayed" />
+
+        {/* Small particles */}
+        <div className="absolute top-[35%] left-[18%] w-2 h-2 bg-emerald/45 rounded-full animate-float" />
+        <div className="absolute bottom-[40%] right-[10%] w-2 h-2 bg-emerald/40 rounded-full animate-float-delayed" />
+        <div className="absolute top-[75%] left-[25%] w-2 h-2 bg-emerald/42 rounded-full animate-drift" />
+        <div className="absolute top-[10%] left-[20%] w-2 h-2 bg-emerald/38 rounded-full animate-wander" />
+        <div className="absolute bottom-[15%] right-[25%] w-2 h-2 bg-emerald/35 rounded-full animate-drift-reverse" />
+
+        {/* Tiny particles */}
+        <div className="absolute top-[45%] right-[8%] w-1.5 h-1.5 bg-emerald/50 rounded-full animate-pulse-slow" />
+        <div className="absolute bottom-[15%] left-[20%] w-1.5 h-1.5 bg-emerald/55 rounded-full animate-float" />
+        <div className="absolute top-[25%] right-[22%] w-1.5 h-1.5 bg-emerald/48 rounded-full animate-drift" />
+
+        {/* Dashed circle decorations */}
+        <DashedCircle preset="medium" className="absolute top-[20%] right-12 w-32 h-32 opacity-20 animate-pulse-slow" />
+        <DashedCircle preset="small" className="absolute bottom-1/3 left-16 w-28 h-28 opacity-15 animate-drift-reverse" />
+        <DashedCircle preset="large" className="absolute top-[60%] right-20 w-40 h-40 opacity-12 animate-drift" />
+        <DashedCircle preset="medium" className="absolute bottom-[20%] left-8 w-24 h-24 opacity-18 animate-float" />
+      </div>
+
+      <main className="relative bg-slate-950/80 min-h-screen z-10">
+        {/* Hero section */}
+        <section className="relative py-24 overflow-hidden bg-slate-800/50 backdrop-blur-[1px]">
           <div className="container mx-auto px-4 max-w-4xl relative z-10 text-center">
             <h1 className="text-5xl font-bold text-text-primary mb-6">About Us</h1>
             <p className="text-xl text-text-secondary leading-relaxed max-w-2xl mx-auto">
@@ -37,7 +76,7 @@ export default function About() {
         {/* Core Principles */}
         <section className="py-12 border-t border-slate-800">
           <div className="container mx-auto px-4 max-w-4xl">
-            <h2 className="text-2xl font-bold text-text-primary mb-8">Core Principles</h2>
+            <h2 className="text-2xl font-bold text-text-primary mb-8 text-center">Core Principles</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-slate-900 p-6 rounded-xl border border-slate-700">
@@ -97,7 +136,7 @@ export default function About() {
         </section>
 
         {/* Technical Philosophy */}
-        <section className="py-12 border-t border-slate-800">
+        <section className="py-12 border-t border-slate-800 bg-slate-800/50 backdrop-blur-[1px]">
           <div className="container mx-auto px-4 max-w-4xl">
             <h2 className="text-2xl font-bold text-text-primary mb-6">Technical Philosophy</h2>
             <p className="text-text-secondary leading-relaxed mb-4">
@@ -114,21 +153,9 @@ export default function About() {
         </section>
 
         {/* Learn More */}
-        <section className="relative py-12 border-t border-slate-800 overflow-hidden">
-          {/* Background decoration */}
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "url('/grid.svg')", backgroundRepeat: 'repeat' }} />
-            <div className="absolute bottom-0 left-0 w-72 h-72 -translate-x-1/3 translate-y-1/3 opacity-20">
-              <img src="/shield-bg.svg" alt="" className="w-full h-full" />
-            </div>
-            {/* Floating particles */}
-            <div className="absolute top-[15%] right-[10%] w-2 h-2 bg-emerald/20 rounded-full animate-float" />
-            <div className="absolute top-[60%] right-[25%] w-1.5 h-1.5 bg-emerald/25 rounded-full animate-drift" />
-            <div className="absolute bottom-[20%] left-[15%] w-2 h-2 bg-emerald/15 rounded-full animate-wander" />
-          </div>
-
-          <div className="container mx-auto px-4 max-w-4xl relative z-10">
-            <h2 className="text-2xl font-bold text-text-primary mb-8">Learn More</h2>
+        <section className="py-12 border-t border-slate-800">
+          <div className="container mx-auto px-4 max-w-4xl">
+            <h2 className="text-2xl font-bold text-text-primary mb-8 text-center">Learn More</h2>
 
             {/* Philosophy & Overview */}
             <h3 className="text-lg font-semibold text-text-primary mb-4">Philosophy & Overview</h3>
@@ -225,22 +252,6 @@ export default function About() {
                 <p className="text-text-secondary text-sm">Browse source code and contribute.</p>
               </a>
             </div>
-          </div>
-        </section>
-
-        {/* Contact */}
-        <section className="py-12 border-t border-slate-800">
-          <div className="container mx-auto px-4 max-w-4xl">
-            <h2 className="text-2xl font-bold text-text-primary mb-4">Contact</h2>
-            <p className="text-text-secondary">
-              For inquiries, reach out to{' '}
-              <a
-                href="mailto:lead@cleanroomlabs.dev"
-                className="text-emerald hover:text-emerald-light transition-colors"
-              >
-                lead@cleanroomlabs.dev
-              </a>
-            </p>
           </div>
         </section>
       </main>
