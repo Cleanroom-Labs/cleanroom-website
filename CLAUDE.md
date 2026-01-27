@@ -30,7 +30,9 @@ See [README.md](README.md) for complete documentation including build commands, 
 |------|---------|
 | `scripts/build-docs.mjs` | Main build orchestrator |
 | `scripts/sync-theme.py` | Propagate theme changes to all submodules |
+| `scripts/push-submodules.py` | Propagate commits through nested submodules |
 | `scripts/generate-pdf/` | PDF report generator for website content |
+| `scripts/submodule_visualizer/` | Interactive visualization of submodule relationships |
 | `cleanroom-technical-docs/source/conf.py` | Master Sphinx configuration |
 | `cleanroom-technical-docs/CLAUDE.md` | Guidance for working with Sphinx docs |
 
@@ -41,6 +43,18 @@ See [README.md](README.md) for complete documentation including build commands, 
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Understanding design decisions |
 | [docs/SUBMODULES_GUIDE.md](docs/SUBMODULES_GUIDE.md) | Troubleshooting submodule issues |
 | [docs/CI_CD_GUIDE.md](docs/CI_CD_GUIDE.md) | CI/CD configuration |
+| [docs/DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) | Production deployment steps |
+| [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | Common issues and solutions |
+
+## NPM Scripts
+
+| Command | Purpose |
+|---------|---------|
+| `npm run dev` | Start development server |
+| `npm run dev:clean` | Build docs then start dev server |
+| `npm run build` | Production build |
+| `npm run build-docs` | Build Sphinx documentation only |
+| `npm run lint` | Run linter |
 
 ## Working in This Repo
 
