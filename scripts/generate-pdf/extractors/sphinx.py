@@ -98,25 +98,20 @@ class SphinxExtractor(BaseExtractor):
                 if html_file.name not in ["index.html"]:
                     files.append(html_file)
 
-        # For meta directory, also handle direct files
+        # For meta directory, use explicit file list only (no fallback)
         if project == "meta":
             direct_files = [
                 "principles.html",
                 "meta-architecture.html",
                 "release-roadmap.html",
-                "requirements-overview.html",
-                "sphinx-needs-guide.html",
-                "rust-integration-guide.html",
+                "traceability-dashboard.html",
             ]
             ordered_files = []
             for filename in direct_files:
                 filepath = project_dir / filename
                 if filepath.exists():
                     ordered_files.append(filepath)
-            # Add any remaining files not in our list
-            for html_file in sorted(project_dir.glob("*.html")):
-                if html_file not in ordered_files and html_file.name not in self.SKIP_FILES:
-                    ordered_files.append(html_file)
+            # No fallback - only include explicitly listed files
             files = ordered_files
 
         return files
