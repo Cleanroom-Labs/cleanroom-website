@@ -88,6 +88,7 @@ export default function BlogPost({ frontmatter, mdxSource }) {
               <div className="flex items-center gap-4 text-text-muted mb-4">
                 <time dateTime={frontmatter.date}>{formattedDate}</time>
                 {frontmatter.author && <span>by {frontmatter.author}</span>}
+                {frontmatter.readTime && <span>{frontmatter.readTime} read</span>}
               </div>
               {frontmatter.tags && frontmatter.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
