@@ -9,6 +9,8 @@ Usage:
     ./scripts/sync-theme.py --dry-run        # Preview changes
     ./scripts/sync-theme.py --no-push        # Commit only, skip pushing
     ./scripts/sync-theme.py --force          # Skip remote sync validation
+    ./scripts/sync-theme.py --verify         # Check for stale generated files after sync
+    ./scripts/sync-theme.py --rebuild        # Auto-regenerate stale files after sync
 
 This script:
 1. Resolves the target theme commit (from CLI or standalone repo)
@@ -286,6 +288,44 @@ def commit_submodule_changes(
     return True
 
 
+def check_theme_staleness(theme_path: Path, rebuild: bool = False) -> tuple[bool, str]:
+    """
+    Check if generated files in a theme location are stale.
+
+    Args:
+        theme_path: Path to the cleanroom-theme submodule
+        rebuild: If True, regenerate stale files
+
+    Returns:
+        Tuple of (is_stale, message)
+    """
+    staleness_script = theme_path / "scripts" / "check-staleness.js"
+
+    if not staleness_script.exists():
+        return (False, "staleness check not available")
+
+    try:
+        args = ["node", str(staleness_script)]
+        if rebuild:
+            args.append("--fix")
+
+        result = subprocess.run(
+            args,
+            cwd=str(theme_path),
+            capture_output=True,
+            text=True,
+        )
+
+        if result.returncode == 0:
+            if rebuild and "regenerated" in result.stdout.lower():
+                return (False, "regenerated")
+            return (False, "up-to-date")
+        else:
+            return (True, "stale")
+    except Exception as e:
+        return (False, f"error: {e}")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Synchronize cleanroom-theme submodule across all locations.",
@@ -328,7 +368,21 @@ changes, to prevent repository divergence. Use --force to skip this check.
         default=DEFAULT_THEME_REPO,
         help=f"Path to standalone theme repo (default: {DEFAULT_THEME_REPO})",
     )
+    parser.add_argument(
+        "--verify",
+        action="store_true",
+        help="Check for stale generated files in each theme location after sync",
+    )
+    parser.add_argument(
+        "--rebuild",
+        action="store_true",
+        help="Auto-regenerate stale generated files after sync (implies --verify)",
+    )
     args = parser.parse_args()
+
+    # --rebuild implies --verify
+    if args.rebuild:
+        args.verify = True
 
     # Validate execution context
     script_dir = Path(__file__).parent.resolve()
@@ -526,6 +580,35 @@ changes, to prevent repository divergence. Use --force to skip this check.
             print(f"  {Colors.red('✗ Failed to push')} {repo.rel_path}")
 
     print()
+
+    # Phase 7: Verify staleness (optional)
+    staleness_warning = False
+    if args.verify and not args.dry_run:
+        print(Colors.blue("Verifying generated files..."))
+
+        for submodule in theme_submodules:
+            rel_path = str(submodule.path.relative_to(repo_root))
+            is_stale, status = check_theme_staleness(submodule.path, rebuild=args.rebuild)
+
+            if is_stale:
+                staleness_warning = True
+                print(f"  {Colors.yellow('⚠')} {rel_path}: {status}")
+            else:
+                status_color = Colors.green if status == "up-to-date" else Colors.yellow
+                print(f"  {status_color('✓')} {rel_path}: {status}")
+
+        print()
+
+        if staleness_warning:
+            print(Colors.yellow("Warning: Some theme locations have stale generated files."))
+            print()
+            print(Colors.blue("To fix:"))
+            print("  1. cd to each theme location")
+            print("  2. Run: npm run build")
+            print("  3. Commit and push the regenerated files")
+            print()
+            print("Or run: ./scripts/sync-theme.py --rebuild")
+            print()
 
     # Final summary
     if args.dry_run:
