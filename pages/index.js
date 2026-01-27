@@ -72,6 +72,7 @@ export default function Home() {
                 name={product.name}
                 description={product.description}
                 docsUrl={product.docsUrl}
+                status={product.status}
               />
             ))}
 
