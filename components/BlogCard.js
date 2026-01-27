@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 export default function BlogCard({ post }) {
-  const { slug, title, date, author, tags, excerpt } = post;
+  const { slug, title, date, author, tags, excerpt, readTime } = post;
 
   const formattedDate = new Date(date).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -20,6 +20,7 @@ export default function BlogCard({ post }) {
       <div className="flex items-center gap-4 text-sm text-text-muted mb-3">
         <time dateTime={date}>{formattedDate}</time>
         {author && <span>by {author}</span>}
+        {readTime && <span>{readTime} read</span>}
       </div>
 
       {excerpt && (
