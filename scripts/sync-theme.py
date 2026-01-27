@@ -288,6 +288,54 @@ def commit_submodule_changes(
     return True
 
 
+def push_ahead_theme_submodules(
+    theme_submodules: list[ThemeSubmodule],
+    dry_run: bool = False
+) -> bool:
+    """
+    Push any theme submodules that are ahead of their remotes.
+
+    This handles the local submodule workflow where changes are made in
+    cleanroom-website/cleanroom-theme and need to be pushed to the local
+    remote (~/Projects/cleanroom-theme) before syncing to other locations.
+
+    Returns True if any were pushed.
+    """
+    pushed_any = False
+
+    for submodule in theme_submodules:
+        # Check if on a branch (not detached HEAD)
+        branch_result = submodule.git("branch", "--show-current", check=False)
+        branch = branch_result.stdout.strip()
+        if not branch:
+            continue  # Skip detached HEAD submodules
+
+        # Fetch from origin to get accurate ahead/behind counts
+        submodule.git("fetch", "origin", "--quiet", check=False)
+
+        # Check if ahead of remote
+        ahead_result = submodule.git(
+            "rev-list", "--count", f"origin/{branch}..HEAD", check=False
+        )
+        if ahead_result.returncode != 0:
+            continue
+
+        ahead_count = ahead_result.stdout.strip()
+        if ahead_count and ahead_count != "0":
+            rel_path = str(submodule.path.name)
+            if dry_run:
+                print(f"  {Colors.yellow('Would push')} {rel_path} ({ahead_count} commits ahead)")
+            else:
+                result = submodule.git("push", "origin", branch, check=False, capture=False)
+                if result.returncode == 0:
+                    print(f"  {Colors.green('Pushed')} {rel_path} ({ahead_count} commits)")
+                    pushed_any = True
+                else:
+                    print(f"  {Colors.red('Failed to push')} {rel_path}")
+
+    return pushed_any
+
+
 def check_theme_staleness(theme_path: Path, rebuild: bool = False) -> tuple[bool, str]:
     """
     Check if generated files in a theme location are stale.
@@ -394,6 +442,14 @@ changes, to prevent repository divergence. Use --force to skip this check.
         return 1
 
     os.chdir(repo_root)
+
+    # Phase 0: Push ahead theme submodules (before resolving target commit)
+    # This handles the local submodule workflow where cleanroom-website/cleanroom-theme
+    # may have commits that need to be pushed to the local remote first.
+    print(Colors.blue("Checking for ahead theme submodules..."))
+    theme_submodules_early = discover_theme_submodules(repo_root)
+    if push_ahead_theme_submodules(theme_submodules_early, args.dry_run):
+        print()
 
     # Phase 1: Resolve target commit
     print(Colors.blue("Resolving target commit..."))
