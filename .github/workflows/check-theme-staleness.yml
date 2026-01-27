@@ -1,0 +1,136 @@
+name: Check Theme Staleness
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cleanroom-theme/tokens/**'
+      - 'cleanroom-theme/scripts/build-*.js'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cleanroom-theme/tokens/**'
+      - 'cleanroom-theme/scripts/build-*.js'
+  workflow_dispatch:
+
+jobs:
+  check-staleness:
+    runs-on: ubuntu-latest
+    # Don't block PRs on staleness - just warn
+    continue-on-error: true
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Check for stale generated files
+      id: staleness
+      working-directory: cleanroom-theme
+      run: |
+        npm run check-staleness 2>&1 | tee staleness-output.txt
+        echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
+
+    - name: Read staleness output
+      id: read-output
+      if: steps.staleness.outputs.exit_code != '0'
+      working-directory: cleanroom-theme
+      run: |
+        {
+          echo 'output<<EOF'
+          cat staleness-output.txt
+          echo 'EOF'
+        } >> $GITHUB_OUTPUT
+
+    - name: Post PR comment on staleness
+      if: github.event_name == 'pull_request' && steps.staleness.outputs.exit_code != '0'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const output = `${{ steps.read-output.outputs.output }}`;
+
+          const body = `## Theme Staleness Warning
+
+          The generated Sphinx theme files appear to be out of sync with the design tokens.
+
+          <details>
+          <summary>Staleness check output</summary>
+
+          \`\`\`
+          ${output}
+          \`\`\`
+
+          </details>
+
+          ### How to fix
+
+          1. Navigate to the theme directory:
+             \`\`\`bash
+             cd cleanroom-theme
+             \`\`\`
+
+          2. Regenerate the files:
+             \`\`\`bash
+             npm run build
+             # or
+             npm run fix-staleness
+             \`\`\`
+
+          3. Commit the updated files:
+             \`\`\`bash
+             git add sphinx/
+             git commit -m "chore: regenerate theme files from tokens"
+             \`\`\`
+
+          ---
+          *This is a warning and does not block the PR.*
+          `;
+
+          // Check if we already have a comment
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+          });
+
+          const botComment = comments.find(comment =>
+            comment.user.type === 'Bot' &&
+            comment.body.includes('Theme Staleness Warning')
+          );
+
+          if (botComment) {
+            // Update existing comment
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: botComment.id,
+              body: body
+            });
+          } else {
+            // Create new comment
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: body
+            });
+          }
+
+    - name: Summary
+      if: always()
+      run: |
+        if [ "${{ steps.staleness.outputs.exit_code }}" = "0" ]; then
+          echo "## Theme Staleness Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "All generated files are up-to-date with design tokens." >> $GITHUB_STEP_SUMMARY
+        else
+          echo "## Theme Staleness Warning" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Generated Sphinx theme files are out of sync with design tokens." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Run \`npm run build\` in \`cleanroom-theme/\` to regenerate." >> $GITHUB_STEP_SUMMARY
+        fi
