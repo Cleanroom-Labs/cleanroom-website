@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-export default function BlogCard({ post }) {
+export default function BlogCard({ post, onTagClick }) {
   const { slug, title, date, author, tags, excerpt, readTime } = post;
 
   const formattedDate = new Date(date).toLocaleDateString('en-US', {
@@ -30,12 +30,16 @@ export default function BlogCard({ post }) {
       {tags && tags.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {tags.map((tag) => (
-            <span
+            <button
               key={tag}
-              className="bg-slate-800 text-text-muted px-2 py-1 rounded text-sm border border-slate-700"
+              onClick={(e) => {
+                e.preventDefault();
+                if (onTagClick) onTagClick(tag);
+              }}
+              className="bg-slate-800 text-text-muted px-2 py-1 rounded text-sm border border-slate-700 hover:border-emerald/50 hover:text-emerald transition-colors"
             >
               {tag}
-            </span>
+            </button>
           ))}
         </div>
       )}

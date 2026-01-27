@@ -1,9 +1,87 @@
+import { useState, useMemo, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import Layout from '../../components/Layout';
 import BlogCard from '../../components/BlogCard';
-import { getAllPosts } from '../../lib/blog';
+import BlogFilters from '../../components/BlogFilters';
+import BlogEmptyState from '../../components/BlogEmptyState';
+import { getAllPosts, getAllTags } from '../../lib/blog';
 import { DashedCircle } from '../../components/icons';
 
-export default function Blog({ posts }) {
+export default function Blog({ posts, allTags }) {
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTags, setSelectedTags] = useState([]);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+
+  const hasActiveFilters = searchQuery || selectedTags.length > 0;
+  const activeFilterCount = (searchQuery ? 1 : 0) + selectedTags.length;
+
+  // Initialize state from URL query params on mount
+  useEffect(() => {
+    if (router.isReady && !isInitialized) {
+      const { q, tags } = router.query;
+      if (q) setSearchQuery(q);
+      if (tags) {
+        const tagArray = Array.isArray(tags) ? tags : tags.split(',');
+        setSelectedTags(tagArray.filter((t) => allTags.includes(t)));
+      }
+      setIsInitialized(true);
+    }
+  }, [router.isReady, router.query, allTags, isInitialized]);
+
+  // Update URL when filters change (after initialization)
+  useEffect(() => {
+    if (!isInitialized) return;
+
+    const query = {};
+    if (searchQuery) query.q = searchQuery;
+    if (selectedTags.length > 0) query.tags = selectedTags.join(',');
+
+    const hasQuery = Object.keys(query).length > 0;
+    const currentPath = router.asPath.split('?')[0];
+
+    router.replace(
+      {
+        pathname: currentPath,
+        query: hasQuery ? query : undefined,
+      },
+      undefined,
+      { shallow: true }
+    );
+  }, [searchQuery, selectedTags, isInitialized]);
+
+  // Filter posts based on search query and selected tags
+  const filteredPosts = useMemo(() => {
+    return posts.filter((post) => {
+      // Text search: match against title, excerpt, or content
+      const query = searchQuery.toLowerCase();
+      const matchesSearch =
+        !searchQuery ||
+        post.title.toLowerCase().includes(query) ||
+        (post.excerpt && post.excerpt.toLowerCase().includes(query)) ||
+        (post.searchContent && post.searchContent.includes(query));
+
+      // Tag filter: post must have ALL selected tags (AND logic)
+      const matchesTags =
+        selectedTags.length === 0 ||
+        selectedTags.every((tag) => post.tags && post.tags.includes(tag));
+
+      return matchesSearch && matchesTags;
+    });
+  }, [posts, searchQuery, selectedTags]);
+
+  const handleTagClick = (tag) => {
+    if (!selectedTags.includes(tag)) {
+      setSelectedTags((prev) => [...prev, tag]);
+    }
+  };
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setSelectedTags([]);
+  };
+
   return (
     <Layout
       title="Blog - Cleanroom Labs"
@@ -62,16 +140,66 @@ export default function Blog({ posts }) {
       </div>
 
       <main className="relative bg-slate-950/80 min-h-screen py-12 z-10">
-        <div className="container mx-auto px-4 max-w-4xl">
+        <div className="container mx-auto px-4 max-w-6xl">
           <h1 className="text-4xl font-bold text-text-primary mb-4">Blog</h1>
           <p className="text-text-secondary mb-8">
             News, updates, and articles about air-gapped computing and privacy-first software.
           </p>
 
-          <div className="space-y-6">
-            {posts.map((post) => (
-              <BlogCard key={post.slug} post={post} />
-            ))}
+          {/* Mobile filter toggle - visible only on small screens */}
+          <button
+            onClick={() => setShowMobileFilters(!showMobileFilters)}
+            className="lg:hidden mb-6 flex items-center gap-2 px-4 py-2 bg-slate-800 rounded-lg text-text-secondary hover:text-text-primary transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+            </svg>
+            Filters {hasActiveFilters && `(${activeFilterCount})`}
+          </button>
+
+          {/* Mobile filter overlay */}
+          {showMobileFilters && (
+            <div className="lg:hidden fixed inset-0 z-50 bg-slate-950/95 p-6 overflow-y-auto">
+              <BlogFilters
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                selectedTags={selectedTags}
+                setSelectedTags={setSelectedTags}
+                allTags={allTags}
+                filteredCount={filteredPosts.length}
+                totalCount={posts.length}
+                onClose={() => setShowMobileFilters(false)}
+                showCloseButton={true}
+              />
+            </div>
+          )}
+
+          {/* Blog posts - with right padding on large screens to avoid fixed sidebar */}
+          <div className="flex lg:pr-48">
+            <div className="flex-1 min-w-0">
+              {filteredPosts.length > 0 ? (
+                <div className="space-y-6">
+                  {filteredPosts.map((post) => (
+                    <BlogCard key={post.slug} post={post} onTagClick={handleTagClick} />
+                  ))}
+                </div>
+              ) : (
+                <BlogEmptyState onClear={clearFilters} />
+              )}
+            </div>
+          </div>
+
+          {/* Right: Fixed filter sidebar - positioned on right edge, hidden on mobile */}
+          <div className="w-56 hidden lg:block fixed top-32 right-8">
+            <BlogFilters
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              selectedTags={selectedTags}
+              setSelectedTags={setSelectedTags}
+              allTags={allTags}
+              filteredCount={filteredPosts.length}
+              totalCount={posts.length}
+            />
           </div>
         </div>
       </main>
@@ -81,9 +209,11 @@ export default function Blog({ posts }) {
 
 export async function getStaticProps() {
   const posts = getAllPosts();
+  const allTags = getAllTags(posts);
   return {
     props: {
       posts,
+      allTags,
     },
   };
 }
