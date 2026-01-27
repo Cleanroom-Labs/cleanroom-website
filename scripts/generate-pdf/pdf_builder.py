@@ -908,7 +908,7 @@ class PDFBuilder:
     def _get_project_title(self, project: str) -> str:
         """Get display title for a project."""
         titles = {
-            "meta": "Cross-Project Documentation",
+            "meta": "Cross-Project Information",
             "airgap-transfer": "AirGap Transfer",
             "airgap-deploy": "AirGap Deploy",
             "cleanroom-whisper": "Cleanroom Whisper",
