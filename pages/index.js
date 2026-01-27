@@ -60,7 +60,9 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center text-text-primary mb-4">Our Tools</h2>
           <p className="text-text-secondary text-center max-w-2xl mx-auto mb-12">
-            Privacy-first tools designed to work completely offline. No cloud, no telemetry, no compromises.
+            Privacy-first tools designed to work completely offline.
+            <br />
+            No cloud, no telemetry, no compromises.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">

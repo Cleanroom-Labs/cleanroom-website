@@ -1,5 +1,5 @@
-import Link from 'next/link';
-import { ChevronIcon, DashedCircle } from './icons';
+import Link from "next/link";
+import { ChevronIcon, DashedCircle } from "./icons";
 
 export default function Hero() {
   return (
@@ -14,7 +14,10 @@ export default function Hero() {
         {/* Grid pattern overlay */}
         <div
           className="absolute inset-0 opacity-5"
-          style={{ backgroundImage: "url('/grid.svg')", backgroundRepeat: 'repeat' }}
+          style={{
+            backgroundImage: "url('/grid.svg')",
+            backgroundRepeat: "repeat",
+          }}
         />
 
         {/* Floating particles - varied sizes, positions, and animations */}
@@ -53,10 +56,22 @@ export default function Hero() {
         <div className="absolute top-[90%] right-[25%] w-1 h-1 bg-emerald/40 rounded-full animate-float-delayed" />
 
         {/* Dashed circle decorations (air gap visualization) */}
-        <DashedCircle preset="large" className="absolute top-1/4 right-10 w-32 h-32 opacity-20 animate-pulse-slow" />
-        <DashedCircle preset="medium" className="absolute bottom-1/3 left-10 w-24 h-24 opacity-15 animate-pulse-slow" />
-        <DashedCircle preset="small" className="absolute top-[10%] left-[35%] w-20 h-20 opacity-10 animate-drift-reverse" />
-        <DashedCircle preset="extraLarge" className="absolute bottom-[15%] right-[30%] w-28 h-28 opacity-12 animate-drift-slow" />
+        <DashedCircle
+          preset="large"
+          className="absolute top-1/4 right-10 w-32 h-32 opacity-20 animate-pulse-slow"
+        />
+        <DashedCircle
+          preset="medium"
+          className="absolute bottom-1/3 left-10 w-24 h-24 opacity-15 animate-pulse-slow"
+        />
+        <DashedCircle
+          preset="small"
+          className="absolute top-[10%] left-[35%] w-20 h-20 opacity-10 animate-drift-reverse"
+        />
+        <DashedCircle
+          preset="extraLarge"
+          className="absolute bottom-[15%] right-[30%] w-28 h-28 opacity-12 animate-drift-slow"
+        />
       </div>
 
       {/* Content */}
@@ -69,15 +84,17 @@ export default function Hero() {
 
           {/* Headline */}
           <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-            Build software that{' '}
+            Build software that{" "}
             <span className="text-emerald">respects privacy</span>
           </h1>
 
           {/* Description */}
-          <p className="text-xl text-text-secondary max-w-2xl leading-relaxed mb-8">
-            Cleanroom Labs builds free and open source tools that work without
-            network dependency. Privacy shouldn't require expertise—just the right tools.
-          </p>
+          <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg px-5 py-4 mb-8 max-w-2xl">
+            <p className="text-xl text-text-secondary leading-relaxed">
+              Cleanroom Labs builds free and open source tools that work without
+              network dependency.
+            </p>
+          </div>
 
           {/* CTA Buttons */}
           <div className="flex flex-wrap gap-4">
