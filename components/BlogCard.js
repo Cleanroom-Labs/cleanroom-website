@@ -10,7 +10,7 @@ export default function BlogCard({ post }) {
   });
 
   return (
-    <article className="bg-slate-900 border border-slate-700 rounded-xl p-6 hover:border-emerald/50 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-glow">
+    <article className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6 hover:border-emerald/50 hover:bg-slate-800/70 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-glow">
       <Link href={`/blog/${slug}`} className="block group">
         <h2 className="text-2xl font-semibold text-text-primary mb-2 group-hover:text-emerald transition-colors">
           {title}
