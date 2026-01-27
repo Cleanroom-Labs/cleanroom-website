@@ -76,7 +76,7 @@ export default function BlogPost({ frontmatter, mdxSource }) {
       </div>
 
       <main className="relative bg-slate-950/80 min-h-screen py-12 z-10">
-        <div className="container mx-auto px-6 max-w-5xl relative bg-slate-950 py-12 rounded-lg shadow-2xl shadow-black/50">
+        <div className="container mx-auto px-6 max-w-5xl relative bg-slate-900 py-12 rounded-lg shadow-2xl shadow-black/50 border border-slate-700">
           <div className="max-w-3xl mx-auto">
           <Link href="/blog" className="text-emerald hover:text-emerald-light transition-colors mb-6 inline-block">
             &larr; Back to Blog
