@@ -8,10 +8,11 @@
   },
   "scripts": {
     "dev": "next dev",
-    "dev:clean": "npm run build-docs && next dev",
+    "dev:clean": "npm run build-docs:clean && next dev",
     "build": "npm run build-docs && next build",
     "postbuild": "next-sitemap",
     "build-docs": "node scripts/build-docs.mjs",
+    "build-docs:clean": "node scripts/build-docs.mjs --clean",
     "start": "next start",
     "lint": "next lint"
   },

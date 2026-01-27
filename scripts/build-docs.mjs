@@ -18,6 +18,10 @@ import { existsSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
+// Parse command line arguments
+const args = process.argv.slice(2);
+const shouldClean = args.includes('--clean');
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const rootDir = join(__dirname, '..');
@@ -127,6 +131,17 @@ function installDependencies() {
   return true;
 }
 
+function cleanBuild() {
+  log('\n🧹 Cleaning previous build...', colors.blue);
+  const result = exec('make clean', technicalDocsDir);
+  if (!result.success) {
+    log('⚠️  Clean failed, continuing anyway...', colors.yellow);
+  } else {
+    log('✓ Build cleaned', colors.green);
+  }
+  return true; // Don't fail the build if clean fails
+}
+
 function buildDocs() {
   log('\n📚 Building Sphinx documentation...', colors.blue);
   log('   Building all subprojects and master docs...', colors.blue);
@@ -194,6 +209,7 @@ async function main() {
     { name: 'Check Python', fn: checkPython },
     { name: 'Setup virtual environment', fn: setupVirtualEnv },
     { name: 'Install dependencies', fn: installDependencies },
+    ...(shouldClean ? [{ name: 'Clean build', fn: cleanBuild }] : []),
     { name: 'Build documentation', fn: buildDocs },
     { name: 'Copy output', fn: copyOutput },
   ];
