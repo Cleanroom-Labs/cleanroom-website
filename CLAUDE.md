@@ -22,6 +22,7 @@ See [README.md](README.md) for complete documentation including build commands, 
 - **Three-commit propagation**: Changes in project docs require commits in: submodule → technical-docs → website
 - **Detached HEAD is normal**: Submodules point to specific commits, not branches. Use `git checkout main` to make changes.
 - **Build fails on warnings**: Sphinx warnings indicate broken references and must be fixed
+- **Local submodules**: All submodules point to local directories (e.g., `~/Projects/cleanroom-theme`), not GitHub. The main website repo has no remote.
 
 ## Important Files
 
@@ -54,11 +55,12 @@ When modifying build scripts:
 2. Check that `public/docs/` is generated correctly
 
 When updating the theme:
-1. Make changes in `/Users/andfranklin/Projects/cleanroom-theme`
+1. Make changes in `/Users/andfranklin/Projects/cleanroom-theme` or `cleanroom-website/cleanroom-theme`
 2. Run `npm run build` to regenerate outputs (required after token changes)
 3. Run `npm run check-staleness` to verify generated files are up-to-date
-4. Commit and push changes in the standalone repo
+4. Commit changes (if working in standalone repo, push to origin)
 5. Run `./scripts/sync-theme.py` to propagate to all 5 submodule locations
+   - If `cleanroom-website/cleanroom-theme` is ahead of its local remote, the script automatically pushes it first
 6. Build with `node scripts/build-docs.mjs` to verify
 7. Push changes in website (and any modified project repos)
 
