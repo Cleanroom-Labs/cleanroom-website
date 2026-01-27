@@ -2,8 +2,14 @@ import Link from 'next/link';
 import { ProductIcon } from './icons';
 
 export default function ProductCard({ name, description, docsUrl }) {
+  const CardWrapper = docsUrl ? Link : 'div';
+  const wrapperProps = docsUrl ? { href: docsUrl } : {};
+
   return (
-    <div className="group bg-slate-900 rounded-xl overflow-hidden border border-slate-700 hover:border-emerald/50 transition-all duration-150 ease-out hover:scale-[1.02] hover:shadow-lg hover:shadow-emerald-glow">
+    <CardWrapper
+      {...wrapperProps}
+      className="group block bg-slate-900 rounded-xl overflow-hidden border border-slate-700 hover:border-emerald/50 transition-all duration-150 ease-out hover:scale-[1.02] hover:shadow-lg hover:shadow-emerald-glow cursor-pointer"
+    >
       {/* Icon area */}
       <div className="h-32 flex items-center justify-center bg-slate-800/50 relative overflow-hidden">
         {/* Subtle glow effect on hover */}
@@ -16,21 +22,9 @@ export default function ProductCard({ name, description, docsUrl }) {
 
       {/* Content */}
       <div className="p-6">
-        <h3 className="text-xl font-bold text-text-primary mb-3">{name}</h3>
-        <p className="text-text-secondary mb-4 leading-relaxed">{description}</p>
-
-        {docsUrl && (
-          <Link
-            href={docsUrl}
-            className="inline-flex items-center text-emerald hover:text-emerald-light transition-colors duration-150 ease-out font-medium"
-          >
-            Learn more
-            <svg className="ml-1 w-4 h-4 transition-transform duration-150 ease-out group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
-        )}
+        <h3 className="text-xl font-bold text-text-primary mb-3 group-hover:text-emerald transition-colors duration-150">{name}</h3>
+        <p className="text-text-secondary leading-relaxed">{description}</p>
       </div>
-    </div>
+    </CardWrapper>
   );
 }
