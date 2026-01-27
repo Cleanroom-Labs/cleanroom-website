@@ -1,4 +1,5 @@
 import Layout from '../components/Layout';
+import Link from 'next/link';
 
 export default function About() {
   return (
@@ -109,6 +110,121 @@ export default function About() {
               When AI capabilities are needed, we integrate local models that run
               entirely on your hardware.
             </p>
+          </div>
+        </section>
+
+        {/* Learn More */}
+        <section className="relative py-12 border-t border-slate-800 overflow-hidden">
+          {/* Background decoration */}
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "url('/grid.svg')", backgroundRepeat: 'repeat' }} />
+            <div className="absolute bottom-0 left-0 w-72 h-72 -translate-x-1/3 translate-y-1/3 opacity-20">
+              <img src="/shield-bg.svg" alt="" className="w-full h-full" />
+            </div>
+            {/* Floating particles */}
+            <div className="absolute top-[15%] right-[10%] w-2 h-2 bg-emerald/20 rounded-full animate-float" />
+            <div className="absolute top-[60%] right-[25%] w-1.5 h-1.5 bg-emerald/25 rounded-full animate-drift" />
+            <div className="absolute bottom-[20%] left-[15%] w-2 h-2 bg-emerald/15 rounded-full animate-wander" />
+          </div>
+
+          <div className="container mx-auto px-4 max-w-4xl relative z-10">
+            <h2 className="text-2xl font-bold text-text-primary mb-8">Learn More</h2>
+
+            {/* Philosophy & Overview */}
+            <h3 className="text-lg font-semibold text-text-primary mb-4">Philosophy & Overview</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mb-10">
+              <Link href="/blog/why-air-gapping" className="group">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-semibold text-emerald group-hover:text-emerald-light transition-colors">Why Air-Gapping?</span>
+                  <svg className="w-4 h-4 text-emerald group-hover:text-emerald-light group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+                <p className="text-text-secondary text-sm">The security philosophy behind offline-first development.</p>
+              </Link>
+              <Link href="/blog/introducing-airgap-suite" className="group">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-semibold text-emerald group-hover:text-emerald-light transition-colors">Introducing the AirGap Suite</span>
+                  <svg className="w-4 h-4 text-emerald group-hover:text-emerald-light group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+                <p className="text-text-secondary text-sm">How our three tools work together.</p>
+              </Link>
+            </div>
+
+            {/* See It In Action */}
+            <h3 className="text-lg font-semibold text-text-primary mb-4">See It In Action</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6 mb-10">
+              <Link href="/blog/demo-whisper-quick-capture" className="group">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-semibold text-emerald group-hover:text-emerald-light transition-colors">Capturing Meeting Notes</span>
+                  <svg className="w-4 h-4 text-emerald group-hover:text-emerald-light group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+                <p className="text-text-secondary text-sm">Voice transcription without the cloud.</p>
+              </Link>
+              <Link href="/blog/demo-deploy-rust-app" className="group">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-semibold text-emerald group-hover:text-emerald-light transition-colors">Packaging Rust Apps</span>
+                  <svg className="w-4 h-4 text-emerald group-hover:text-emerald-light group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+                <p className="text-text-secondary text-sm">Bundle applications for air-gapped deployment.</p>
+              </Link>
+              <Link href="/blog/demo-transfer-ollama" className="group">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-semibold text-emerald group-hover:text-emerald-light transition-colors">Transferring Large Models</span>
+                  <svg className="w-4 h-4 text-emerald group-hover:text-emerald-light group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+                <p className="text-text-secondary text-sm">Multi-USB orchestration for big files.</p>
+              </Link>
+            </div>
+
+            {/* Resources */}
+            <h3 className="text-lg font-semibold text-text-primary mb-4">Resources</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+              <Link href="/docs/meta/principles.html" className="group">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-semibold text-emerald group-hover:text-emerald-light transition-colors">Design Principles</span>
+                  <svg className="w-4 h-4 text-emerald group-hover:text-emerald-light group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+                <p className="text-text-secondary text-sm">The technical philosophy behind our tools.</p>
+              </Link>
+              <Link href="/docs/meta/release-roadmap.html" className="group">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-semibold text-emerald group-hover:text-emerald-light transition-colors">Roadmap</span>
+                  <svg className="w-4 h-4 text-emerald group-hover:text-emerald-light group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+                <p className="text-text-secondary text-sm">What we're building next.</p>
+              </Link>
+              <Link href="/docs/index.html" className="group">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-semibold text-emerald group-hover:text-emerald-light transition-colors">Technical Documentation</span>
+                  <svg className="w-4 h-4 text-emerald group-hover:text-emerald-light group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+                <p className="text-text-secondary text-sm">Requirements, design specs, and API references.</p>
+              </Link>
+              <a href="https://github.com/Cleanroom-Labs" target="_blank" rel="noopener noreferrer" className="group">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-semibold text-emerald group-hover:text-emerald-light transition-colors">GitHub</span>
+                  <svg className="w-4 h-4 text-emerald group-hover:text-emerald-light group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+                <p className="text-text-secondary text-sm">Browse source code and contribute.</p>
+              </a>
+            </div>
           </div>
         </section>
 
