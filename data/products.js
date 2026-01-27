@@ -12,6 +12,6 @@ export const products = [
   {
     name: 'Cleanroom Whisper',
     description: 'Private voice transcription powered by local AI. Your words stay on your machine—no cloud, no network, complete privacy.',
-    docsUrl: '/docs/airgap-whisper/readme.html',
+    docsUrl: '/docs/cleanroom-whisper/readme.html',
   },
 ];
