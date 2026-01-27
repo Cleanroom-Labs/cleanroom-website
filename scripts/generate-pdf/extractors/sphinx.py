@@ -104,7 +104,7 @@ class SphinxExtractor(BaseExtractor):
                 "principles.html",
                 "meta-architecture.html",
                 "release-roadmap.html",
-                "traceability-dashboard.html",
+                "specification-overview.html",
             ]
             ordered_files = []
             for filename in direct_files:
