@@ -96,30 +96,7 @@ git submodule update --recursive --remote
    ./scripts/deploy-release.sh <project> v1.0.0
    ```
 
-## Troubleshooting
-
-### Detached HEAD State
-
-This is normal for submodules pointing to specific commits. To work on docs:
-
-```bash
-cd cleanroom-technical-docs/<project>-docs
-git checkout main
-```
-
-### Changes Not Showing
-
-Update submodules:
-```bash
-git submodule update --recursive --remote
-```
-
-### Can't Push Changes
-
-Make sure you're on a branch:
-```bash
-git checkout main
-```
+For troubleshooting, see [TROUBLESHOOTING.md](TROUBLESHOOTING.md#submodule-issues).
 
 ## Best Practices
 

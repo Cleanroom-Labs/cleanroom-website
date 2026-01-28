@@ -119,9 +119,9 @@ Possible causes:
 4. **Case sensitivity** - macOS is case-insensitive, Linux is case-sensitive
 
 Debug approach:
-```bash
-./scripts/test-ci-locally.sh
-```
+1. Run `./scripts/test-ci-locally.sh` to simulate CI
+2. Check workflow logs in the Actions tab
+3. Compare local environment with CI environment (e.g., Python version, installed packages)
 
 ## Submodule Issues
 
