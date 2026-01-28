@@ -63,6 +63,21 @@ cleanroom-website/                    # This repo
 | `./scripts/test-ci-locally.sh` | Simulate CI locally |
 | `python -m scripts.generate-pdf` | Generate comprehensive PDF from website |
 
+## Mobile Testing with ngrok
+
+To test the site from a mobile device or share a preview URL:
+
+```bash
+# Install ngrok
+brew install ngrok
+
+# Start dev server and tunnel
+npm run dev
+ngrok http 3000  # In another terminal
+```
+
+Access the generated URL (e.g., `https://abc123.ngrok.io`) from any device. Press `Ctrl+C` to stop the tunnel.
+
 ## PDF Generation
 
 Generate a comprehensive PDF report from the website content:
