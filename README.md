@@ -103,42 +103,7 @@ The PDF includes:
 
 See [scripts/generate-pdf/README.md](scripts/generate-pdf/README.md) for details.
 
-## Working with Submodules
-
-### Update All Submodules
-
-```bash
-git pull --recurse-submodules
-```
-
-### Make Changes to Project Documentation
-
-```bash
-cd cleanroom-technical-docs/<project>-docs
-git checkout main                    # Switch from detached HEAD
-# make changes
-git add . && git commit -m "Update"
-git push
-
-# Propagate to parent repos (3 commits total)
-cd ..
-git add <project>-docs && git commit -m "Update reference" && git push
-
-cd ..
-git add cleanroom-technical-docs && git commit -m "Update reference" && git push
-```
-
-### Release Workflow
-
-```bash
-# Tag the docs
-cd cleanroom-technical-docs/<project>-docs
-git tag v1.0.0 && git push origin v1.0.0
-
-# Deploy to website
-cd /path/to/cleanroom-website
-./scripts/deploy-release.sh <project> v1.0.0
-```
+See [docs/SUBMODULES_GUIDE.md](docs/SUBMODULES_GUIDE.md) for submodule operations and release workflows.
 
 ## Architecture
 
