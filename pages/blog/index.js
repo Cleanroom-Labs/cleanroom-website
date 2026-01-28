@@ -159,7 +159,7 @@ export default function Blog({ posts, allTags }) {
 
           {/* Mobile filter overlay */}
           {showMobileFilters && (
-            <div className="md:hidden fixed inset-0 z-50 bg-slate-950/95 p-6 overflow-y-auto">
+            <div className="md:hidden fixed inset-0 z-50 bg-slate-950/95 px-6 pt-20 pb-6 overflow-y-auto">
               <BlogFilters
                 searchQuery={searchQuery}
                 setSearchQuery={setSearchQuery}
