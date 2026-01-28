@@ -39,14 +39,14 @@ export default function Layout({ children, title, description }) {
       {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-slate-800 border-b border-slate-700 text-white flex-shrink-0">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-6 md:gap-8">
             <Link href={nav.brand.href} className="hover:opacity-80 transition-opacity">
               <img src="/favicon.svg" alt="Cleanroom Labs home" className="w-8 h-8" />
             </Link>
-            <Link href={nav.brand.href} className="font-bold text-lg hover:text-emerald transition-colors">
+            <Link href={nav.brand.href} className="hidden md:block font-bold text-lg hover:text-emerald transition-colors">
               {nav.brand.text}
             </Link>
-            <div className="flex gap-6">
+            <div className="flex gap-4 md:gap-6">
               {nav.links.map((link) => (
                 <Link
                   key={link.href}
