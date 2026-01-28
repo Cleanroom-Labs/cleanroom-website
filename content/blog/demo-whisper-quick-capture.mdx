@@ -2,7 +2,7 @@
 title: "Capturing Meeting Notes with Your Voice—No Cloud Required"
 date: "2026-01-10"
 author: "Cleanroom Labs Lead Dev"
-tags: ["airgap-whisper", "demo"]
+tags: ["cleanroom-whisper", "demo"]
 excerpt: "Learn how Cleanroom Whisper enables quick voice capture workflows without sending your audio to external servers."
 slug: "demo-whisper-quick-capture"
 readTime: "6 min"
@@ -37,9 +37,9 @@ Cleanroom Whisper brings the convenience of voice transcription without the priv
 
 Press a global hotkey → speak your thought → press the hotkey again → your transcription appears instantly. Copy it with another hotkey or click from the system tray menu. Everything stays on your machine.
 
-It's like having a private assistant that never leaves your computer.
+All processing happens locally on your machine.
 
-For detailed technical specifications, see the [Cleanroom Whisper documentation](/docs/airgap-whisper/readme.html). This post focuses on how it works in practice.
+For detailed technical specifications, see the [Cleanroom Whisper documentation](/docs/cleanroom-whisper/readme.html). This post focuses on how it works in practice.
 
 ---
 
@@ -97,11 +97,11 @@ Researchers conducting interviews in privacy-sensitive contexts (healthcare, leg
 
 **Privacy Through Architecture**
 
-Cleanroom Whisper doesn't just promise privacy—it's architecturally impossible for it to violate privacy. There's no network code in the application. It can't send data to external servers because it doesn't know how. Your audio is processed locally by whisper.cpp (a well-established open-source transcription engine) and stored in a local SQLite database. Nothing leaves your machine.
+Cleanroom Whisper has no network code. It can't send data to external servers because it doesn't have the capability to make network requests. Your audio is processed locally by whisper.cpp (a well-established open-source transcription engine) and stored in a local SQLite database. Nothing leaves your machine.
 
-**No Subscriptions, No Accounts, No Dependencies**
+**No Subscriptions or Accounts**
 
-Once installed, Cleanroom Whisper works forever. No monthly fees. No account creation. No internet connection required. It's software you own and control.
+Once installed, Cleanroom Whisper works indefinitely without accounts or subscriptions.
 
 **Cross-Platform Consistency**
 
@@ -109,13 +109,13 @@ Whether you're on macOS, Windows, or Linux, the experience is identical. The sam
 
 **Speed and Reliability**
 
-Local processing means no waiting for network requests. Your transcription appears in seconds, not "when the cloud decides." And it works consistently—no rate limits, no service outages, no throttling.
+Local processing means no waiting for network requests. Transcription appears in seconds. There are no rate limits or service outages to deal with.
 
 ---
 
 ## Getting Started
 
-Cleanroom Whisper will be available as part of the v1.0.0 release of the AirGap suite. Once released, you'll need:
+Cleanroom Whisper will be available as part of the v1.0.0 release. Once released, you'll need:
 
 1. The Cleanroom Whisper application (available as a pre-built binary for your platform)
 2. whisper.cpp (the open-source transcription engine)
@@ -127,10 +127,7 @@ After installation, configure the paths to your whisper.cpp binary and model fil
 
 **Want to learn more?**
 
-- [Cleanroom Whisper documentation](/docs/airgap-whisper/readme.html) - Full project overview
-- [Cleanroom Whisper Use Cases](/docs/airgap-whisper/use-cases/overview.html) - Detailed workflow scenarios
-- [Introducing the AirGap Suite](/blog/introducing-airgap-suite) - How all three projects work together
+- [Cleanroom Whisper documentation](/docs/cleanroom-whisper/readme.html) - Full project overview
+- [Cleanroom Whisper Use Cases](/docs/cleanroom-whisper/use-cases/overview.html) - Detailed workflow scenarios
+- [Privacy-First Tools for Air-Gapped Environments](/blog/introducing-airgap-tools) - How all three projects work together
 
----
-
-*Capture your thoughts. Keep your privacy. Cleanroom Whisper makes it simple.*
