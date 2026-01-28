@@ -149,7 +149,7 @@ export default function Blog({ posts, allTags }) {
           {/* Mobile filter toggle - visible only on small screens */}
           <button
             onClick={() => setShowMobileFilters(!showMobileFilters)}
-            className="lg:hidden mb-6 flex items-center gap-2 px-4 py-2 bg-slate-800 rounded-lg text-text-secondary hover:text-text-primary transition-colors"
+            className="md:hidden mb-6 flex items-center gap-2 px-4 py-2 bg-slate-800 rounded-lg text-text-secondary hover:text-text-primary transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
@@ -159,7 +159,7 @@ export default function Blog({ posts, allTags }) {
 
           {/* Mobile filter overlay */}
           {showMobileFilters && (
-            <div className="lg:hidden fixed inset-0 z-50 bg-slate-950/95 p-6 overflow-y-auto">
+            <div className="md:hidden fixed inset-0 z-50 bg-slate-950/95 p-6 overflow-y-auto">
               <BlogFilters
                 searchQuery={searchQuery}
                 setSearchQuery={setSearchQuery}
@@ -174,8 +174,21 @@ export default function Blog({ posts, allTags }) {
             </div>
           )}
 
-          {/* Blog posts - with right padding on large screens to avoid fixed sidebar */}
-          <div className="flex lg:pr-48">
+          {/* Tablet: inline filters - visible on md-xl screens */}
+          <div className="hidden md:block xl:hidden mb-8">
+            <BlogFilters
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              selectedTags={selectedTags}
+              setSelectedTags={setSelectedTags}
+              allTags={allTags}
+              filteredCount={filteredPosts.length}
+              totalCount={posts.length}
+            />
+          </div>
+
+          {/* Blog posts - with right padding on xl screens to avoid fixed sidebar */}
+          <div className="flex xl:pr-48">
             <div className="flex-1 min-w-0">
               {filteredPosts.length > 0 ? (
                 <div className="space-y-6">
@@ -189,8 +202,8 @@ export default function Blog({ posts, allTags }) {
             </div>
           </div>
 
-          {/* Right: Fixed filter sidebar - positioned on right edge, hidden on mobile */}
-          <div className="w-56 hidden lg:block fixed top-32 right-8">
+          {/* Right: Fixed filter sidebar - positioned on right edge, only on xl+ screens */}
+          <div className="w-56 hidden xl:block fixed top-32 right-8">
             <BlogFilters
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
