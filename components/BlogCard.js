@@ -17,10 +17,20 @@ export default function BlogCard({ post, onTagClick }) {
         </h2>
       </Link>
 
-      <div className="flex items-center gap-4 text-sm text-text-muted mb-3">
+      <div className="flex items-center gap-2 text-sm text-text-muted mb-3">
         <time dateTime={date}>{formattedDate}</time>
-        {author && <span>by {author}</span>}
-        {readTime && <span>{readTime} read</span>}
+        {author && (
+          <>
+            <span>•</span>
+            <span>by {author}</span>
+          </>
+        )}
+        {readTime && (
+          <>
+            <span>•</span>
+            <span>{readTime} read</span>
+          </>
+        )}
       </div>
 
       {excerpt && (
