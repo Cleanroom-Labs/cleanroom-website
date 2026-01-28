@@ -23,3 +23,9 @@ __pycache__/
 
 # PDF generation output
 /output/
+
+# Test outputs
+/coverage/
+/test-results/
+/playwright-report/
+/playwright/.cache/
