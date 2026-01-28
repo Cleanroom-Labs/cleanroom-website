@@ -87,7 +87,7 @@ export default function BlogFilters({
               <button
                 key={tag}
                 onClick={() => toggleTag(tag)}
-                className={`h-8 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
+                className={`px-2 py-1 rounded text-sm transition-all duration-200 ${
                   isActive
                     ? 'bg-emerald text-white shadow-lg shadow-emerald-glow'
                     : 'bg-slate-800 text-text-muted border border-slate-700 hover:border-emerald/50 hover:text-text-secondary'
