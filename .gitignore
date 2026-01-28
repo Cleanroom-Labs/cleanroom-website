@@ -19,6 +19,7 @@ scratch.txt
 
 # Python
 __pycache__/
+.venv/
 *.pyc
 
 # PDF generation output
