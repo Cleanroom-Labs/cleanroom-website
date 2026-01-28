@@ -3,7 +3,7 @@ import { ChevronIcon, DashedCircle } from "./icons";
 
 export default function Hero() {
   return (
-    <section className="relative bg-slate-900 text-white min-h-screen flex items-center overflow-hidden">
+    <section className="relative w-full bg-slate-900 text-white min-h-screen flex items-center overflow-hidden">
       {/* Background decorations */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Gradient orbs */}
