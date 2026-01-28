@@ -17,18 +17,18 @@ export default function BlogCard({ post, onTagClick }) {
         </h2>
       </Link>
 
-      <div className="flex items-center gap-2 text-sm text-text-muted mb-3">
-        <time dateTime={date}>{formattedDate}</time>
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-text-muted mb-3">
+        <time dateTime={date} className="whitespace-nowrap">{formattedDate}</time>
         {author && (
           <>
             <span>•</span>
-            <span>by {author}</span>
+            <span className="whitespace-nowrap">by {author}</span>
           </>
         )}
         {readTime && (
           <>
             <span>•</span>
-            <span>{readTime} read</span>
+            <span className="whitespace-nowrap">{readTime} read</span>
           </>
         )}
       </div>
