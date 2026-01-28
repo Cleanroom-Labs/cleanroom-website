@@ -85,10 +85,20 @@ export default function BlogPost({ frontmatter, mdxSource }) {
           <article>
             <header className="mb-8">
               <h1 className="text-4xl font-bold text-text-primary mb-4">{frontmatter.title}</h1>
-              <div className="flex items-center gap-4 text-text-muted mb-4">
+              <div className="flex items-center gap-2 text-text-muted mb-4">
                 <time dateTime={frontmatter.date}>{formattedDate}</time>
-                {frontmatter.author && <span>by {frontmatter.author}</span>}
-                {frontmatter.readTime && <span>{frontmatter.readTime} read</span>}
+                {frontmatter.author && (
+                  <>
+                    <span>•</span>
+                    <span>by {frontmatter.author}</span>
+                  </>
+                )}
+                {frontmatter.readTime && (
+                  <>
+                    <span>•</span>
+                    <span>{frontmatter.readTime} read</span>
+                  </>
+                )}
               </div>
               {frontmatter.tags && frontmatter.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
