@@ -86,6 +86,33 @@ public/docs/
 
 Tool: `sphinx-multiversion` extension
 
+## Submodules
+
+The full nesting structure:
+
+```
+cleanroom-website/                                    # This repo
+├── cleanroom-technical-docs/                         # Level 1 submodule
+│   ├── cleanroom-whisper-docs/                       # Level 2 submodule
+│   │   └── source/cleanroom-theme/                   # Level 3 submodule
+│   ├── airgap-deploy-docs/                           # Level 2 submodule
+│   │   └── source/cleanroom-theme/                   # Level 3 submodule
+│   ├── airgap-transfer-docs/                         # Level 2 submodule
+│   │   └── source/cleanroom-theme/                   # Level 3 submodule
+│   └── source/cleanroom-theme/                       # Level 2 submodule
+└── cleanroom-theme/                                  # Level 1 submodule
+```
+
+| Submodule | Purpose |
+|-----------|---------|
+| `cleanroom-technical-docs` | Aggregates all project documentation into a single Sphinx build. |
+| `cleanroom-theme` | Shared theme and styling used by all documentation projects. |
+| `cleanroom-whisper-docs` | Documentation for Cleanroom Whisper, an offline audio transcription application. |
+| `airgap-deploy-docs` | Documentation for AirGap Deploy, a tool for preparing software deployments for air-gapped systems. |
+| `airgap-transfer-docs` | Documentation for AirGap Transfer, a tool for transferring files to air-gapped systems. |
+
+The `cleanroom-theme` submodule appears at multiple levels so that each project can build its documentation independently with consistent styling.
+
 ## References
 
 - [Submodules Guide](./SUBMODULES_GUIDE.md) - Daily operations

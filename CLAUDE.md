@@ -18,9 +18,8 @@ See [README.md](README.md) for complete documentation including build commands, 
 
 ## Key Concepts
 
-- **Three-level nested submodules**: website → technical-docs → project-docs
-- **Three-commit propagation**: Changes in project docs require commits in: submodule → technical-docs → website
-- **Detached HEAD is normal**: Submodules point to specific commits, not branches. Use `git checkout main` to make changes.
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the submodule structure, design rationale, and submodule descriptions.
+
 - **Build fails on warnings**: Sphinx warnings indicate broken references and must be fixed
 - **Local submodules**: All submodules point to local directories (e.g., `~/Projects/cleanroom-theme`), not GitHub. The main website repo has no remote.
 

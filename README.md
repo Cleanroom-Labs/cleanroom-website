@@ -24,20 +24,6 @@ node scripts/build-docs.mjs
 
 Output is generated to `public/docs/index.html`.
 
-## Repository Structure
-
-```
-cleanroom-website/                    # This repo
-├── cleanroom-technical-docs/         # Submodule - documentation aggregator
-│   ├── <project>-docs/               # Submodules - individual project docs
-│   ├── source/                       # Master Sphinx source
-│   ├── shared/                       # Shared theme configuration
-│   └── requirements.txt              # Python dependencies
-├── scripts/                          # Build and deployment automation
-├── docs/                             # Developer documentation
-└── public/docs/                      # Generated output (gitignored)
-```
-
 ## Build Commands
 
 ### npm Scripts
@@ -107,18 +93,7 @@ See [docs/SUBMODULES_GUIDE.md](docs/SUBMODULES_GUIDE.md) for submodule operation
 
 ## Architecture
 
-This repository uses a **three-level nested submodule architecture**:
-
-1. **Website → Technical Docs**: Single submodule coupling website to docs aggregator
-2. **Technical Docs → Project Docs**: Multiple submodules for each project
-3. **Code Repos → Project Docs**: Dual-homing allows code repos to include their docs
-
-Key characteristics:
-- **Version coupling** via git SHAs ensures docs match website releases
-- **Detached HEAD is normal** - submodules point to specific commits
-- **Changes require 3 commits** to propagate from project docs to website
-
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for design rationale and alternatives considered.
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the submodule structure, design rationale, and alternatives considered.
 
 ## Documentation Technology
 
