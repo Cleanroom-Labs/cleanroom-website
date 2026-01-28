@@ -50,7 +50,7 @@ AirGap Deploy automates the entire workflow. You describe what you want to packa
 
 Create a deployment manifest → run the prep command → transfer the package → run the install script. Everything builds and installs automatically on the air-gapped system. No missing dependencies. No manual steps. No iteration.
 
-It's like having a deployment engineer who never forgets anything.
+The manifest captures everything you need, so nothing gets forgotten.
 
 For detailed technical specifications, see the [AirGap Deploy documentation](/docs/airgap-deploy/readme.html). This post focuses on the workflow.
 
@@ -102,7 +102,7 @@ Extract the archive. Run the generated install script. It:
 - Sets up configuration files
 - Verifies the installation
 
-No internet connection required. No missing dependencies. No manual intervention. Just a working application.
+The offline system doesn't need internet access—all dependencies are included in the package.
 
 ---
 
@@ -143,25 +143,25 @@ Manual dependency tracking is error-prone. You forget packages. You download the
 
 **Saves Time and Frustration**
 
-No more iteration cycles. No more "just one more dependency" USB walks. Create the package once, install it once, done. What used to take days or weeks now takes hours.
+This removes the iteration cycles and repeated USB walks to fetch forgotten dependencies. Create the package once, install it once, done.
 
 **Enables Secure Deployment**
 
-Air-gapped environments exist for a reason—they protect sensitive data and critical systems. But if deployment is too hard, people find workarounds that compromise security. AirGap Deploy makes secure deployment *easier* than insecure shortcuts.
+Air-gapped environments exist for a reason—they protect sensitive data and critical systems. But if deployment is too hard, people find workarounds that compromise security. AirGap Deploy removes the temptation to bypass security for convenience.
 
 **Declarative and Transparent**
 
 The manifest file is human-readable. Anyone can review it and understand what's being deployed. This transparency is crucial for security reviews and compliance audits.
 
-**Open Source and Free**
+**Open Source**
 
-Unlike commercial deployment solutions that require expensive licenses and heavy infrastructure, AirGap Deploy is a simple, open-source tool. No vendor lock-in. No per-seat costs. No complex setup.
+AirGap Deploy is open source with no external dependencies beyond the Rust toolchain.
 
 ---
 
 ## Getting Started
 
-AirGap Deploy will be available as part of the v1.0.0 release of the AirGap suite. Once released, you'll be able to:
+AirGap Deploy will be available as part of the v1.0.0 release. Once released, you'll be able to:
 
 1. Install AirGap Deploy (single binary, no dependencies)
 2. Create a manifest for your application
@@ -172,15 +172,12 @@ AirGap Deploy will be available as part of the v1.0.0 release of the AirGap suit
 
 - Simple Rust CLI applications
 - Applications with C library dependencies
-- Multi-component systems (like AirGap Whisper + whisper.cpp)
+- Multi-component systems (like Cleanroom Whisper + whisper.cpp)
 - Large ML deployments (see the [Ollama deployment post](/blog/demo-transfer-ollama))
 
 **Want to learn more?**
 
 - [AirGap Deploy documentation](/docs/airgap-deploy/readme.html) - Full project overview
 - [Ollama Deployment Workflow](/docs/airgap-deploy/use-cases/workflow-ollama.html) - Detailed technical example
-- [Introducing the AirGap Suite](/blog/introducing-airgap-suite) - How all three projects work together
+- [Privacy-First Tools for Air-Gapped Environments](/blog/introducing-airgap-tools) - How all three projects work together
 
----
-
-*Package once. Deploy confidently. AirGap Deploy makes air-gapped deployment simple.*

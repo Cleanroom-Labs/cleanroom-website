@@ -35,11 +35,11 @@ Manual chunking isn't just annoying—it's a deployment blocker.
 
 ## The Solution: AirGap Deploy + AirGap Transfer
 
-This is where the AirGap suite shines through integration. AirGap Deploy packages everything you need (application, dependencies, models) into a single deployment archive. AirGap Transfer handles the multi-USB orchestration automatically.
+This is where the AirGap tools work together. AirGap Deploy packages everything you need (application, dependencies, models) into a single deployment archive. AirGap Transfer handles the multi-USB orchestration automatically.
 
 **The workflow:**
 
-Package with Deploy → chunk with Transfer → physically transfer USB drives → reconstruct with Transfer → install with Deploy's generated script. Everything is automated. Nothing is manual. No human error.
+Package with Deploy → chunk with Transfer → physically transfer USB drives → reconstruct with Transfer → install with Deploy's generated script. The process is automated, reducing human error.
 
 For technical details, see the [Ollama Deployment Workflow](/docs/airgap-deploy/use-cases/workflow-ollama.html) documentation. This post focuses on the end-to-end experience.
 
@@ -137,9 +137,9 @@ Minutes later, Ollama is running on your air-gapped system with the llama2-7b mo
 
 ## Why This Matters
 
-**Enterprise-Grade Reliability Without Enterprise Cost**
+**Reliable Verification**
 
-Manual chunking and verification is what humans do wrong. AirGap Transfer automates it with cryptographic checksums, manifest tracking, and resume capability. You get the reliability of expensive commercial tools without the cost or complexity.
+Manual chunking and verification is error-prone. AirGap Transfer automates it with cryptographic checksums, manifest tracking, and resume capability.
 
 **Eliminates the "Sneaker Net" Pain Points**
 
@@ -162,20 +162,12 @@ The manifest file serves as a complete record of what was transferred. For compl
 
 ## Next Steps
 
-AirGap Transfer and AirGap Deploy will be available as part of the v1.0.0 release of the AirGap suite. Once released, you'll be able to deploy Ollama and other large applications to air-gapped systems with confidence.
+AirGap Transfer and AirGap Deploy will be available as part of the v1.0.0 release. Once released, you'll be able to deploy Ollama and other large applications to air-gapped systems with confidence.
 
 **Want to learn more?**
 
 - [AirGap Transfer documentation](/docs/airgap-transfer/readme.html) - Full project overview and CLI reference
 - [AirGap Deploy documentation](/docs/airgap-deploy/readme.html) - Packaging system documentation
 - [Ollama Deployment Workflow](/docs/airgap-deploy/use-cases/workflow-ollama.html) - Detailed technical walkthrough
-- [Introducing the AirGap Suite](/blog/introducing-airgap-suite) - Complete suite overview
+- [Privacy-First Tools for Air-Gapped Environments](/blog/introducing-airgap-tools) - Overview of all three tools
 
-**Other demo posts:**
-
-- [Capturing Meeting Notes with AirGap Whisper](/blog/demo-whisper-quick-capture)
-- [Packaging Rust Apps with AirGap Deploy](/blog/demo-deploy-rust-app)
-
----
-
-*From many drives to one system. AirGap Transfer makes multi-USB deployment reliable.*
