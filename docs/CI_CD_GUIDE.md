@@ -250,75 +250,7 @@ git push
 
 ### Common Build Failures
 
-**Error: Submodule not initialized**
-
-```
-ERROR: Submodule <project>-docs not initialized
-```
-
-**Cause:** Checkout didn't include `submodules: recursive`
-
-**Fix:** Ensure workflow has:
-```yaml
-- uses: actions/checkout@v4
-  with:
-    submodules: recursive
-```
-
-**Error: Build warnings detected**
-
-```
-⚠️  Build completed with warnings
-```
-
-**Cause:** Sphinx detected issues (broken links, missing references, etc.)
-
-**Fix:** Run locally to see warnings:
-```bash
-cd cleanroom-technical-docs
-make html
-# Review warnings in output
-```
-
-**Error: Intersphinx mapping failed**
-
-```
-WARNING: intersphinx inventory 'https://...' not fetchable
-```
-
-**Cause:** Project docs not built before master docs
-
-**Fix:** Ensure workflow builds individual projects first:
-```yaml
-- name: Build individual project documentation
-  run: |
-    for project in <project>-docs ...; do
-      cd $project
-      sphinx-build -M html source build
-      cd ..
-    done
-
-- name: Build master documentation
-  run: make html
-```
-
-**Error: Deploy to GitHub Pages failed**
-
-```
-Error: HttpError: Resource not accessible by integration
-```
-
-**Cause:** GitHub Pages not configured or wrong permissions
-
-**Fix:**
-1. Settings → Pages → Source: "GitHub Actions"
-2. Check workflow permissions:
-   ```yaml
-   permissions:
-     contents: read
-     pages: write
-     id-token: write
-   ```
+See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for build failure solutions.
 
 ## Environment Variables
 
@@ -339,64 +271,7 @@ To add custom environment variables:
 
 ## Troubleshooting
 
-### Workflow Not Triggering
-
-**Check 1: Path filters**
-
-If you change a file but workflow doesn't run, check path filters:
-
-```yaml
-on:
-  push:
-    paths:
-      - 'source/**'           # Only triggers for source/ changes
-      - 'airgap-*-docs/**'    # Or submodule changes
-```
-
-**Solution:** Either change a matching path or use `workflow_dispatch` to trigger manually.
-
-**Check 2: Branch filters**
-
-```yaml
-on:
-  push:
-    branches: [main]  # Only triggers on main branch
-```
-
-**Solution:** Push to `main` or add your branch to the list.
-
-### Submodules at Wrong Version
-
-**Problem:** CI builds different version than expected.
-
-**Cause:** Submodule references not updated.
-
-**Solution:**
-```bash
-cd cleanroom-technical-docs
-git submodule update --remote <project>-docs
-# Or manually:
-cd <project>-docs
-git checkout v1.0.0
-cd ..
-git add <project>-docs
-git commit -m "Update docs to v1.0.0"
-```
-
-### Local Build Works, CI Fails
-
-**Problem:** Documentation builds locally but fails in CI.
-
-**Possible causes:**
-1. **Missing dependency:** Check `requirements.txt` is complete
-2. **System dependency:** Ensure Graphviz installed in workflow
-3. **Path issues:** Use relative paths, not absolute
-4. **File case sensitivity:** macOS is case-insensitive, Linux is case-sensitive
-
-**Debug approach:**
-1. Run `./scripts/test-ci-locally.sh` to simulate CI
-2. Check workflow logs in Actions tab
-3. Compare local environment with CI environment
+See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for CI/CD troubleshooting, including workflow triggers, submodule version issues, and local-vs-CI debugging.
 
 ## Advanced Configuration
 
@@ -435,17 +310,6 @@ Add notification step:
     # Send notification (Slack, email, etc.)
     curl -X POST $WEBHOOK_URL -d '{"text":"Build failed!"}'
 ```
-
-## Helper Scripts
-
-All helper scripts are in `scripts/`:
-
-- **test-ci-locally.sh** - Simulate CI build locally
-- **check-submodules.py** - Verify submodule health
-- **update-project-docs.sh** - Update project to specific version
-- **add-new-project.sh** - Add new project as submodule
-- **deploy-release.sh** - Deploy specific release
-- **build-single-project.sh** - Build individual project locally
 
 ## References
 

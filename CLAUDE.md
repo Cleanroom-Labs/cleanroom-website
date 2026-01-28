@@ -56,33 +56,4 @@ See [README.md](README.md) for complete documentation including build commands, 
 | `npm run build-docs` | Build Sphinx documentation only |
 | `npm run lint` | Run linter |
 
-## Working in This Repo
-
-When modifying documentation:
-1. Run `./scripts/check-submodules.py` to verify health
-2. Make changes in the appropriate submodule (checkout a branch first)
-3. Build with `node scripts/build-docs.mjs` to verify no warnings
-4. Propagate commits through all three levels
-
-When modifying build scripts:
-1. Test locally with `./scripts/test-ci-locally.sh`
-2. Check that `public/docs/` is generated correctly
-
-When updating the theme:
-1. Make changes in `/Users/andfranklin/Projects/cleanroom-theme` or `cleanroom-website/cleanroom-theme`
-2. Run `npm run build` to regenerate outputs (required after token changes)
-3. Run `npm run check-staleness` to verify generated files are up-to-date
-4. Commit changes (if working in standalone repo, push to origin)
-5. Run `./scripts/sync-theme.py` to propagate to all 5 submodule locations
-   - If `cleanroom-website/cleanroom-theme` is ahead of its local remote, the script automatically pushes it first
-6. Build with `node scripts/build-docs.mjs` to verify
-7. Push changes in website (and any modified project repos)
-
-Note: Use `./scripts/sync-theme.py --verify` to check for stale files after syncing,
-or `--rebuild` to auto-regenerate them. CI will warn on PRs if theme files are stale.
-
-When generating PDF reports:
-1. Build docs: `npm run build-docs`
-2. Start dev server: `npm run dev`
-3. Generate PDF: `python -m scripts.generate-pdf`
-4. Output: `output/cleanroom-labs.pdf`
+See [README.md](README.md) for workflows and [docs/](docs/) for detailed guides.

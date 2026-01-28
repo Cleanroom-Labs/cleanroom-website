@@ -126,12 +126,7 @@ git push --force origin main
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| "Submodule not initialized" | Add `submodules: recursive` to checkout action |
-| "Resource not accessible" | Enable workflow write permissions in settings |
-| Old content showing | Hard refresh browser, wait for CDN cache |
-| Cross-references broken | Verify intersphinx uses relative paths |
+See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for deployment troubleshooting.
 
 ## Custom Domain (Optional)
 
