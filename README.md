@@ -35,7 +35,7 @@ Output is generated to `public/docs/index.html`.
 | `npm run build` | Production build (rebuilds docs first) |
 | `npm run build-docs` | Build Sphinx documentation only |
 | `npm run start` | Start production server |
-| `npm run lint` | Run ESLint |
+| `npm run lint` | Print lint setup guidance (linting not configured yet) |
 
 ### Shell Scripts
 

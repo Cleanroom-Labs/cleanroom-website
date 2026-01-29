@@ -45,7 +45,7 @@ jobs:
         echo ""
 
         # Build each project
-        for project in airgap-whisper-docs airgap-deploy-docs airgap-transfer-docs; do
+        for project in cleanroom-whisper-docs airgap-deploy-docs airgap-transfer-docs; do
           echo "## Building $project"
           cd $project
 
@@ -99,7 +99,7 @@ jobs:
         # Optionally copy individual project docs
         # (useful if you want direct links to project docs)
         # mkdir -p public/docs/projects
-        # cp -r cleanroom-technical-docs/airgap-whisper-docs/build/html public/docs/projects/whisper
+        # cp -r cleanroom-technical-docs/cleanroom-whisper-docs/build/html public/docs/projects/whisper
         # cp -r cleanroom-technical-docs/airgap-deploy-docs/build/html public/docs/projects/deploy
         # cp -r cleanroom-technical-docs/airgap-transfer-docs/build/html public/docs/projects/transfer
 
@@ -150,7 +150,7 @@ jobs:
         echo "✓ All documentation built successfully"
         echo ""
         echo "## Projects Built"
-        echo "- AirGap Whisper"
+        echo "- Cleanroom Whisper"
         echo "- AirGap Deploy"
         echo "- AirGap Transfer"
         echo "- Master documentation"

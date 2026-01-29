@@ -53,6 +53,6 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the submodule structure, de
 | `npm run dev:clean` | Build docs then start dev server |
 | `npm run build` | Production build |
 | `npm run build-docs` | Build Sphinx documentation only |
-| `npm run lint` | Run linter |
+| `npm run lint` | Print lint setup guidance (linting not configured yet) |
 
 See [README.md](README.md) for workflows and [docs/](docs/) for detailed guides.

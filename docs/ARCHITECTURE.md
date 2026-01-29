@@ -20,7 +20,6 @@ A three-level nested submodule architecture:
 cleanroom-website/                    # Parent repository
 ├── cleanroom-technical-docs/         # Submodule (aggregates projects)
 │   ├── <project>-docs/               # Submodules (project docs)
-│   ├── shared/                       # Shared theme configuration
 │   └── source/                       # Master documentation
 └── scripts/                          # Helper scripts
 ```
@@ -45,7 +44,7 @@ For operational details, see [cleanroom-technical-docs/README.md](../cleanroom-t
 
 ### Shared Theme via Inheritance
 
-Projects import shared configuration from `shared/theme_config.py`, allowing:
+Projects import shared configuration from `source/cleanroom-theme/theme_config.py`, allowing:
 - Single source of truth for styling
 - Easy global updates
 - Project-specific overrides when needed
