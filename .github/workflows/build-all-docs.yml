@@ -72,11 +72,18 @@ jobs:
         echo "## Building Master Documentation"
         make html 2>&1 | tee build.log
 
-        # Check for warnings (ignore intersphinx inventory fetch warnings)
+        # Check for errors/warnings (ignore intersphinx inventory fetch warnings)
+        ERRORS_ALL="$(grep -E 'ERROR:' build.log || true)"
         WARNINGS_ALL="$(grep -E 'WARNING:' build.log || true)"
         WARNINGS_NON_IGNORED="$(echo "$WARNINGS_ALL" | grep -viE 'failed to reach any of the inventories|intersphinx inventory' || true)"
 
-        if [ -n "$WARNINGS_NON_IGNORED" ]; then
+        if [ -n "$ERRORS_ALL" ]; then
+          echo ""
+          echo "❌ Build completed with errors"
+          echo ""
+          echo "$ERRORS_ALL"
+          exit 1
+        elif [ -n "$WARNINGS_NON_IGNORED" ]; then
           echo ""
           echo "⚠️  Build completed with warnings"
           echo ""
