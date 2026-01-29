@@ -22,20 +22,17 @@ if ! command -v python3 &> /dev/null; then
 fi
 echo "✓ Python 3: $(python3 --version)"
 
-if ! command -v pip &> /dev/null; then
-    echo "❌ ERROR: pip not found"
-    exit 1
-fi
-echo "✓ pip: $(pip --version)"
+TECH_DOCS_DIR="$ROOT_DIR/cleanroom-technical-docs"
+VENV_DIR="$TECH_DOCS_DIR/.venv"
+PIP="$VENV_DIR/bin/pip"
+SPHINX_BUILD="$VENV_DIR/bin/sphinx-build"
 
-if ! command -v sphinx-build &> /dev/null; then
-    echo "⚠️  WARNING: sphinx-build not in PATH"
-    echo "   Installing dependencies..."
-    cd "$ROOT_DIR/cleanroom-technical-docs"
-    pip install -r requirements.txt
-    cd "$ROOT_DIR"
+if [ ! -x "$SPHINX_BUILD" ]; then
+    echo "Setting up Sphinx virtualenv at $VENV_DIR ..."
+    python3 -m venv "$VENV_DIR"
+    "$PIP" install -r "$TECH_DOCS_DIR/requirements.txt"
 fi
-echo "✓ sphinx-build: $(sphinx-build --version)"
+echo "✓ sphinx-build: $("$SPHINX_BUILD" --version)"
 
 echo ""
 echo "## Verifying Submodules"
@@ -58,7 +55,7 @@ else
 fi
 
 # Check nested submodules
-for submodule in airgap-whisper-docs airgap-deploy-docs airgap-transfer-docs; do
+for submodule in cleanroom-whisper-docs airgap-deploy-docs airgap-transfer-docs; do
     if [ ! -e "$submodule/.git" ]; then
         echo "❌ ERROR: Submodule $submodule not initialized"
         exit 1
@@ -84,16 +81,26 @@ echo ""
 cd cleanroom-technical-docs
 
 # Use the Makefile which handles building projects + master + copying
-make html 2>&1 | tee build.log
+make html SPHINXBUILD="$SPHINX_BUILD" 2>&1 | tee build.log
 
-# Check for warnings
-if grep -qi "warning" build.log; then
+# Check for warnings (treat intersphinx inventory fetch warnings as informational)
+WARNINGS_ALL="$(grep -E 'WARNING:' build.log || true)"
+WARNINGS_NON_IGNORED="$(echo "$WARNINGS_ALL" | grep -viE 'failed to reach any of the inventories|intersphinx inventory' || true)"
+
+if [ -n "$WARNINGS_NON_IGNORED" ]; then
     echo ""
     echo "⚠️  Build completed with warnings:"
     echo ""
-    grep -i "warning" build.log
+    echo "$WARNINGS_NON_IGNORED"
     echo ""
     WARNINGS="true"
+elif [ -n "$WARNINGS_ALL" ]; then
+    echo ""
+    echo "ℹ️  Build produced intersphinx inventory warnings (ignored for local runs):"
+    echo ""
+    echo "$WARNINGS_ALL"
+    echo ""
+    WARNINGS="false"
 else
     echo "✓ Build completed with no warnings"
     WARNINGS="false"
@@ -104,7 +111,7 @@ echo ""
 echo "## Verifying Project Documentation"
 echo ""
 
-for project in airgap-whisper airgap-deploy airgap-transfer; do
+for project in cleanroom-whisper airgap-deploy airgap-transfer; do
     if [ ! -f build/html/$project/index.html ]; then
         echo "❌ ERROR: $project docs not found in master build"
         exit 1

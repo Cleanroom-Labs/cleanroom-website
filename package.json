@@ -14,7 +14,7 @@
     "build-docs": "node scripts/build-docs.mjs",
     "build-docs:clean": "node scripts/build-docs.mjs --clean",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "node scripts/lint.mjs",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage",

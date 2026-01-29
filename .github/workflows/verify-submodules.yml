@@ -67,7 +67,7 @@ jobs:
         cd cleanroom-technical-docs
 
         # Check each project submodule
-        for submodule in airgap-whisper-docs airgap-deploy-docs airgap-transfer-docs; do
+        for submodule in cleanroom-whisper-docs airgap-deploy-docs airgap-transfer-docs; do
           echo "### $submodule"
 
           if [ ! -d "$submodule/.git" ]; then
@@ -108,7 +108,7 @@ jobs:
         cd cleanroom-technical-docs
 
         # Fetch latest from remote (if configured)
-        for submodule in airgap-whisper-docs airgap-deploy-docs airgap-transfer-docs; do
+        for submodule in cleanroom-whisper-docs airgap-deploy-docs airgap-transfer-docs; do
           cd $submodule
 
           # Only check if remote is configured (not file://)

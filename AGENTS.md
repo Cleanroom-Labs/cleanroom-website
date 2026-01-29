@@ -17,7 +17,7 @@ npm run dev:clean    # Rebuild docs, then start dev server
 npm run build        # Build docs + production Next.js build
 npm run build-docs   # Run scripts/build-docs.mjs only
 npm run start        # Start production server
-npm run lint         # Next.js lint
+npm run lint         # Print lint setup guidance (linting not configured yet)
 npm run test         # Vitest unit tests
 npm run test:e2e     # Playwright E2E tests
 ```
