@@ -199,7 +199,7 @@ git push origin v1.0.0-rc.1
 This triggers:
 - `deploy-tagged.yml` workflow
 - Deploys to **preview** environment
-- URL: `https://[org].github.io/cleanroom-technical-docs/` (with RC badge)
+- URL: `https://cleanroom-labs.github.io/cleanroom-technical-docs/` (with RC badge)
 
 **Step 2: Review Preview**
 
@@ -224,7 +224,7 @@ git push origin v1.0.0
 This triggers:
 - `deploy-tagged.yml` workflow
 - Deploys to **production** environment
-- URL: `https://[org].github.io/cleanroom-technical-docs/`
+- URL: `https://cleanroom-labs.github.io/cleanroom-technical-docs/`
 
 **Step 4: Update Parent Repository**
 
@@ -324,4 +324,4 @@ For issues with CI/CD:
 1. Check workflow logs in Actions tab
 2. Run `./scripts/test-ci-locally.sh` to reproduce locally
 3. Review this guide for common issues
-4. Check [repository issues](link-to-issues)
+4. Check the repository Issues tracker (if enabled)
