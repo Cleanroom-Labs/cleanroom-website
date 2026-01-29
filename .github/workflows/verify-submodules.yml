@@ -41,16 +41,13 @@ jobs:
         CURRENT=$(git describe --exact-match --tags 2>/dev/null || git branch --show-current || echo "DETACHED")
 
         if [ "$CURRENT" = "DETACHED" ]; then
-          echo "⚠️  WARNING: Submodule is in DETACHED HEAD state"
-          echo "Current commit: $(git rev-parse --short HEAD)"
+          # This is normal: submodules are pinned to a specific commit.
+          echo "ℹ️  Submodule is in DETACHED HEAD state (expected for submodules)"
+          echo "   Current commit: $(git rev-parse --short HEAD)"
           echo ""
-          echo "To fix, update the submodule reference:"
-          echo "  cd cleanroom-technical-docs"
-          echo "  git checkout <branch-or-tag>"
-          echo "  cd .."
-          echo "  git add cleanroom-technical-docs"
-          echo "  git commit -m 'Update submodule reference'"
-          exit 1
+          echo "   If you need to edit the submodule:"
+          echo "     cd cleanroom-technical-docs"
+          echo "     git checkout main  # or a tag"
         else
           echo "✓ Submodule is on: $CURRENT"
           echo "  Commit: $(git rev-parse --short HEAD)"

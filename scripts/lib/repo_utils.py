@@ -144,12 +144,19 @@ class RepoInfo:
         ahead, _ = self.get_ahead_behind_count(branch)
         return ahead
 
-    def validate(self, check_sync: bool = False) -> bool:
+    def validate(
+        self,
+        check_sync: bool = False,
+        allow_detached: bool = False,
+        allow_no_remote: bool = False,
+    ) -> bool:
         """
         Validate repository state. Returns True if valid for pushing.
 
         Args:
             check_sync: If True, also check that repo is in sync with remote (not behind)
+            allow_detached: If True, treat detached HEAD repos as non-fatal (useful for submodules)
+            allow_no_remote: If True, treat missing origin remote as non-fatal
         """
         # Check for uncommitted changes
         if self.has_uncommitted_changes():
@@ -162,13 +169,16 @@ class RepoInfo:
         if not self.branch:
             self.status = RepoStatus.DETACHED
             self.error_message = f"Detached HEAD state. Run: cd {self.rel_path} && git checkout <branch>"
-            return False
+            # Detached HEAD is normal for submodules pinned to a commit. It's only
+            # fatal if the caller intends to push from this repo.
+            return allow_detached
 
         # Check for remote
         if not self.has_remote():
             self.status = RepoStatus.NO_REMOTE
             self.error_message = "No remote 'origin' configured"
-            return False
+            # Some repos in this workspace intentionally have no remote (e.g. local-only setups).
+            return allow_no_remote
 
         # Check commits ahead/behind
         self.ahead_count, self.behind_count = self.get_ahead_behind_count(self.branch)

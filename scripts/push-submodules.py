@@ -34,9 +34,9 @@ Examples:
   %(prog)s --force            # Push even with validation warnings
 
 The script validates that each repo:
-  - Is on a branch (not detached HEAD)
   - Has no uncommitted changes
-  - Has a pushable remote
+  - Has a pushable remote (if it needs pushing)
+  - Is on a branch (for repos that will be pushed)
   - Has commits ahead of remote
 """,
     )
@@ -79,7 +79,7 @@ The script validates that each repo:
     repos_to_push: list = []
 
     for repo in repos:
-        if repo.validate():
+        if repo.validate(allow_detached=True, allow_no_remote=True):
             if repo.status == RepoStatus.PENDING:
                 repos_to_push.append(repo)
         else:
