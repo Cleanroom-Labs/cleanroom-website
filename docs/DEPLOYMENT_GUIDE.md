@@ -114,14 +114,14 @@ git tag v1.0.0 && git push origin main && git push origin v1.0.0
 ## Rollback
 
 ```bash
-# Revert last deployment
+# Preferred: revert the last deployment commit
 cd cleanroom-technical-docs
 git revert HEAD
 git push
 
-# Or rollback to specific version
-git reset --hard <commit-sha>
-git push --force origin main
+# Last resort: reset + force-push (coordinate first; rewrites history)
+# git reset --hard <commit-sha>
+# git push --force-with-lease origin main
 ```
 
 ## Troubleshooting
