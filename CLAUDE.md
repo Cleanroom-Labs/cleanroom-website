@@ -20,7 +20,7 @@ See [README.md](README.md) for complete documentation including build commands, 
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the submodule structure, design rationale, and submodule descriptions.
 
-- **Build fails on warnings**: Sphinx warnings indicate broken references and must be fixed
+- **Warnings policy**: Treat Sphinx warnings as failures, except intersphinx inventory fetch warnings which may appear when offline or before deployment
 - **Local submodules**: All submodules point to local directories (e.g., `~/Projects/cleanroom-theme`), not GitHub. The main website repo has no remote.
 
 ## Important Files
