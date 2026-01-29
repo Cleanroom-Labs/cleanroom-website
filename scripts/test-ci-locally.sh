@@ -83,11 +83,19 @@ cd cleanroom-technical-docs
 # Use the Makefile which handles building projects + master + copying
 make html SPHINXBUILD="$SPHINX_BUILD" 2>&1 | tee build.log
 
-# Check for warnings (treat intersphinx inventory fetch warnings as informational)
+# Check for errors/warnings (treat intersphinx inventory fetch warnings as informational)
+ERRORS_ALL="$(grep -E 'ERROR:' build.log || true)"
 WARNINGS_ALL="$(grep -E 'WARNING:' build.log || true)"
 WARNINGS_NON_IGNORED="$(echo "$WARNINGS_ALL" | grep -viE 'failed to reach any of the inventories|intersphinx inventory' || true)"
 
-if [ -n "$WARNINGS_NON_IGNORED" ]; then
+if [ -n "$ERRORS_ALL" ]; then
+    echo ""
+    echo "❌ Build completed with errors:"
+    echo ""
+    echo "$ERRORS_ALL"
+    echo ""
+    WARNINGS="true"
+elif [ -n "$WARNINGS_NON_IGNORED" ]; then
     echo ""
     echo "⚠️  Build completed with warnings:"
     echo ""
@@ -126,10 +134,10 @@ echo ""
 
 cd build/html
 
-if grep -r "airgap-whisper" . >/dev/null 2>&1; then
-    echo "✓ airgap-whisper references found"
+if grep -r "cleanroom-whisper" . >/dev/null 2>&1; then
+    echo "✓ cleanroom-whisper references found"
 else
-    echo "⚠️  No references to airgap-whisper found"
+    echo "⚠️  No references to cleanroom-whisper found"
 fi
 
 if grep -r "airgap-deploy" . >/dev/null 2>&1; then
