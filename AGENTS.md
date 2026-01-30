@@ -4,7 +4,6 @@
 - `pages/` contains Next.js routes and page-level logic.
 - `components/` holds reusable UI components (React + Tailwind).
 - `styles/` and `tailwind.config.js` define global styling and tokens.
-- `content/` and `data/` store site content and metadata.
 - `lib/` contains shared helpers (e.g., content parsing).
 - `tests/unit/` for Vitest unit tests, `tests/e2e/` for Playwright specs.
 - `public/` hosts static assets and generated docs output (`public/docs/index.html`).
@@ -12,9 +11,9 @@
 
 ## Build, Test, and Development Commands
 ```bash
-npm run dev          # Start Next.js dev server (uses existing docs)
-npm run dev:clean    # Rebuild docs, then start dev server
-npm run build        # Build docs + production Next.js build
+npm run dev          # Start Next.js dev server (webpack; uses existing docs)
+npm run dev:clean    # Rebuild docs, then start dev server (webpack)
+npm run build        # Build docs + production Next.js build (webpack)
 npm run build-docs   # Run scripts/build-docs.mjs only
 npm run start        # Start production server
 npm run lint         # Print lint setup guidance (linting not configured yet)
