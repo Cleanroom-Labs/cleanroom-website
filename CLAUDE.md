@@ -7,6 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 See [README.md](README.md) for complete documentation including build commands, repository structure, and submodule workflows.
 
 **Build docs:** `node scripts/build-docs.mjs`
+**Build site only:** `npm run build:web`
 
 **Check submodules:** `./scripts/check-submodules.py`
 
@@ -24,6 +25,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the submodule structure, de
 - **Local submodules**: All submodules point to local directories (e.g., `~/Projects/cleanroom-theme`), not GitHub. The main website repo has no remote.
 - **Next.js build mode**: Use webpack (`--webpack`) for `dev`/`build` to avoid Turbopack panics in restricted environments.
 - **Runtime requirement**: Next.js 16 requires Node.js 20.9+.
+- **CI Node version**: GitHub Actions reads the Node version from `.nvmrc`.
 
 ## Important Files
 
@@ -54,6 +56,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the submodule structure, de
 | `npm run dev` | Start development server (webpack) |
 | `npm run dev:clean` | Build docs then start dev server (webpack) |
 | `npm run build` | Production build (webpack; builds docs first) |
+| `npm run build:web` | Production build (webpack; skips docs) |
 | `npm run build-docs` | Build Sphinx documentation only |
 | `npm run lint` | Print lint setup guidance (linting not configured yet) |
 

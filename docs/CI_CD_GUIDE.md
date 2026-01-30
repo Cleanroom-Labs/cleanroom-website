@@ -96,10 +96,13 @@ Developer → Create tag (v1.0.0-rc.1) → Preview Deployment
 
 **For cleanroom-technical-docs repository:**
 
+Node.js:
+- CI uses `.nvmrc` (via `actions/setup-node` `node-version-file`) for the website workflow Node version.
+
 1. **Enable GitHub Pages:**
    - Go to Settings → Pages
    - Source: "GitHub Actions"
-   - Branch: Not needed (Actions deploys directly)
+    - Branch: Not needed (Actions deploys directly)
 
 2. **Configure environments (optional):**
    - Settings → Environments
