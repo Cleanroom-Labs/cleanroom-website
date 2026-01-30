@@ -24,7 +24,7 @@
     "test:all": "npm run test -- --run && npm run test:e2e"
   },
   "engines": {
-    "node": ">=18.0.0",
+    "node": ">=20.9.0",
     "npm": ">=9.0.0"
   },
   "keywords": [],
