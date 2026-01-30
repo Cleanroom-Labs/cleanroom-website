@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Avoid Next.js guessing the workspace root when multiple lockfiles exist.
+  outputFileTracingRoot: __dirname,
   async headers() {
     return [
       {
