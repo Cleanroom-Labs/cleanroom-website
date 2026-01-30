@@ -76,6 +76,28 @@ Why this is safe to ignore:
 
 The only impact is that cross-project `:ref:` links in subprojects won't resolve during local development. All other documentation features work normally.
 
+### Next.js Build/Dev Failures
+
+**Turbopack panic / "Operation not permitted (os error 1)"**
+
+Some environments block Turbopack from spawning helper processes or binding ports. Use webpack instead:
+
+```bash
+npm run dev   # runs: next dev --webpack
+npm run build # runs: next build --webpack (after building docs)
+```
+
+If you're running Next directly:
+
+```bash
+./node_modules/.bin/next dev --webpack
+./node_modules/.bin/next build --webpack
+```
+
+**Node version errors**
+
+Next.js 16 requires Node.js 20.9+. Check with `node -v` and upgrade if needed.
+
 ## CI/CD Issues
 
 ### Workflow Not Triggering
