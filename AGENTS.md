@@ -11,12 +11,13 @@
 
 ## Build, Test, and Development Commands
 ```bash
-npm run dev          # Start Next.js dev server (webpack; uses existing docs)
+npm run dev          # Start Next.js dev server (webpack)
 npm run dev:clean    # Rebuild docs, then start dev server (webpack)
-npm run build        # Build docs + production Next.js build (webpack)
+npm run build        # Build docs + production build (webpack)
+npm run build:web    # Build Next.js site only (webpack)
 npm run build-docs   # Run scripts/build-docs.mjs only
 npm run start        # Start production server
-npm run lint         # Print lint setup guidance (linting not configured yet)
+npm run lint         # Print lint guidance (not configured)
 npm run test         # Vitest unit tests
 npm run test:e2e     # Playwright E2E tests
 ```
