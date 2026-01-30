@@ -7,9 +7,9 @@
     "doc": "docs"
   },
   "scripts": {
-    "dev": "next dev",
-    "dev:clean": "npm run build-docs:clean && next dev",
-    "build": "npm run build-docs && next build",
+    "dev": "next dev --webpack",
+    "dev:clean": "npm run build-docs:clean && next dev --webpack",
+    "build": "npm run build-docs && next build --webpack",
     "postbuild": "next-sitemap",
     "build-docs": "node scripts/build-docs.mjs",
     "build-docs:clean": "node scripts/build-docs.mjs --clean",
