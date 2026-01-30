@@ -30,9 +30,10 @@ Output is generated to `public/docs/index.html`.
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start dev server (uses existing built docs) |
-| `npm run dev:clean` | Rebuild docs, then start dev server |
-| `npm run build` | Production build (rebuilds docs first) |
+| `npm run dev` | Start dev server (webpack; uses existing built docs) |
+| `npm run dev:clean` | Rebuild docs, then start dev server (webpack) |
+| `npm run build` | Build docs + production site build (webpack) |
+| `npm run build:web` | Build the Next.js site only (webpack; skips docs) |
 | `npm run build-docs` | Build Sphinx documentation only |
 | `npm run start` | Start production server |
 | `npm run lint` | Print lint setup guidance (linting not configured yet) |
