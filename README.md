@@ -5,7 +5,7 @@ Documentation aggregation platform using nested git submodules to manage technic
 ## Prerequisites
 
 - Python 3.9+
-- Node.js 20.9+ (required by Next.js 16)
+- Node.js 20.9+ (required by Next.js 16; see `.nvmrc`)
 - Graphviz (`brew install graphviz` on macOS)
 
 ## Getting Started
