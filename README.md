@@ -123,3 +123,4 @@ See [docs/CI_CD_GUIDE.md](docs/CI_CD_GUIDE.md) for details.
 - [CI/CD Guide](docs/CI_CD_GUIDE.md) - Workflow configuration
 - [Deployment Guide](docs/DEPLOYMENT_GUIDE.md) - Production deployment steps
 - [Troubleshooting](docs/TROUBLESHOOTING.md) - Common issues and solutions
+- [Style Guide](docs/STYLE_GUIDE.md) - Writing conventions and terminology
