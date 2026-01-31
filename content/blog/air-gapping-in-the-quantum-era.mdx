@@ -1,0 +1,77 @@
+---
+title: "Air-Gapping in the Quantum Era"
+date: "2026-01-31"
+author: "Lead Dev"
+tags: ["security", "privacy"]
+excerpt: "Quantum computing threatens current encryption through 'harvest now, decrypt later' attacks. Air-gapping removes the most scalable collection vector: the network itself."
+slug: "air-gapping-in-the-quantum-era"
+readTime: "8 min"
+---
+
+---
+
+## Introduction
+
+Quantum computing will eventually break the encryption that protects most data in transit today. This isn't a distant hypothetical — adversaries are already preparing by collecting encrypted data now, banking on future quantum capabilities to decrypt it later. For organizations handling data with long-term sensitivity, the question isn't whether to prepare, but how.
+
+[Air-gapping](/blog/why-air-gapping) offers something that no encryption algorithm can: it removes the network as a collection vector entirely. Data that never traverses a network can't be passively harvested, regardless of how powerful future decryption becomes.
+
+## Harvest now, decrypt later
+
+The "harvest now, decrypt later" attack is straightforward. An adversary with access to encrypted network traffic — whether through a compromised ISP, a tapped undersea cable, or a breach at a cloud provider — records everything. The data is meaningless today because current computers can't break the encryption in any reasonable timeframe. But quantum computers will change that math.
+
+This threatens two of the three pillars of the CIA triad. Confidentiality is the obvious one — encrypted data becomes readable. But integrity is also at risk: if an adversary can break the cryptographic signatures that verify data hasn't been tampered with, they can potentially forge trusted communications.
+
+The data most at risk has a long shelf life. Medical records remain sensitive for a patient's lifetime. Classified government information may carry decades-long protection periods. Financial data, intellectual property, legal communications, and trade secrets all retain value well beyond the horizon when quantum decryption may become practical.
+
+The scale of the problem is daunting. One organization conducting a [cryptographic inventory](https://www.youtube.com/watch?v=gw29HhUoH_I) found 4,000 custom cryptographic implementations across their systems. At one conversion per day, remediation would take over a decade. As one security professional put it: "You can't secure what you can't see. And you can't fix the crypto you don't know about."
+
+## Why air-gapping mitigates this
+
+The core insight is simple: **data that never touches a network can't be harvested from one.**
+
+The "harvest now, decrypt later" attack depends on passive collection — intercepting encrypted data as it flows across networks. Air-gapping eliminates this vector entirely. When sensitive data moves only on physical media across a physical air gap, an adversary needs physical access to the transfer media, not just network proximity or a compromised router.
+
+This is the sneakernet's security advantage. A USB drive carried across a room is not routable, not interceptable at a network tap, and not stored in some transit log at a cloud provider. The transfer is a discrete physical event that happens in a specific place at a specific time, observable by the people involved.
+
+For environments handling data with decades-long sensitivity — healthcare, defense, legal, financial — air-gapping buys time that no encryption algorithm can guarantee right now. Post-quantum cryptographic standards are still maturing. NIST has published [initial post-quantum algorithms](https://csrc.nist.gov/projects/post-quantum-cryptography), but widespread adoption across the software ecosystem will take years. Air-gapping provides protection during that transition by removing the collection opportunity altogether.
+
+This echoes the thesis from [Why Air-Gapping?](/blog/why-air-gapping): air-gapping collapses continuous, distributed exposure into discrete, auditable events. In the quantum context, "continuous exposure" means every packet of encrypted data flowing across a network is a potential future plaintext. The air gap reduces that to only the data deliberately placed on physical media — a dramatically smaller and more controllable surface.
+
+## How AirGap Transfer supports this
+
+Moving sensitive data across an air gap requires more than just copying files to a USB drive. You need integrity verification, audit trails, and a way to handle transfers that exceed a single drive's capacity. This is what [AirGap Transfer](/blog/introducing-airgap-tools) is built for.
+
+- **Hash verification.** Every file transferred across the air gap is verified with cryptographic hashes. Integrity is confirmed at the point of transfer, not assumed. If something changes between the source system and the air-gapped destination — whether from drive corruption, tampering, or a faulty copy — you'll know before the data enters the secure environment.
+
+- **Manifest tracking.** AirGap Transfer generates JSON manifests documenting exactly what crossed the gap: file names, sizes, hash values, chunk assignments, and verification status. This is the audit trail that makes air-gapped transfers accountable. When compliance requires demonstrating chain of custody for sensitive data, the manifest is the record.
+
+- **Multi-drive chunking.** Sensitive datasets frequently exceed single-drive capacity. Medical imaging archives, ML training data, financial modeling datasets — these routinely run into tens or hundreds of gigabytes. AirGap Transfer splits large transfers across multiple USB drives with integrity preserved across chunks, then reconstructs and verifies on the other side.
+
+- **No network exposure.** The transfer mechanism is physical media, not a network protocol. There's no TCP stream to intercept, no TLS handshake to record, no encrypted packet to store for future decryption. The "harvest now" phase of the attack has nothing to harvest.
+
+## Cryptographic Bill of Materials
+
+Preparing for the quantum era requires knowing what cryptographic algorithms your systems actually use. A Cryptographic Bill of Materials (CBOM) extends the [SBOM concept](/blog/air-gapping-your-software-supply-chain) by inventorying not just your software components, but the specific cryptographic implementations they rely on.
+
+On an air-gapped system, maintaining a CBOM serves two purposes:
+
+1. **Planning.** You know which components need post-quantum replacement and can prioritize based on the sensitivity of the data they protect. A hashing algorithm used for file integrity checks has different urgency than an encryption algorithm protecting patient records at rest.
+
+2. **Crypto agility.** Security professionals use this term to describe systems designed so that cryptographic algorithms can be swapped without rearchitecting the entire application. When post-quantum standards are finalized and implementations are ready, you need a process to get those updates into the air-gapped environment.
+
+The same disciplined transfer workflow that manages your [software dependencies](/blog/air-gapping-your-software-supply-chain) can manage cryptographic updates. Download the new implementations on the connected side, verify them, transfer across the air gap with AirGap Transfer, and deploy to the air-gapped system. The air gap doesn't prevent upgrades — it ensures they happen deliberately, with verification at every step.
+
+## Conclusion
+
+Air-gapping doesn't solve the quantum threat. Nothing does yet — post-quantum cryptography is still being standardized and adopted. But air-gapping removes the most scalable attack vector: passive network collection. Combined with SBOMs and CBOMs for visibility, a deliberate update cadence for cryptographic agility, and tools like AirGap Transfer for verified physical transfers, it's a practical strategy for protecting sensitive data while the rest of the ecosystem catches up.
+
+The organizations most at risk are those handling data that will still be sensitive a decade from now. For them, the question isn't whether quantum computers will eventually break today's encryption — it's whether their data is being collected off the wire right now. Air-gapping ensures it isn't.
+
+For the broader case for air-gapping as a security strategy, see [Why Air-Gapping?](/blog/why-air-gapping). For how air-gapping applies to software supply chain security, see [Air-Gapping Your Software Supply Chain](/blog/air-gapping-your-software-supply-chain). For the full suite of tools, see [Privacy-First Tools for Air-Gapped Environments](/blog/introducing-airgap-tools).
+
+## References
+
+- [Securing AI for the Quantum Era](https://www.youtube.com/watch?v=gw29HhUoH_I)
+- [NIST Post-Quantum Cryptography Project](https://csrc.nist.gov/projects/post-quantum-cryptography)
+- [CISA/NSA ESF: Securing the Software Supply Chain — OSS and SBOMs](https://www.cisa.gov/sites/default/files/2023-12/ESF_SECURING_THE_SOFTWARE_SUPPLY_CHAIN%20RECOMMENDED%20PRACTICES%20FOR%20MANAGING%20OPEN%20SOURCE%20SOFTWARE%20AND%20SOFTWARE%20BILL%20OF%20MATERIALS.pdf) (December 2023)
