@@ -48,6 +48,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the submodule structure, de
 | [docs/CI_CD_GUIDE.md](docs/CI_CD_GUIDE.md) | CI/CD configuration |
 | [docs/DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) | Production deployment steps |
 | [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | Common issues and solutions |
+| [docs/STYLE_GUIDE.md](docs/STYLE_GUIDE.md) | Writing style and terminology conventions |
 
 ## NPM Scripts
 
