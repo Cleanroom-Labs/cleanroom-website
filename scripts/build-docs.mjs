@@ -165,7 +165,7 @@ function buildDocs() {
   log('   Building all subprojects and master docs...', colors.blue);
 
   // Use the Makefile's html target which:
-  // 1. Builds all subprojects (cleanroom-whisper-docs, airgap-deploy-docs, airgap-transfer-docs)
+  // 1. Builds all subprojects (whisper, deploy, transfer)
   // 2. Builds the master documentation
   // 3. Copies subproject builds into master build/html/
   // This ensures consistent theming across all docs
