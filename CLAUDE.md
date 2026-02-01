@@ -15,7 +15,7 @@ See [README.md](README.md) for complete documentation including build commands, 
 
 **Check theme staleness:** `cd cleanroom-theme && npm run check-staleness`
 
-**Generate PDF:** `python -m scripts.generate-pdf`
+**Generate PDF:** `python -m scripts.generate-pdf` (add `--draft` for watermark)
 
 ## Key Concepts
 

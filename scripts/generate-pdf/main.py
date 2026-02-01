@@ -71,6 +71,12 @@ Prerequisites:
         help="Enable verbose output",
     )
 
+    parser.add_argument(
+        "--draft",
+        action="store_true",
+        help="Add a diagonal DRAFT watermark to every page",
+    )
+
     return parser.parse_args()
 
 
@@ -135,6 +141,7 @@ def main() -> int:
             screenshots=screenshots,
             config=config,
             output_path=output_path,
+            draft=args.draft,
         )
         print(f"\nSuccess! PDF generated at: {result_path}")
         return 0
