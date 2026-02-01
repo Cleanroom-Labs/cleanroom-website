@@ -1,3 +1,22 @@
+// Donate page temporarily hidden — redirect to home
+// To re-enable: restore the original page content below and uncomment
+// nav.donate in cleanroom-theme/tokens/navigation.js
+
+export async function getServerSideProps() {
+  return {
+    redirect: {
+      destination: '/',
+      permanent: false,
+    },
+  };
+}
+
+export default function Donate() {
+  return null;
+}
+
+/*
+// Original donate page — uncomment to restore
 import Layout from '../components/Layout';
 
 export default function Donate() {
@@ -45,3 +64,4 @@ export default function Donate() {
     </Layout>
   );
 }
+*/

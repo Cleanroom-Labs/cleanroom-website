@@ -58,12 +58,7 @@ export default function Layout({ children, title, description }) {
               ))}
             </div>
           </div>
-          <Link
-            href={nav.donate.href}
-            className="bg-emerald hover:bg-emerald-light text-white px-4 py-2 rounded-md font-semibold transition-colors"
-          >
-            {nav.donate.text}
-          </Link>
+          {/* Donate button hidden — uncomment nav.donate in cleanroom-theme/tokens/navigation.js to re-enable */}
         </div>
       </nav>
 
