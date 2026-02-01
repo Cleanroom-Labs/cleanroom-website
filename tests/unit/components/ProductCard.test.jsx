@@ -6,14 +6,14 @@ describe('ProductCard', () => {
   const activeProduct = {
     name: 'AirGap Transfer',
     description: 'Secure data transfer for moving files between air-gapped systems.',
-    docsUrl: '/docs/airgap-transfer/readme.html',
+    docsUrl: '/docs/transfer/readme.html',
     status: 'active',
   };
 
   const plannedProduct = {
     name: 'Cleanroom Whisper',
     description: 'Private voice transcription powered by local AI.',
-    docsUrl: '/docs/cleanroom-whisper/readme.html',
+    docsUrl: '/docs/whisper/readme.html',
     status: 'planned',
   };
 

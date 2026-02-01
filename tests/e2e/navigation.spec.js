@@ -108,7 +108,7 @@ test.describe('Navigation', () => {
       });
 
       const href = await productLink.getAttribute('href');
-      expect(href).toContain('/docs/airgap-transfer');
+      expect(href).toContain('/docs/transfer');
     });
   });
 
