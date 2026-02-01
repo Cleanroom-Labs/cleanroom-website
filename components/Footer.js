@@ -20,12 +20,7 @@ export default function Footer() {
             >
               GitHub
             </a>
-            <Link
-              href="/donate"
-              className="hover:text-emerald transition-colors"
-            >
-              Donate
-            </Link>
+            {/* Donate link hidden — re-enable when ready */}
             <a
               href="mailto:lead@cleanroomlabs.dev"
               className="hover:text-emerald transition-colors"

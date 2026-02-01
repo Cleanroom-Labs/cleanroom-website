@@ -124,17 +124,17 @@ test.describe('Navigation', () => {
     });
   });
 
-  test.describe('Donate page navigation', () => {
-    test('can navigate to donate page', async ({ page }) => {
-      await page.goto('/');
-
-      const donateLink = page.getByRole('link', { name: /donate|support/i }).first();
-      if (await donateLink.isVisible()) {
-        await donateLink.click();
-        await expect(page).toHaveURL('/donate');
-      }
-    });
-  });
+  // Donate page navigation — hidden for now, re-enable with donate button
+  // test.describe('Donate page navigation', () => {
+  //   test('can navigate to donate page', async ({ page }) => {
+  //     await page.goto('/');
+  //     const donateLink = page.getByRole('link', { name: /donate|support/i }).first();
+  //     if (await donateLink.isVisible()) {
+  //       await donateLink.click();
+  //       await expect(page).toHaveURL('/donate');
+  //     }
+  //   });
+  // });
 });
 
 test.describe('Navigation - Mobile', () => {
