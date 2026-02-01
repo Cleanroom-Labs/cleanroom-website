@@ -2,7 +2,7 @@
  * Base styles imported from design system
  */
 
-@import '../cleanroom-theme/css/base.css';
+@import '../theme/css/base.css';
 
 @tailwind base;
 @tailwind components;
