@@ -13,8 +13,8 @@ export const products = [
   },
   {
     name: 'Cleanroom Whisper',
-    description: 'Private voice transcription powered by local AI. Your words stay on your machine—no cloud, no network, complete privacy.',
+    description: 'Private voice transcription powered by local AI. No cloud, no network, complete privacy.',
     docsUrl: '/docs/cleanroom-whisper/readme.html',
-    status: 'planned',
+    status: 'active',
   },
 ];
