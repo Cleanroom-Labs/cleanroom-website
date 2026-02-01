@@ -22,7 +22,7 @@ if ! command -v python3 &> /dev/null; then
 fi
 echo "✓ Python 3: $(python3 --version)"
 
-TECH_DOCS_DIR="$ROOT_DIR/cleanroom-technical-docs"
+TECH_DOCS_DIR="$ROOT_DIR/technical-docs"
 VENV_DIR="$TECH_DOCS_DIR/.venv"
 PIP="$VENV_DIR/bin/pip"
 SPHINX_BUILD="$VENV_DIR/bin/sphinx-build"
@@ -44,7 +44,7 @@ cd "$ROOT_DIR"
 git submodule status
 
 # Check technical-docs
-cd cleanroom-technical-docs
+cd technical-docs
 
 CURRENT=$(git describe --exact-match --tags 2>/dev/null || git branch --show-current || echo "DETACHED")
 if [ "$CURRENT" = "DETACHED" ]; then
@@ -78,7 +78,7 @@ echo ""
 echo "## Building All Documentation (Projects + Master)"
 echo ""
 
-cd cleanroom-technical-docs
+cd technical-docs
 
 # Use the Makefile which handles building projects + master + copying
 make html SPHINXBUILD="$SPHINX_BUILD" 2>&1 | tee build.log
@@ -164,15 +164,15 @@ if [ "$WARNINGS" = "true" ]; then
     echo "The build succeeded but produced warnings."
     echo "Review the build.log above and fix warnings before pushing."
     echo ""
-    echo "Build output: cleanroom-technical-docs/build/html/index.html"
+    echo "Build output: technical-docs/build/html/index.html"
     exit 1
 else
     echo "✅ CI test passed successfully!"
     echo ""
     echo "All checks passed. The build is ready for CI/CD."
     echo ""
-    echo "Build output: cleanroom-technical-docs/build/html/index.html"
+    echo "Build output: technical-docs/build/html/index.html"
     echo ""
     echo "To view the documentation:"
-    echo "  open cleanroom-technical-docs/build/html/index.html"
+    echo "  open technical-docs/build/html/index.html"
 fi

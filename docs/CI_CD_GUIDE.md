@@ -7,7 +7,7 @@ This guide explains the CI/CD infrastructure for building and deploying the nest
 The CI/CD system consists of **three workflows** that handle different aspects of the build and deployment process:
 
 ### 1. Build and Deploy (Main Branch)
-**File:** `cleanroom-technical-docs/.github/workflows/sphinx-docs.yml`
+**File:** `technical-docs/.github/workflows/sphinx-docs.yml`
 
 **Triggers:**
 - Push to `main` branch (when docs or submodules change)
@@ -29,7 +29,7 @@ The CI/CD system consists of **three workflows** that handle different aspects o
 - Cross-reference verification
 
 ### 2. Deploy Tagged Release
-**File:** `cleanroom-technical-docs/.github/workflows/deploy-tagged.yml`
+**File:** `technical-docs/.github/workflows/deploy-tagged.yml`
 
 **Triggers:**
 - Git tags matching `v*` (e.g., `v1.0.0`) → Production
@@ -94,7 +94,7 @@ Developer → Create tag (v1.0.0-rc.1) → Preview Deployment
 
 ### Prerequisites
 
-**For cleanroom-technical-docs repository:**
+**For technical-docs repository:**
 
 Node.js:
 - CI uses `.nvmrc` (via `actions/setup-node` `node-version-file`) for the website workflow Node version.
@@ -143,7 +143,7 @@ This simulates the GitHub Actions workflow and will:
 
 ```bash
 # Edit content in project docs
-cd cleanroom-technical-docs/<project>-docs
+cd technical-docs/<project>-docs
 # ... make changes ...
 git add .
 git commit -m "Update documentation"
@@ -155,13 +155,13 @@ git add <project>-docs
 git commit -m "Update docs submodule"
 git push
 
-# This triggers cleanroom-technical-docs CI → deploys to GitHub Pages
+# This triggers technical-docs CI → deploys to GitHub Pages
 ```
 
 **Scenario 2: Update master documentation**
 
 ```bash
-cd cleanroom-technical-docs
+cd technical-docs
 # ... edit source/*.rst ...
 git add source/
 git commit -m "Update master documentation"
@@ -175,12 +175,12 @@ git push
 ```bash
 cd cleanroom-website
 # ... make changes to technical-docs submodule ...
-git add cleanroom-technical-docs
+git add technical-docs
 git commit -m "Update technical docs"
 git push
 
 # Triggers verify-submodules workflow
-# Does NOT automatically deploy (must push from cleanroom-technical-docs)
+# Does NOT automatically deploy (must push from technical-docs)
 ```
 
 ### Deploying a Release
@@ -189,7 +189,7 @@ git push
 
 ```bash
 # Tag the docs
-cd cleanroom-technical-docs/<project>-docs
+cd technical-docs/<project>-docs
 git tag v1.0.0-rc.1
 git push origin v1.0.0-rc.1
 
@@ -202,7 +202,7 @@ git push origin v1.0.0-rc.1
 This triggers:
 - `deploy-tagged.yml` workflow
 - Deploys to **preview** environment
-- URL: `https://cleanroom-labs.github.io/cleanroom-technical-docs/` (with RC badge)
+- URL: `https://cleanroom-labs.github.io/technical-docs/` (with RC badge)
 
 **Step 2: Review Preview**
 
@@ -214,7 +214,7 @@ This triggers:
 
 ```bash
 # Tag the docs (final)
-cd cleanroom-technical-docs/<project>-docs
+cd technical-docs/<project>-docs
 git tag v1.0.0
 git push origin v1.0.0
 
@@ -227,16 +227,16 @@ git push origin v1.0.0
 This triggers:
 - `deploy-tagged.yml` workflow
 - Deploys to **production** environment
-- URL: `https://cleanroom-labs.github.io/cleanroom-technical-docs/`
+- URL: `https://cleanroom-labs.github.io/technical-docs/`
 
 **Step 4: Update Parent Repository**
 
 ```bash
 cd cleanroom-website
-cd cleanroom-technical-docs
+cd technical-docs
 git checkout v1.0.0
 cd ..
-git add cleanroom-technical-docs
+git add technical-docs
 git commit -m "Release v1.0.0 documentation"
 git push
 ```

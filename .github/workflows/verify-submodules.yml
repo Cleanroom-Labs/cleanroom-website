@@ -35,7 +35,7 @@ jobs:
         echo "## Technical Docs Submodule"
         echo ""
 
-        cd cleanroom-technical-docs
+        cd technical-docs
 
         # Check if on branch or tag
         CURRENT=$(git describe --exact-match --tags 2>/dev/null || git branch --show-current || echo "DETACHED")
@@ -46,7 +46,7 @@ jobs:
           echo "   Current commit: $(git rev-parse --short HEAD)"
           echo ""
           echo "   If you need to edit the submodule:"
-          echo "     cd cleanroom-technical-docs"
+          echo "     cd technical-docs"
           echo "     git checkout main  # or a tag"
         else
           echo "✓ Submodule is on: $CURRENT"
@@ -61,7 +61,7 @@ jobs:
         echo "## Nested Submodules (Project Docs)"
         echo ""
 
-        cd cleanroom-technical-docs
+        cd technical-docs
 
         # Check each project submodule
         for submodule in cleanroom-whisper-docs airgap-deploy-docs airgap-transfer-docs; do
@@ -102,7 +102,7 @@ jobs:
         echo "## Available Updates"
         echo ""
 
-        cd cleanroom-technical-docs
+        cd technical-docs
 
         # Fetch latest from remote (if configured)
         for submodule in cleanroom-whisper-docs airgap-deploy-docs airgap-transfer-docs; do

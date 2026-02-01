@@ -15,12 +15,12 @@ fi
 
 echo "Deploying ${PROJECT} ${VERSION} documentation..."
 
-cd cleanroom-technical-docs/${PROJECT}-docs
+cd technical-docs/${PROJECT}-docs
 git fetch --tags
 git checkout $VERSION
 
 cd ../..
-git add cleanroom-technical-docs
+git add technical-docs
 git commit -m "Release ${PROJECT} ${VERSION} documentation"
 git push
 

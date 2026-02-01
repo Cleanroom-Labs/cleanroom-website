@@ -338,7 +338,7 @@ def discover_repos(repo_root: Path, exclude_theme: bool = True) -> list[RepoInfo
             submodule_path = git_file.parent
 
             # Skip cleanroom-theme submodules if requested
-            if exclude_theme and submodule_path.name == "cleanroom-theme":
+            if exclude_theme and submodule_path.name == "theme":
                 continue
 
             repos.append(RepoInfo(path=submodule_path, repo_root=repo_root))

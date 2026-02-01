@@ -959,7 +959,7 @@ class PDFBuilder:
         import sys
 
         # Try to import from theme icons
-        theme_icons = self.config.repo_root / "cleanroom-theme" / "icons"
+        theme_icons = self.config.repo_root / "theme" / "icons"
 
         if theme_icons.exists():
             if str(theme_icons) not in sys.path:

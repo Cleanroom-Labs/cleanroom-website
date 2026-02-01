@@ -11,7 +11,7 @@ This guide consolidates common issues and solutions for the cleanroom-website do
 The Python virtual environment is not set up or activated.
 
 ```bash
-cd cleanroom-technical-docs
+cd technical-docs
 python3 -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
@@ -52,7 +52,7 @@ Build script needs `.mjs` extension or `"type": "module"` in package.json.
 Sphinx detected issues like broken links or missing references. Run locally to see details:
 
 ```bash
-cd cleanroom-technical-docs
+cd technical-docs
 make html
 # Review warnings in output
 ```
@@ -63,11 +63,11 @@ During local development, you may see warnings like:
 
 ```
 WARNING: failed to reach any of the inventories with the following issues:
-intersphinx inventory 'https://cleanroomlabs.dev/docs/airgap-deploy/objects.inv'
+intersphinx inventory 'https://cleanroomlabs.dev/docs/deploy/objects.inv'
 not fetchable due to 404 Client Error
 ```
 
-**This is expected behavior.** The subproject `conf.py` files have intersphinx mappings pointing to URLs that don't exist yet (e.g., `https://cleanroomlabs.dev/docs/airgap-deploy/`). These URLs will work once the documentation is deployed to cleanroomlabs.dev.
+**This is expected behavior.** The subproject `conf.py` files have intersphinx mappings pointing to URLs that don't exist yet (e.g., `https://cleanroomlabs.dev/docs/deploy/`). These URLs will work once the documentation is deployed to cleanroomlabs.dev.
 
 Why this is safe to ignore:
 - **Warnings, not errors** - The build completes successfully
@@ -153,7 +153,7 @@ This is **normal** for submodules - they point to specific commits, not branches
 
 To make changes:
 ```bash
-cd cleanroom-technical-docs/<project>-docs
+cd technical-docs/<project>-docs
 git checkout main
 # Now you can commit and push
 ```
@@ -178,7 +178,7 @@ git checkout main
 The parent repository references have not been updated.
 
 ```bash
-cd cleanroom-technical-docs
+cd technical-docs
 git submodule update --remote <project>-docs
 # Or manually:
 cd <project>-docs
@@ -236,7 +236,7 @@ node scripts/build-docs.mjs
 node scripts/build-docs.mjs
 
 # Check Python environment
-cd cleanroom-technical-docs
+cd technical-docs
 source .venv/bin/activate
 pip list | grep sphinx
 ```

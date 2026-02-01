@@ -48,7 +48,7 @@ class ThemeSubmodule:
     """Information about a theme submodule location."""
     path: Path
     parent_repo: Path
-    submodule_rel_path: str  # Path relative to parent repo (e.g., "source/cleanroom-theme")
+    submodule_rel_path: str  # Path relative to parent repo (e.g., "source/theme")
     current_commit: Optional[str] = None
 
     @property
@@ -296,7 +296,7 @@ def push_ahead_theme_submodules(
     Push any theme submodules that are ahead of their remotes.
 
     This handles the local submodule workflow where changes are made in
-    cleanroom-website/cleanroom-theme and need to be pushed to the local
+    cleanroom-website/theme and need to be pushed to the local
     remote (~/Projects/cleanroom-theme) before syncing to other locations.
 
     Returns True if any were pushed.
@@ -444,7 +444,7 @@ changes, to prevent repository divergence. Use --force to skip this check.
     os.chdir(repo_root)
 
     # Phase 0: Push ahead theme submodules (before resolving target commit)
-    # This handles the local submodule workflow where cleanroom-website/cleanroom-theme
+    # This handles the local submodule workflow where cleanroom-website/theme
     # may have commits that need to be pushed to the local remote first.
     print(Colors.blue("Checking for ahead theme submodules..."))
     theme_submodules_early = discover_theme_submodules(repo_root)

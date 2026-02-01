@@ -4,7 +4,7 @@
  * Build Sphinx documentation with nested submodule support
  *
  * This script:
- * 1. Checks for cleanroom-technical-docs submodule
+ * 1. Checks for technical-docs submodule
  * 2. Verifies Python and Sphinx installation
  * 3. Builds documentation for all projects (subprojects + master) via Makefile
  * 4. Copies output to public/docs
@@ -25,7 +25,7 @@ const shouldClean = args.includes('--clean');
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const rootDir = join(__dirname, '..');
-const technicalDocsDir = join(rootDir, 'cleanroom-technical-docs');
+const technicalDocsDir = join(rootDir, 'technical-docs');
 const outputDir = join(rootDir, 'public', 'docs');
 
 // ANSI color codes
@@ -59,13 +59,13 @@ function checkSubmodule() {
   log('\n📁 Checking for technical-docs submodule...', colors.blue);
   
   if (!existsSync(technicalDocsDir)) {
-    log('❌ cleanroom-technical-docs submodule not found', colors.red);
+    log('❌ technical-docs submodule not found', colors.red);
     log('   Run: git submodule update --init --recursive', colors.yellow);
     return false;
   }
   
   if (!existsSync(join(technicalDocsDir, 'source'))) {
-    log('❌ cleanroom-technical-docs appears incomplete', colors.red);
+    log('❌ technical-docs appears incomplete', colors.red);
     log('   Run: git submodule update --init --recursive', colors.yellow);
     return false;
   }

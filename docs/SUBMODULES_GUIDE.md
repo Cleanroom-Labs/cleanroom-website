@@ -8,7 +8,7 @@ This repository uses a three-level nested submodule architecture for documentati
 
 ```
 cleanroom-website/                # Level 1
-└── cleanroom-technical-docs/     # Level 2 (submodule)
+└── technical-docs/     # Level 2 (submodule)
     ├── project-1-docs/           # Level 3 (submodule)
     ├── project-2-docs/           # Level 3 (submodule)
     └── project-3-docs/           # Level 3 (submodule)
@@ -53,7 +53,7 @@ git submodule update --recursive --remote
 
 1. Navigate to submodule:
    ```bash
-   cd cleanroom-technical-docs/<project>-docs
+   cd technical-docs/<project>-docs
    ```
 
 2. Checkout a branch (not detached HEAD):
@@ -76,7 +76,7 @@ git submodule update --recursive --remote
    git push
    
    cd ..
-   git add cleanroom-technical-docs
+   git add technical-docs
    git commit -m "Update reference"
    git push
    ```
@@ -85,7 +85,7 @@ git submodule update --recursive --remote
 
 1. Tag documentation:
    ```bash
-   cd cleanroom-technical-docs/<project>-docs
+   cd technical-docs/<project>-docs
    git tag v1.0.0
    git push origin v1.0.0
    ```

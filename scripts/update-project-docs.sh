@@ -16,7 +16,7 @@ fi
 echo "Updating ${PROJECT} documentation to ${VERSION}..."
 
 # Navigate to technical docs
-cd cleanroom-technical-docs
+cd technical-docs
 
 # Navigate to project submodule
 cd ${PROJECT}-docs
@@ -38,7 +38,7 @@ git commit -m "Update ${PROJECT} docs to ${VERSION}"
 cd ..
 
 # Commit the technical-docs update
-git add cleanroom-technical-docs
+git add technical-docs
 git commit -m "Update technical docs (${PROJECT} ${VERSION})"
 
 echo "✓ Submodules updated successfully"
