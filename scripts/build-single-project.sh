@@ -14,7 +14,7 @@ fi
 
 echo "Building ${PROJECT} documentation..."
 
-cd cleanroom-technical-docs/${PROJECT}-docs
+cd technical-docs/${PROJECT}-docs
 
 # Create venv if it doesn't exist
 if [ ! -d ".venv" ]; then

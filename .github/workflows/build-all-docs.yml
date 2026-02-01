@@ -4,13 +4,13 @@ on:
   push:
     branches: [main]
     paths:
-      - 'cleanroom-technical-docs/**'
+      - 'technical-docs/**'
       - 'scripts/**'
       - '.github/workflows/build-all-docs.yml'
   pull_request:
     branches: [main]
     paths:
-      - 'cleanroom-technical-docs/**'
+      - 'technical-docs/**'
   workflow_dispatch:
 
 jobs:
@@ -34,12 +34,12 @@ jobs:
 
     - name: Install Python dependencies
       run: |
-        cd cleanroom-technical-docs
+        cd technical-docs
         pip install -r requirements.txt
 
     - name: Build all project documentation
       run: |
-        cd cleanroom-technical-docs
+        cd technical-docs
 
         echo "# Building All Project Documentation"
         echo ""
@@ -67,7 +67,7 @@ jobs:
 
     - name: Build master documentation
       run: |
-        cd cleanroom-technical-docs
+        cd technical-docs
 
         echo "## Building Master Documentation"
         make html 2>&1 | tee build.log
@@ -109,14 +109,14 @@ jobs:
         mkdir -p public/docs
 
         # Copy master docs
-        cp -r cleanroom-technical-docs/build/html/* public/docs/
+        cp -r technical-docs/build/html/* public/docs/
 
         # Optionally copy individual project docs
         # (useful if you want direct links to project docs)
         # mkdir -p public/docs/projects
-        # cp -r cleanroom-technical-docs/cleanroom-whisper-docs/build/html public/docs/projects/whisper
-        # cp -r cleanroom-technical-docs/airgap-deploy-docs/build/html public/docs/projects/deploy
-        # cp -r cleanroom-technical-docs/airgap-transfer-docs/build/html public/docs/projects/transfer
+        # cp -r technical-docs/cleanroom-whisper-docs/build/html public/docs/projects/whisper
+        # cp -r technical-docs/airgap-deploy-docs/build/html public/docs/projects/deploy
+        # cp -r technical-docs/airgap-transfer-docs/build/html public/docs/projects/transfer
 
         echo "✓ Documentation copied to public/docs/"
 

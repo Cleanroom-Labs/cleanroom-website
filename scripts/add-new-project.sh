@@ -16,7 +16,7 @@ fi
 echo "Adding new project: ${PROJECT}..."
 
 # Navigate to technical docs
-cd cleanroom-technical-docs
+cd technical-docs
 
 # Add as submodule
 git submodule add $DOCS_REPO ${PROJECT}-docs
@@ -32,13 +32,13 @@ git commit -m "Add ${PROJECT} documentation as submodule"
 cd ..
 
 # Commit technical-docs update
-git add cleanroom-technical-docs
+git add technical-docs
 git commit -m "Add ${PROJECT} to technical documentation"
 
 echo "✓ Project added successfully"
 echo ""
 echo "Next steps:"
-echo "  1. Update cleanroom-technical-docs/source/index.rst to include ${PROJECT}"
+echo "  1. Update technical-docs/source/index.rst to include ${PROJECT}"
 echo "  2. Configure intersphinx in ${PROJECT}-docs/source/conf.py"
 echo "  3. Test build: npm run build-docs"
 echo "  4. Push changes: git push --recurse-submodules=on-demand"

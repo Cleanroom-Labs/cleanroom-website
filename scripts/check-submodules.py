@@ -75,10 +75,10 @@ def main() -> int:
 
     # Determine repo root
     repo_root = Path(__file__).parent.parent.resolve()
-    technical_docs = repo_root / "cleanroom-technical-docs"
+    technical_docs = repo_root / "technical-docs"
 
     if not technical_docs.exists():
-        print(f"{Colors.red('Error')}: cleanroom-technical-docs not found")
+        print(f"{Colors.red('Error')}: technical-docs not found")
         return 1
 
     print("Checking submodule health...")
@@ -113,10 +113,10 @@ def main() -> int:
 
     print("")
     print("To fix detached HEAD state:")
-    print("  cd cleanroom-technical-docs/<project>-docs")
+    print("  cd technical-docs/<project>-docs")
     print("  git checkout <branch-or-tag>")
     print("  cd ../..")
-    print("  git add cleanroom-technical-docs")
+    print("  git add technical-docs")
     print('  git commit -m "Update submodule reference"')
 
     return 0 if all_healthy else 1

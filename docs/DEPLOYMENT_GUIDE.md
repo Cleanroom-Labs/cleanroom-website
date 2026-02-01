@@ -13,7 +13,7 @@ This guide covers deploying the documentation to GitHub Pages.
 ```
 GitHub Organization
 ├── cleanroom-website           # Parent repository
-├── cleanroom-technical-docs    # Documentation aggregator
+├── technical-docs    # Documentation aggregator
 └── <project>-docs              # Individual project docs (multiple)
 ```
 
@@ -32,10 +32,10 @@ git push -u origin main
 git push --tags
 ```
 
-### Update and push cleanroom-technical-docs
+### Update and push technical-docs
 
 ```bash
-cd cleanroom-technical-docs
+cd technical-docs
 
 # Update .gitmodules to use GitHub URLs
 # [submodule "<project>-docs"]
@@ -45,7 +45,7 @@ cd cleanroom-technical-docs
 git submodule sync --recursive
 git add .gitmodules
 git commit -m "Update submodule URLs to GitHub"
-git remote add origin git@github.com:<org>/cleanroom-technical-docs.git
+git remote add origin git@github.com:<org>/technical-docs.git
 git push -u origin main
 ```
 
@@ -64,7 +64,7 @@ git push -u origin main
 
 ## Step 3: Configure GitHub Pages
 
-1. Navigate to `cleanroom-technical-docs` repository settings
+1. Navigate to `technical-docs` repository settings
 2. Go to **Settings → Pages**
 3. Set **Source** to "GitHub Actions"
 4. Under **Settings → Actions → General**, set workflow permissions to "Read and write"
@@ -72,14 +72,14 @@ git push -u origin main
 ## Step 4: Trigger First Deployment
 
 ```bash
-cd cleanroom-technical-docs
+cd technical-docs
 git commit --allow-empty -m "Trigger initial deployment"
 git push
 ```
 
 Monitor the build in the Actions tab. Documentation will be available at:
 ```
-https://<org>.github.io/cleanroom-technical-docs/
+https://<org>.github.io/technical-docs/
 ```
 
 ## Deploying Updates
@@ -88,7 +88,7 @@ https://<org>.github.io/cleanroom-technical-docs/
 
 ```bash
 # Make changes in project docs
-cd cleanroom-technical-docs/<project>-docs
+cd technical-docs/<project>-docs
 git checkout main
 # ... edit files ...
 git add . && git commit -m "Update" && git push
@@ -101,7 +101,7 @@ cd .. && git add <project>-docs && git commit -m "Update docs" && git push
 
 ```bash
 # Tag project docs
-cd cleanroom-technical-docs/<project>-docs
+cd technical-docs/<project>-docs
 git tag v1.0.0 && git push origin v1.0.0
 
 # Tag technical-docs
@@ -115,7 +115,7 @@ git tag v1.0.0 && git push origin main && git push origin v1.0.0
 
 ```bash
 # Preferred: revert the last deployment commit
-cd cleanroom-technical-docs
+cd technical-docs
 git revert HEAD
 git push
 

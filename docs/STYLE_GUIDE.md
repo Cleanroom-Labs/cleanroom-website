@@ -10,7 +10,7 @@ Writing conventions and terminology standards for the Cleanroom website, blog po
 | General adjective | "air-gapped" (hyphenated) | "an air-gapped system" |
 | General verb/gerund | "air-gapping" (hyphenated) | "why air-gapping matters" |
 | Product names | "AirGap" (CamelCase) | "AirGap Transfer", "AirGap Deploy" |
-| CLI commands/paths | lowercase hyphenated | `airgap-transfer pack`, `/docs/airgap-deploy/` |
+| CLI commands/paths | lowercase hyphenated | `airgap-transfer pack`, `/docs/deploy/` |
 
 **Never use** "airgapped" or "airgap" (single word) when referring to the general concept. The single-word form is reserved for product identifiers, slugs, and CLI commands.
 
@@ -18,7 +18,7 @@ Writing conventions and terminology standards for the Cleanroom website, blog po
 
 Tone varies by context:
 
-- **Technical documentation** (`cleanroom-technical-docs`): Technical and direct. Avoid marketing language.
+- **Technical documentation** (`technical-docs`): Technical and direct. Avoid marketing language.
 - **Blog posts**: Less formal tone is fine. Conversational writing is encouraged.
 - **Top-level pages**: Marketing language is acceptable where appropriate, but keep it grounded.
 

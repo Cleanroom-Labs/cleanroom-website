@@ -13,7 +13,7 @@ See [README.md](README.md) for complete documentation including build commands, 
 
 **Sync theme:** `./scripts/sync-theme.py`
 
-**Check theme staleness:** `cd cleanroom-theme && npm run check-staleness`
+**Check theme staleness:** `cd theme && npm run check-staleness`
 
 **Generate PDF:** `python -m scripts.generate-pdf` (add `--draft` for watermark)
 
@@ -36,8 +36,8 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the submodule structure, de
 | `scripts/push-submodules.py` | Propagate commits through nested submodules |
 | `scripts/generate-pdf/` | PDF report generator for website content |
 | `scripts/submodule_visualizer/` | Interactive visualization of submodule relationships |
-| `cleanroom-technical-docs/source/conf.py` | Master Sphinx configuration |
-| `cleanroom-technical-docs/CLAUDE.md` | Guidance for working with Sphinx docs |
+| `technical-docs/source/conf.py` | Master Sphinx configuration |
+| `technical-docs/CLAUDE.md` | Guidance for working with Sphinx docs |
 
 ## Detailed Documentation
 
