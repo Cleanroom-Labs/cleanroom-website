@@ -55,7 +55,7 @@ else
 fi
 
 # Check nested submodules
-for submodule in cleanroom-whisper-docs airgap-deploy-docs airgap-transfer-docs; do
+for submodule in whisper deploy transfer; do
     if [ ! -e "$submodule/.git" ]; then
         echo "❌ ERROR: Submodule $submodule not initialized"
         exit 1
@@ -119,7 +119,7 @@ echo ""
 echo "## Verifying Project Documentation"
 echo ""
 
-for project in cleanroom-whisper airgap-deploy airgap-transfer; do
+for project in whisper deploy transfer; do
     if [ ! -f build/html/$project/index.html ]; then
         echo "❌ ERROR: $project docs not found in master build"
         exit 1
@@ -134,23 +134,13 @@ echo ""
 
 cd build/html
 
-if grep -r "cleanroom-whisper" . >/dev/null 2>&1; then
-    echo "✓ cleanroom-whisper references found"
-else
-    echo "⚠️  No references to cleanroom-whisper found"
-fi
-
-if grep -r "airgap-deploy" . >/dev/null 2>&1; then
-    echo "✓ airgap-deploy references found"
-else
-    echo "⚠️  No references to airgap-deploy found"
-fi
-
-if grep -r "airgap-transfer" . >/dev/null 2>&1; then
-    echo "✓ airgap-transfer references found"
-else
-    echo "⚠️  No references to airgap-transfer found"
-fi
+for project in whisper deploy transfer; do
+    if grep -r "$project" . >/dev/null 2>&1; then
+        echo "✓ $project references found"
+    else
+        echo "⚠️  No references to $project found"
+    fi
+done
 
 cd "$ROOT_DIR"
 
