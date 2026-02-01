@@ -22,6 +22,11 @@ const nextConfig = {
         destination: '/docs/index.html',
         permanent: true,
       },
+      {
+        source: '/donate',
+        destination: '/',
+        permanent: false,
+      },
     ];
   },
 };
