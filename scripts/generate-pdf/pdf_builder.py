@@ -27,8 +27,9 @@ from extractors.base import ContentSection
 class PDFBuilder:
     """Build PDF from extracted content using single-document approach."""
 
-    def __init__(self, config: Optional[Config] = None):
+    def __init__(self, config: Optional[Config] = None, draft: bool = False):
         self.config = config or default_config
+        self.draft = draft
 
         if not WEASYPRINT_AVAILABLE:
             raise ImportError(
@@ -126,11 +127,37 @@ class PDFBuilder:
         </html>
         """
 
+    def _get_draft_watermark_css(self) -> str:
+        """Generate CSS for DRAFT watermark on all pages.
+
+        Uses position: fixed which WeasyPrint repeats on every printed page.
+        """
+        if not self.draft:
+            return ""
+
+        return """
+        body::after {
+            content: "DRAFT";
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 120pt;
+            font-weight: 700;
+            color: rgba(239, 68, 68, 0.08);
+            pointer-events: none;
+            z-index: 9999;
+            letter-spacing: 0.2em;
+            white-space: nowrap;
+        }
+        """
+
     def _get_base_css(self) -> str:
         """Generate base CSS for all pages with reduced whitespace."""
         colors = self.config.colors
         fonts = self.config.fonts
         layout = self.config.page_layout
+        draft_css = self._get_draft_watermark_css()
 
         return f"""
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -462,6 +489,8 @@ class PDFBuilder:
         .need_container svg.feather {{
             display: none !important;
         }}
+
+        {draft_css}
         """
 
     def _get_cover_css(self) -> str:
@@ -1195,7 +1224,8 @@ def build_pdf(
     screenshots: dict[str, Path],
     config: Optional[Config] = None,
     output_path: Optional[Path] = None,
+    draft: bool = False,
 ) -> Path:
     """Convenience function to build PDF."""
-    builder = PDFBuilder(config)
+    builder = PDFBuilder(config, draft=draft)
     return builder.build(blog_sections, docs_sections, screenshots, output_path)

@@ -39,6 +39,9 @@ python -m scripts.generate-pdf --output custom-output.pdf
 # Skip screenshots (use cached or no screenshots)
 python -m scripts.generate-pdf --skip-screenshots
 
+# Add DRAFT watermark to every page
+python -m scripts.generate-pdf --draft
+
 # Verbose output
 python -m scripts.generate-pdf --verbose
 
@@ -68,6 +71,7 @@ python -m scripts.generate-pdf
 | `--output PATH` | Output PDF location (default: `output/cleanroom-labs.pdf`) |
 | `--server-url URL` | Dev server URL for screenshots (default: `http://localhost:3000`) |
 | `--skip-screenshots` | Use existing screenshots or skip screenshot capture |
+| `--draft` | Add a diagonal "DRAFT" watermark to every page |
 | `--verbose, -v` | Enable verbose output |
 | `--help` | Show help message |
 

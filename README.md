@@ -80,6 +80,7 @@ python -m scripts.generate-pdf
 # Options
 python -m scripts.generate-pdf --output custom-output.pdf
 python -m scripts.generate-pdf --skip-screenshots  # Use cached screenshots
+python -m scripts.generate-pdf --draft              # Add DRAFT watermark
 ```
 
 The PDF includes:
