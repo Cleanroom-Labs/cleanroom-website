@@ -14,7 +14,7 @@
  */
 
 import { execSync } from 'child_process';
-import { existsSync } from 'fs';
+import { existsSync, readdirSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
@@ -27,6 +27,26 @@ const __dirname = dirname(__filename);
 const rootDir = join(__dirname, '..');
 const technicalDocsDir = join(rootDir, 'technical-docs');
 const outputDir = join(rootDir, 'public', 'docs');
+const venvDir = join(technicalDocsDir, '.venv');
+let venvBinDir = null;
+
+// Find the actual bin directory inside a venv. Some Python installations
+// (e.g. Python 3.14 invoked from within another venv) create a nested
+// subdirectory like .venv/<dirname>/bin/ instead of .venv/bin/.
+function findVenvBin(dir) {
+  const scriptsName = process.platform === 'win32' ? 'Scripts' : 'bin';
+  const direct = join(dir, scriptsName);
+  if (existsSync(direct)) return direct;
+  try {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      if (entry.isDirectory()) {
+        const nested = join(dir, entry.name, scriptsName);
+        if (existsSync(nested)) return nested;
+      }
+    }
+  } catch {}
+  return null;
+}
 
 // ANSI color codes
 const colors = {
@@ -90,18 +110,22 @@ function checkPython() {
 
 function setupVirtualEnv() {
   log('\n🔧 Setting up Python virtual environment...', colors.blue);
-  
-  const venvDir = join(technicalDocsDir, '.venv');
-  
+
   if (!existsSync(venvDir)) {
     log('Creating virtual environment...', colors.blue);
-    const result = exec('python3 -m venv .venv', technicalDocsDir);
+    const result = exec(`python3 -m venv "${venvDir}"`, technicalDocsDir);
     if (!result.success) {
       log('❌ Failed to create virtual environment', colors.red);
       return false;
     }
   }
-  
+
+  venvBinDir = findVenvBin(venvDir);
+  if (!venvBinDir) {
+    log('❌ Could not locate bin directory inside virtual environment', colors.red);
+    return false;
+  }
+
   log('✓ Virtual environment ready', colors.green);
   return true;
 }
@@ -109,13 +133,7 @@ function setupVirtualEnv() {
 function installDependencies() {
   log('\n📦 Installing Sphinx dependencies...', colors.blue);
   
-  const activateCmd = process.platform === 'win32' 
-    ? '.venv\\Scripts\\activate' 
-    : 'source .venv/bin/activate';
-  
-  const pipCmd = process.platform === 'win32'
-    ? '.venv\\Scripts\\pip'
-    : '.venv/bin/pip';
+  const pipCmd = join(venvBinDir, 'pip');
   
   const result = exec(
     `${pipCmd} install -q -r requirements.txt`,
@@ -152,10 +170,7 @@ function buildDocs() {
   // 3. Copies subproject builds into master build/html/
   // This ensures consistent theming across all docs
 
-  // Use absolute path so it works when Makefile cds into subdirectories
-  const sphinxBuild = process.platform === 'win32'
-    ? join(technicalDocsDir, '.venv', 'Scripts', 'sphinx-build')
-    : join(technicalDocsDir, '.venv', 'bin', 'sphinx-build');
+  const sphinxBuild = join(venvBinDir, 'sphinx-build');
 
   const result = exec(
     `make html SPHINXBUILD="${sphinxBuild}"`,
