@@ -1,6 +1,6 @@
 [submodule "cleanroom-theme"]
 	path = theme
-	url = git@github.com:CleanroomLead/cleanroom-theme.git
+	url = git@github.com:Cleanroom-Labs/cleanroom-theme.git
 [submodule "cleanroom-technical-docs"]
 	path = technical-docs
-	url = git@github.com:CleanroomLead/cleanroom-technical-docs.git
+	url = git@github.com:Cleanroom-Labs/cleanroom-technical-docs.git
