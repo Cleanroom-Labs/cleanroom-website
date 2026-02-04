@@ -1,6 +1,6 @@
 [submodule "cleanroom-theme"]
 	path = common
-	url = git@github.com:Cleanroom-Labs/cleanroom-website-common.git
+	url = https://github.com/Cleanroom-Labs/cleanroom-website-common.git
 [submodule "cleanroom-technical-docs"]
 	path = technical-docs
-	url = git@github.com:Cleanroom-Labs/cleanroom-technical-docs.git
+	url = https://github.com/Cleanroom-Labs/cleanroom-technical-docs.git
