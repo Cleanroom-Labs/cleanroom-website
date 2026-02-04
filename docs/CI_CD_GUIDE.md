@@ -15,7 +15,7 @@ The CI/CD system consists of **three workflows** that handle different aspects o
 - Manual workflow dispatch
 
 **What it does:**
-1. Checks out repository with all nested submodules (requires `SUBMODULE_PAT` secret)
+1. Checks out repository with all nested submodules
 2. Verifies submodule initialization
 3. Builds documentation with `DOCS_VERSION=dev` via `make html`
 4. Checks for warnings via `make html-check`
@@ -117,12 +117,7 @@ Developer → Create tag (v1.0.0) → Stable Deployment
 
 **For technical-docs repository:**
 
-1. **Configure `SUBMODULE_PAT` secret:**
-   - Go to Settings → Secrets and variables → Actions
-   - Add a repository secret named `SUBMODULE_PAT`
-   - Value: a GitHub Personal Access Token with `repo` scope (needed to check out private submodules)
-
-2. **Enable GitHub Pages:**
+1. **Enable GitHub Pages:**
    - Go to Settings → Pages
    - Source: "GitHub Actions"
    - This is required for both dev deployment and tagged releases
@@ -282,9 +277,6 @@ The workflows use these environment variables:
 - `GITHUB_SHA` - Commit SHA
 - `GITHUB_REF_NAME` - Branch/tag name
 - `GITHUB_EVENT_NAME` - Trigger event (push, pull_request, etc.)
-
-**Secrets:**
-- `SUBMODULE_PAT` - GitHub Personal Access Token with `repo` scope (required for private submodule checkout)
 
 To add additional environment variables:
 1. Repository Settings → Secrets and variables → Actions
