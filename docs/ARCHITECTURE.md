@@ -20,7 +20,7 @@ A three-level nested submodule architecture:
 cleanroom-website/                    # Parent repository
 ├── technical-docs/                   # Submodule (aggregates projects)
 │   ├── <project>/                    # Submodules (project docs)
-│   ├── common/                       # Submodule (shared theme & build tools)
+│   ├── common/                       # Submodule (shared design system & build tools)
 │   └── source/                       # Master documentation
 └── scripts/                          # Helper scripts
 ```
@@ -43,11 +43,11 @@ For operational details, see [technical-docs/README.md](../technical-docs/README
 - Requires submodule knowledge
 - More complex than monorepo
 
-### Shared Theme via Inheritance
+### Shared Configuration via Inheritance
 
 Projects import shared configuration from `common/theme_config.py` (at each repo's root level), allowing:
-- Single source of truth for styling
-- Easy global updates
+- Single source of truth for styling, icons, and Sphinx settings
+- Easy global updates via `sync-common.py`
 - Project-specific overrides when needed
 
 ### Tag-Based Deployment
@@ -65,7 +65,7 @@ Releases use git tags:
 
 ### Separate Repos (No Submodules)
 - ❌ No centralized aggregation
-- ❌ Hard to ensure consistent theme
+- ❌ Hard to ensure consistent styling
 - ❌ No dual-homing capability
 
 ### Sparse Checkout
@@ -106,12 +106,12 @@ cleanroom-website/                                    # This repo
 | Submodule | Purpose |
 |-----------|---------|
 | `technical-docs` | Aggregates all project documentation into a single Sphinx build. |
-| `common` | Shared theme, styling, and build tools used by all documentation projects. |
+| `common` | Shared design system, Sphinx configuration, product icons, and build tools used by the website and all documentation projects. |
 | `whisper` | Documentation for Cleanroom Whisper, an offline audio transcription application. |
 | `deploy` | Documentation for AirGap Deploy, a tool for preparing software deployments for air-gapped systems. |
 | `transfer` | Documentation for AirGap Transfer, a tool for transferring files to air-gapped systems. |
 
-The `common` submodule appears at each repo's root level so that each project can build its documentation independently with consistent styling.
+The `common` submodule appears at each repo's root level so that each project can build its documentation independently with consistent configuration and styling.
 
 ## References
 
