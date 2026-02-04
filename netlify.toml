@@ -1,5 +1,5 @@
 [build]
-  command = "git submodule update --init --recursive && sudo apt-get install -y graphviz && npm run build"
+  command = "git submodule update --init --recursive && npm run build"
   publish = ".next"
 
 [build.environment]
