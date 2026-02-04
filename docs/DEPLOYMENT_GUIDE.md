@@ -10,11 +10,13 @@ This guide covers deploying the documentation to GitHub Pages.
 
 ## Deployment Overview
 
+The `sphinx-docs.yml` workflow builds and verifies documentation but does not deploy. Tagged releases via `deploy-tagged.yml` handle deployment to GitHub Pages.
+
 ```
 GitHub Organization
 ├── cleanroom-website           # Parent repository
-├── technical-docs    # Documentation aggregator
-└── <project>-docs              # Individual project docs (multiple)
+├── technical-docs              # Documentation aggregator
+└── <project>                   # Individual project docs (multiple)
 ```
 
 ## Step 1: Create GitHub Repositories
@@ -26,8 +28,8 @@ Create repositories for each component. Do not initialize them (we're pushing ex
 ### Push project documentation repositories first
 
 ```bash
-cd <project>-docs
-git remote add origin git@github.com:<org>/<project>-docs.git
+cd <project>
+git remote add origin git@github.com:<org>/<project>.git
 git push -u origin main
 git push --tags
 ```
@@ -38,9 +40,9 @@ git push --tags
 cd technical-docs
 
 # Update .gitmodules to use GitHub URLs
-# [submodule "<project>-docs"]
-#     path = <project>-docs
-#     url = git@github.com:<org>/<project>-docs.git
+# [submodule "<project>"]
+#     path = <project>
+#     url = git@github.com:<org>/<project>.git
 
 git submodule sync --recursive
 git add .gitmodules
@@ -88,25 +90,25 @@ https://<org>.github.io/technical-docs/
 
 ```bash
 # Make changes in project docs
-cd technical-docs/<project>-docs
+cd technical-docs/<project>
 git checkout main
 # ... edit files ...
 git add . && git commit -m "Update" && git push
 
 # Update parent references
-cd .. && git add <project>-docs && git commit -m "Update docs" && git push
+cd .. && git add <project> && git commit -m "Update docs" && git push
 ```
 
 ### Tagged releases
 
 ```bash
 # Tag project docs
-cd technical-docs/<project>-docs
+cd technical-docs/<project>
 git tag v1.0.0 && git push origin v1.0.0
 
 # Tag technical-docs
 cd ..
-git add <project>-docs
+git add <project>
 git commit -m "Release v1.0.0"
 git tag v1.0.0 && git push origin main && git push origin v1.0.0
 ```

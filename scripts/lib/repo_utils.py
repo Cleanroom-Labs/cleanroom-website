@@ -323,7 +323,7 @@ def discover_repos(repo_root: Path, exclude_theme: bool = True) -> list[RepoInfo
 
     Args:
         repo_root: Root directory of the main repository
-        exclude_theme: If True, exclude cleanroom-theme submodules (default)
+        exclude_theme: If True, exclude common (cleanroom-website-common) submodules (default)
     """
     repos = [RepoInfo(path=repo_root, repo_root=repo_root)]
 
@@ -337,8 +337,8 @@ def discover_repos(repo_root: Path, exclude_theme: bool = True) -> list[RepoInfo
         if git_file.is_file():
             submodule_path = git_file.parent
 
-            # Skip cleanroom-theme submodules if requested
-            if exclude_theme and submodule_path.name == "theme":
+            # Skip common (cleanroom-website-common) submodules if requested
+            if exclude_theme and submodule_path.name == "common":
                 continue
 
             repos.append(RepoInfo(path=submodule_path, repo_root=repo_root))

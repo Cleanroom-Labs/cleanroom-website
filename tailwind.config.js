@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-const themePreset = require('./theme/tailwind/preset');
+const themePreset = require('./common/tailwind/preset');
 
 module.exports = {
   presets: [themePreset],

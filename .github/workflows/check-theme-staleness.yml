@@ -4,13 +4,13 @@ on:
   push:
     branches: [main]
     paths:
-      - 'theme/tokens/**'
-      - 'theme/scripts/build-*.js'
+      - 'common/tokens/**'
+      - 'common/scripts/build-*.js'
   pull_request:
     branches: [main]
     paths:
-      - 'theme/tokens/**'
-      - 'theme/scripts/build-*.js'
+      - 'common/tokens/**'
+      - 'common/scripts/build-*.js'
   workflow_dispatch:
 
 jobs:
@@ -30,7 +30,7 @@ jobs:
 
     - name: Check for stale generated files
       id: staleness
-      working-directory: theme
+      working-directory: common
       run: |
         npm run check-staleness 2>&1 | tee staleness-output.txt
         echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
@@ -38,7 +38,7 @@ jobs:
     - name: Read staleness output
       id: read-output
       if: steps.staleness.outputs.exit_code != '0'
-      working-directory: theme
+      working-directory: common
       run: |
         {
           echo 'output<<EOF'
@@ -70,7 +70,7 @@ jobs:
 
           1. Navigate to the theme directory:
              \`\`\`bash
-             cd theme
+             cd common
              \`\`\`
 
           2. Regenerate the files:
@@ -132,5 +132,5 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Generated Sphinx theme files are out of sync with design tokens." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Run \`npm run build\` in \`theme/\` to regenerate." >> $GITHUB_STEP_SUMMARY
+          echo "Run \`npm run build\` in \`common/\` to regenerate." >> $GITHUB_STEP_SUMMARY
         fi

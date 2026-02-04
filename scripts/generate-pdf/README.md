@@ -13,7 +13,7 @@ Generate a comprehensive PDF report from the Cleanroom Labs website content, inc
 
 ## Prerequisites
 
-- Python 3.9+
+- Python 3.14+
 - Built documentation (`npm run build-docs`)
 - Running dev server (`npm run dev`) for screenshots
 
@@ -108,7 +108,7 @@ scripts/generate-pdf/
 
 ### Colors
 
-Colors are sourced from `cleanroom-theme/tokens/colors.js` and defined in `config.py`:
+Colors are sourced from `common/tokens/colors.js` and defined in `config.py`:
 
 - **Cover page**: Dark background (`#030712`), emerald accents (`#10b981`)
 - **Content pages**: Light background (`#ffffff`), dark text (`#1e293b`)

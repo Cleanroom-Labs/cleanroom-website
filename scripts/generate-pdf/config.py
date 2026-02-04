@@ -1,7 +1,7 @@
 """
 Configuration and design tokens for PDF generation.
 
-Design tokens sourced from cleanroom-theme/tokens/colors.js
+Design tokens sourced from common/tokens/colors.js
 """
 
 from dataclasses import dataclass, field
@@ -30,7 +30,7 @@ class Paths:
 
 @dataclass
 class Colors:
-    """Design tokens from cleanroom-theme/tokens/colors.js"""
+    """Design tokens from common/tokens/colors.js"""
 
     # Backgrounds
     slate_950: str = "#030712"  # Deepest background (hero, cards)

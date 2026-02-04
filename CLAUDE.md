@@ -11,9 +11,9 @@ See [README.md](README.md) for complete documentation including build commands, 
 
 **Check submodules:** `./scripts/check-submodules.py`
 
-**Sync theme:** `./scripts/sync-theme.py`
+**Sync common:** `./scripts/sync-common.py`
 
-**Check theme staleness:** `cd theme && npm run check-staleness`
+**Check theme staleness:** `cd common && npm run check-staleness`
 
 **Generate PDF:** `python -m scripts.generate-pdf` (add `--draft` for watermark)
 
@@ -22,7 +22,7 @@ See [README.md](README.md) for complete documentation including build commands, 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the submodule structure, design rationale, and submodule descriptions.
 
 - **Warnings policy**: Treat Sphinx warnings as failures, except intersphinx inventory fetch warnings which may appear when offline or before deployment
-- **Local submodules**: All submodules point to local directories (e.g., `~/Projects/cleanroom-theme`), not GitHub. The main website repo has no remote.
+- **Submodule URLs**: Submodules point to GitHub (e.g., `git@github.com:Cleanroom-Labs/cleanroom-website-common.git`).
 - **Next.js build mode**: Use webpack (`--webpack`) for `dev`/`build` to avoid Turbopack panics in restricted environments.
 - **Runtime requirement**: Next.js 16 requires Node.js 20.9+.
 - **CI Node version**: GitHub Actions reads the Node version from `.nvmrc`.
@@ -32,7 +32,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the submodule structure, de
 | File | Purpose |
 |------|---------|
 | `scripts/build-docs.mjs` | Main build orchestrator |
-| `scripts/sync-theme.py` | Propagate theme changes to all submodules |
+| `scripts/sync-common.py` | Propagate common submodule changes to all locations |
 | `scripts/push-submodules.py` | Propagate commits through nested submodules |
 | `scripts/generate-pdf/` | PDF report generator for website content |
 | `scripts/submodule_visualizer/` | Interactive visualization of submodule relationships |

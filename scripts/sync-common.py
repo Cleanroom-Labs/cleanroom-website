@@ -1,22 +1,22 @@
 #!/usr/bin/env python3
 """
-scripts/sync-theme.py
-Synchronizes cleanroom-theme submodule across all locations with validation and push support.
+scripts/sync-common.py
+Synchronizes cleanroom-website-common submodule across all locations with validation and push support.
 
 Usage:
-    ./scripts/sync-theme.py                  # Sync to latest main, commit, and push
-    ./scripts/sync-theme.py abc1234          # Sync to specific commit
-    ./scripts/sync-theme.py --dry-run        # Preview changes
-    ./scripts/sync-theme.py --no-push        # Commit only, skip pushing
-    ./scripts/sync-theme.py --force          # Skip remote sync validation
-    ./scripts/sync-theme.py --verify         # Check for stale generated files after sync
-    ./scripts/sync-theme.py --rebuild        # Auto-regenerate stale files after sync
+    ./scripts/sync-common.py                  # Sync to latest main, commit, and push
+    ./scripts/sync-common.py abc1234          # Sync to specific commit
+    ./scripts/sync-common.py --dry-run        # Preview changes
+    ./scripts/sync-common.py --no-push        # Commit only, skip pushing
+    ./scripts/sync-common.py --force          # Skip remote sync validation
+    ./scripts/sync-common.py --verify         # Check for stale generated files after sync
+    ./scripts/sync-common.py --rebuild        # Auto-regenerate stale files after sync
 
 This script:
-1. Resolves the target theme commit (from CLI or standalone repo)
-2. Discovers all cleanroom-theme submodule locations
+1. Resolves the target common submodule commit (from CLI or standalone repo)
+2. Discovers all cleanroom-website-common submodule locations
 3. Validates parent repos are in sync with remotes (prevents divergence)
-4. Updates theme submodules to target commit
+4. Updates common submodules to target commit
 5. Commits changes bottom-up through the hierarchy
 6. Pushes all changes (unless --no-push)
 """
@@ -40,7 +40,7 @@ from lib.repo_utils import (
 
 
 # Default standalone theme repo path
-DEFAULT_THEME_REPO = Path.home() / "Projects" / "cleanroom-theme"
+DEFAULT_THEME_REPO = Path.home() / "Projects" / "cleanroom-website-common"
 
 
 @dataclass
@@ -103,7 +103,7 @@ def parse_gitmodules(gitmodules_path: Path) -> list[tuple[str, str]]:
         # New section
         if line.startswith("[submodule"):
             # Save previous section if it was a theme
-            if current_path and current_url and "cleanroom-theme" in current_url:
+            if current_path and current_url and "cleanroom-website-common" in current_url:
                 results.append((current_path, current_url))
             current_path = None
             current_url = None
@@ -113,14 +113,14 @@ def parse_gitmodules(gitmodules_path: Path) -> list[tuple[str, str]]:
             current_url = line[6:].strip()
 
     # Don't forget last section
-    if current_path and current_url and "cleanroom-theme" in current_url:
+    if current_path and current_url and "cleanroom-website-common" in current_url:
         results.append((current_path, current_url))
 
     return results
 
 
 def discover_theme_submodules(repo_root: Path) -> list[ThemeSubmodule]:
-    """Discover all cleanroom-theme submodule locations by parsing .gitmodules files."""
+    """Discover all cleanroom-website-common submodule locations by parsing .gitmodules files."""
     submodules = []
 
     # Find all .gitmodules files
@@ -296,8 +296,8 @@ def push_ahead_theme_submodules(
     Push any theme submodules that are ahead of their remotes.
 
     This handles the local submodule workflow where changes are made in
-    cleanroom-website/theme and need to be pushed to the local
-    remote (~/Projects/cleanroom-theme) before syncing to other locations.
+    cleanroom-website/common and need to be pushed to the local
+    remote (~/Projects/cleanroom-website-common) before syncing to other locations.
 
     Returns True if any were pushed.
     """
@@ -338,10 +338,10 @@ def push_ahead_theme_submodules(
 
 def check_theme_staleness(theme_path: Path, rebuild: bool = False) -> tuple[bool, str]:
     """
-    Check if generated files in a theme location are stale.
+    Check if generated files in a common submodule location are stale.
 
     Args:
-        theme_path: Path to the cleanroom-theme submodule
+        theme_path: Path to the cleanroom-website-common submodule
         rebuild: If True, regenerate stale files
 
     Returns:
@@ -376,7 +376,7 @@ def check_theme_staleness(theme_path: Path, rebuild: bool = False) -> tuple[bool
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Synchronize cleanroom-theme submodule across all locations.",
+        description="Synchronize cleanroom-website-common submodule across all locations.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -583,7 +583,7 @@ changes, to prevent repository divergence. Use --force to skip this check.
             if commit_submodule_changes(
                 repo,
                 subpaths,
-                "chore: update theme submodule",
+                "chore: update common submodule",
                 dry_run=args.dry_run,
             ):
                 committed_repos.append(repo)
@@ -598,6 +598,7 @@ changes, to prevent repository divergence. Use --force to skip this check.
         print("  2. Build:  node scripts/build-docs.mjs")
         print("  3. Push:   ./scripts/push-submodules.py")
         return 0
+
 
     if not committed_repos and not args.dry_run:
         print(Colors.green("No commits made - nothing to push."))
@@ -663,7 +664,7 @@ changes, to prevent repository divergence. Use --force to skip this check.
             print("  2. Run: npm run build")
             print("  3. Commit and push the regenerated files")
             print()
-            print("Or run: ./scripts/sync-theme.py --rebuild")
+            print("Or run: ./scripts/sync-common.py --rebuild")
             print()
 
     # Final summary
@@ -677,7 +678,7 @@ changes, to prevent repository divergence. Use --force to skip this check.
         print(f"  Repos to push: {len(repos_to_push)}")
         print()
         print(Colors.blue("To execute:"))
-        print("  ./scripts/sync-theme.py")
+        print("  ./scripts/sync-common.py")
     elif push_failed:
         print(Colors.red("Some pushes failed."))
         print()
