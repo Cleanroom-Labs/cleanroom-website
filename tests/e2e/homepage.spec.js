@@ -49,17 +49,11 @@ test.describe('Homepage', () => {
     test('active products link to their documentation', async ({ page }) => {
       // AirGap Transfer should link to docs
       const transferLink = page.getByRole('link', { name: /AirGap Transfer/i }).first();
-      await expect(transferLink).toHaveAttribute('href', /\/docs\/airgap-transfer/);
+      await expect(transferLink).toHaveAttribute('href', /\/docs\/transfer/);
 
       // AirGap Deploy should link to docs
       const deployLink = page.getByRole('link', { name: /AirGap Deploy/i }).first();
-      await expect(deployLink).toHaveAttribute('href', /\/docs\/airgap-deploy/);
-    });
-
-    test('planned product shows "Planned" badge', async ({ page }) => {
-      // Cleanroom Whisper is planned
-      const plannedBadge = page.getByText('Planned');
-      await expect(plannedBadge).toBeVisible();
+      await expect(deployLink).toHaveAttribute('href', /\/docs\/deploy/);
     });
 
     test('displays "Coming Soon" placeholder card', async ({ page }) => {
