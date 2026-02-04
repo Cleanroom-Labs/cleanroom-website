@@ -13,7 +13,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-          token: ${{ secrets.SUBMODULE_PAT }}
       - uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
@@ -32,7 +31,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-          token: ${{ secrets.SUBMODULE_PAT }}
       - uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
@@ -48,7 +46,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-          token: ${{ secrets.SUBMODULE_PAT }}
       - uses: actions/setup-python@v5
         with:
           python-version: '3.14'
@@ -64,7 +61,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-          token: ${{ secrets.SUBMODULE_PAT }}
       - uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
