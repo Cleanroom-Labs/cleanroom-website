@@ -7,7 +7,7 @@
 - `lib/` contains shared helpers (e.g., content parsing).
 - `tests/unit/` for Vitest unit tests, `tests/e2e/` for Playwright specs.
 - `public/` hosts static assets and generated docs output (`public/docs/index.html`).
-- `technical-docs/` and `common/` are submodules for docs content and shared theme/build tools.
+- `technical-docs/` and `common/` are submodules for docs content and shared design system/build tools.
 
 ## Build, Test, and Development Commands
 ```bash
