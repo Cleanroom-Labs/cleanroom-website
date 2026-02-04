@@ -7,7 +7,7 @@
 - `lib/` contains shared helpers (e.g., content parsing).
 - `tests/unit/` for Vitest unit tests, `tests/e2e/` for Playwright specs.
 - `public/` hosts static assets and generated docs output (`public/docs/index.html`).
-- `cleanroom-technical-docs/` and `cleanroom-theme/` are submodules for docs content/theme.
+- `technical-docs/` and `common/` are submodules for docs content and shared theme/build tools.
 
 ## Build, Test, and Development Commands
 ```bash
@@ -41,15 +41,15 @@ For doc-only workflows, `node scripts/build-docs.mjs` generates `public/docs/ind
 - If you touch submodules, mention the updated project/version in the PR description.
 
 ## Docs & Submodules
-- `cleanroom-technical-docs/` contains its own submodules, and those submodules also nest more submodules (multi-level recursion).
-- Example nested path: `cleanroom-technical-docs/airgap-deploy-docs/source/cleanroom-theme`.
+- `technical-docs/` contains its own submodules, and those submodules also nest more submodules (multi-level recursion).
+- Example nested path: `technical-docs/deploy/common/`.
 - Always sync recursively: `git submodule update --init --recursive`.
 - Inspect nested state with `git submodule status --recursive`.
 - Use `./scripts/check-submodules.py` to verify submodule health.
 Current submodules (top-level and nested):
-- Top-level: `cleanroom-technical-docs/`, `cleanroom-theme/`.
-- Under `cleanroom-technical-docs/`: `airgap-deploy-docs/`, `airgap-transfer-docs/`, `cleanroom-whisper-docs/`, and `source/cleanroom-theme/`.
-- Under each `*-docs/`: `source/cleanroom-theme/`.
+- Top-level: `technical-docs/`, `common/`.
+- Under `technical-docs/`: `whisper/`, `deploy/`, `transfer/`, and `common/`.
+- Under each project: `common/`.
 
 ## Reference Docs
 - `README.md` is the primary contributor guide (setup, commands, workflows).

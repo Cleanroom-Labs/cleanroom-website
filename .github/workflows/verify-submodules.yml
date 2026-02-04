@@ -65,10 +65,10 @@ jobs:
         cd technical-docs
 
         # Check each project submodule
-        for submodule in cleanroom-whisper-docs airgap-deploy-docs airgap-transfer-docs; do
+        for submodule in whisper deploy transfer; do
           echo "### $submodule"
 
-          if [ ! -d "$submodule/.git" ]; then
+          if [ ! -e "$submodule/.git" ]; then
             echo "❌ ERROR: Submodule $submodule not initialized"
             exit 1
           fi
@@ -106,7 +106,7 @@ jobs:
         cd technical-docs
 
         # Fetch latest from remote (if configured)
-        for submodule in cleanroom-whisper-docs airgap-deploy-docs airgap-transfer-docs; do
+        for submodule in whisper deploy transfer; do
           cd $submodule
 
           # Only check if remote is configured (not file://)

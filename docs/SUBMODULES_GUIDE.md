@@ -6,13 +6,11 @@ This repository uses a three-level nested submodule architecture for documentati
 
 ## Architecture
 
-```
-cleanroom-website/                # Level 1
-└── technical-docs/     # Level 2 (submodule)
-    ├── project-1-docs/           # Level 3 (submodule)
-    ├── project-2-docs/           # Level 3 (submodule)
-    └── project-3-docs/           # Level 3 (submodule)
-```
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the full submodule nesting
+structure and design rationale.
+
+In short: `cleanroom-website` → `technical-docs` → project submodules
+(`whisper`, `deploy`, `transfer`), each with their own `common` submodule.
 
 ## Quick Reference
 
@@ -53,7 +51,7 @@ git submodule update --recursive --remote
 
 1. Navigate to submodule:
    ```bash
-   cd technical-docs/<project>-docs
+   cd technical-docs/<project>
    ```
 
 2. Checkout a branch (not detached HEAD):
@@ -71,7 +69,7 @@ git submodule update --recursive --remote
 4. Update parent repositories (requires 3 commits):
    ```bash
    cd ..
-   git add <project>-docs
+   git add <project>
    git commit -m "Update reference"
    git push
    
@@ -85,7 +83,7 @@ git submodule update --recursive --remote
 
 1. Tag documentation:
    ```bash
-   cd technical-docs/<project>-docs
+   cd technical-docs/<project>
    git tag v1.0.0
    git push origin v1.0.0
    ```

@@ -1,6 +1,6 @@
 // Product Icons for Cleanroom Labs
-// Icons sourced from cleanroom-theme - single source of truth
-import { iconPaths, projectToIcon, chevronPaths, dashedCirclePresets } from '../../theme/icons';
+// Icons sourced from common submodule (cleanroom-website-common) - single source of truth
+import { iconPaths, projectToIcon, chevronPaths, dashedCirclePresets } from '../../common/icons';
 
 function renderIcon(iconName, className) {
   const icon = iconPaths[iconName];

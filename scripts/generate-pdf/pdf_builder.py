@@ -955,11 +955,11 @@ class PDFBuilder:
         return subtitles.get(project, "")
 
     def _get_project_icon_svg(self, project: str) -> str:
-        """Get SVG icon for a project from cleanroom-theme."""
+        """Get SVG icon for a project from the common submodule."""
         import sys
 
         # Try to import from theme icons
-        theme_icons = self.config.repo_root / "theme" / "icons"
+        theme_icons = self.config.repo_root / "common" / "icons"
 
         if theme_icons.exists():
             if str(theme_icons) not in sys.path:

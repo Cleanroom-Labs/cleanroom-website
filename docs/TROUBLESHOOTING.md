@@ -53,8 +53,8 @@ Sphinx detected issues like broken links or missing references. Run locally to s
 
 ```bash
 cd technical-docs
-make html
-# Review warnings in output
+make html          # Build all documentation
+make html-check    # Check build.log for warnings/errors
 ```
 
 ### Intersphinx Inventory Warnings (Safe to Ignore)
@@ -141,9 +141,10 @@ Possible causes:
 4. **Case sensitivity** - macOS is case-insensitive, Linux is case-sensitive
 
 Debug approach:
-1. Run `./scripts/test-ci-locally.sh` to simulate CI
-2. Check workflow logs in the Actions tab
-3. Compare local environment with CI environment (e.g., Python version, installed packages)
+1. Run `make html && make html-check` in `technical-docs/` to reproduce CI warning checking
+2. Run `./scripts/test-ci-locally.sh` to simulate CI
+3. Check workflow logs in the Actions tab
+4. Compare local environment with CI environment (e.g., Python version, installed packages)
 
 ## Submodule Issues
 
@@ -153,7 +154,7 @@ This is **normal** for submodules - they point to specific commits, not branches
 
 To make changes:
 ```bash
-cd technical-docs/<project>-docs
+cd technical-docs/<project>
 git checkout main
 # Now you can commit and push
 ```
@@ -179,12 +180,12 @@ The parent repository references have not been updated.
 
 ```bash
 cd technical-docs
-git submodule update --remote <project>-docs
+git submodule update --remote <project>
 # Or manually:
-cd <project>-docs
+cd <project>
 git checkout v1.0.0
 cd ..
-git add <project>-docs
+git add <project>
 git commit -m "Update docs to v1.0.0"
 ```
 

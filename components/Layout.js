@@ -2,7 +2,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import Footer from './Footer';
 
-const nav = require('../theme/tokens/navigation');
+const nav = require('../common/tokens/navigation');
 
 const defaultTitle = 'Cleanroom Labs';
 const defaultDescription = 'Free and open source tools for air-gapped development';
@@ -58,7 +58,7 @@ export default function Layout({ children, title, description }) {
               ))}
             </div>
           </div>
-          {/* Donate button hidden — uncomment nav.donate in cleanroom-theme/tokens/navigation.js to re-enable */}
+          {/* Donate button hidden — uncomment nav.donate in common/tokens/navigation.js to re-enable */}
         </div>
       </nav>
 

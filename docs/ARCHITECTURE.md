@@ -19,7 +19,8 @@ A three-level nested submodule architecture:
 ```
 cleanroom-website/                    # Parent repository
 ├── technical-docs/                   # Submodule (aggregates projects)
-│   ├── <project>-docs/               # Submodules (project docs)
+│   ├── <project>/                    # Submodules (project docs)
+│   ├── common/                       # Submodule (shared theme & build tools)
 │   └── source/                       # Master documentation
 └── scripts/                          # Helper scripts
 ```
@@ -44,7 +45,7 @@ For operational details, see [technical-docs/README.md](../technical-docs/README
 
 ### Shared Theme via Inheritance
 
-Projects import shared configuration from `source/theme/theme_config.py`, allowing:
+Projects import shared configuration from `common/theme_config.py` (at each repo's root level), allowing:
 - Single source of truth for styling
 - Easy global updates
 - Project-specific overrides when needed
@@ -92,25 +93,25 @@ The full nesting structure:
 ```
 cleanroom-website/                                    # This repo
 ├── technical-docs/                                   # Level 1 submodule
-│   ├── whisper-docs/                                 # Level 2 submodule
-│   │   └── source/theme/                             # Level 3 submodule
-│   ├── deploy-docs/                                  # Level 2 submodule
-│   │   └── source/theme/                             # Level 3 submodule
-│   ├── transfer-docs/                                # Level 2 submodule
-│   │   └── source/theme/                             # Level 3 submodule
-│   └── source/theme/                                 # Level 2 submodule
-└── theme/                                            # Level 1 submodule
+│   ├── whisper/                                      # Level 2 submodule
+│   │   └── common/                                   # Level 3 submodule
+│   ├── deploy/                                       # Level 2 submodule
+│   │   └── common/                                   # Level 3 submodule
+│   ├── transfer/                                     # Level 2 submodule
+│   │   └── common/                                   # Level 3 submodule
+│   └── common/                                       # Level 2 submodule
+└── common/                                           # Level 1 submodule
 ```
 
 | Submodule | Purpose |
 |-----------|---------|
 | `technical-docs` | Aggregates all project documentation into a single Sphinx build. |
-| `theme` | Shared theme and styling used by all documentation projects. |
-| `whisper-docs` | Documentation for Cleanroom Whisper, an offline audio transcription application. |
-| `deploy-docs` | Documentation for AirGap Deploy, a tool for preparing software deployments for air-gapped systems. |
-| `transfer-docs` | Documentation for AirGap Transfer, a tool for transferring files to air-gapped systems. |
+| `common` | Shared theme, styling, and build tools used by all documentation projects. |
+| `whisper` | Documentation for Cleanroom Whisper, an offline audio transcription application. |
+| `deploy` | Documentation for AirGap Deploy, a tool for preparing software deployments for air-gapped systems. |
+| `transfer` | Documentation for AirGap Transfer, a tool for transferring files to air-gapped systems. |
 
-The `theme` submodule appears at multiple levels so that each project can build its documentation independently with consistent styling.
+The `common` submodule appears at each repo's root level so that each project can build its documentation independently with consistent styling.
 
 ## References
 

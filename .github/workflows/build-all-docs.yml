@@ -28,7 +28,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
+        python-version: '3.14'
 
     - name: Install Graphviz
       run: sudo apt-get update && sudo apt-get install -y graphviz
@@ -38,69 +38,15 @@ jobs:
         cd technical-docs
         pip install -r requirements.txt
 
-    - name: Build all project documentation
+    - name: Build all documentation
       run: |
         cd technical-docs
+        make html
 
-        echo "# Building All Project Documentation"
-        echo ""
-
-        # Build each project
-        for project in cleanroom-whisper-docs airgap-deploy-docs airgap-transfer-docs; do
-          echo "## Building $project"
-          cd $project
-
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt
-          fi
-
-          sphinx-build -M html source build
-
-          if [ ! -f build/html/index.html ]; then
-            echo "❌ ERROR: Build failed for $project"
-            exit 1
-          fi
-
-          echo "✓ $project built successfully"
-          echo ""
-          cd ..
-        done
-
-    - name: Build master documentation
+    - name: Check for build warnings
       run: |
         cd technical-docs
-
-        echo "## Building Master Documentation"
-        make html 2>&1 | tee build.log
-
-        # Check for errors/warnings (ignore intersphinx inventory fetch warnings)
-        ERRORS_ALL="$(grep -E 'ERROR:' build.log || true)"
-        WARNINGS_ALL="$(grep -E 'WARNING:' build.log || true)"
-        WARNINGS_NON_IGNORED="$(echo "$WARNINGS_ALL" | grep -viE 'failed to reach any of the inventories|intersphinx inventory' || true)"
-
-        if [ -n "$ERRORS_ALL" ]; then
-          echo ""
-          echo "❌ Build completed with errors"
-          echo ""
-          echo "$ERRORS_ALL"
-          exit 1
-        elif [ -n "$WARNINGS_NON_IGNORED" ]; then
-          echo ""
-          echo "⚠️  Build completed with warnings"
-          echo ""
-          echo "Warnings found:"
-          echo "$WARNINGS_NON_IGNORED"
-          echo ""
-          echo "Please review and fix warnings before merging"
-          exit 1
-        elif [ -n "$WARNINGS_ALL" ]; then
-          echo ""
-          echo "ℹ️  Build produced intersphinx inventory warnings (ignored):"
-          echo ""
-          echo "$WARNINGS_ALL"
-        else
-          echo "✓ Build completed with no warnings"
-        fi
+        make html-check
 
     - name: Copy built docs to public directory
       run: |
@@ -115,9 +61,9 @@ jobs:
         # Optionally copy individual project docs
         # (useful if you want direct links to project docs)
         # mkdir -p public/docs/projects
-        # cp -r technical-docs/cleanroom-whisper-docs/build/html public/docs/projects/whisper
-        # cp -r technical-docs/airgap-deploy-docs/build/html public/docs/projects/deploy
-        # cp -r technical-docs/airgap-transfer-docs/build/html public/docs/projects/transfer
+        # cp -r technical-docs/whisper/build/html public/docs/projects/whisper
+        # cp -r technical-docs/deploy/build/html public/docs/projects/deploy
+        # cp -r technical-docs/transfer/build/html public/docs/projects/transfer
 
         echo "✓ Documentation copied to public/docs/"
 

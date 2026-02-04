@@ -6,7 +6,7 @@ This guide explains the CI/CD infrastructure for building and deploying the nest
 
 The CI/CD system consists of **three workflows** that handle different aspects of the build and deployment process:
 
-### 1. Build and Deploy (Main Branch)
+### 1. Build and Verify (Main Branch)
 **File:** `technical-docs/.github/workflows/sphinx-docs.yml`
 
 **Triggers:**
@@ -15,18 +15,20 @@ The CI/CD system consists of **three workflows** that handle different aspects o
 - Manual workflow dispatch
 
 **What it does:**
-1. Checks out repository with all nested submodules
+1. Checks out repository with all nested submodules (requires `SUBMODULE_PAT` secret)
 2. Verifies submodule initialization
-3. Builds each project's documentation (project submodules)
-4. Builds master documentation with intersphinx references
-5. Verifies cross-references are working
-6. Deploys to GitHub Pages (main branch only)
+3. Builds each project's documentation via `make html`
+4. Checks for warnings via `make html-check`
+5. Verifies project docs are present in build output
+6. Verifies cross-references are working
+7. Uploads build artifact
 
 **Key features:**
 - Full submodule support with `submodules: recursive`
 - Individual project builds before master build (enables intersphinx)
-- Warning detection and reporting
+- Centralized warning detection via `make html-check` (matches local build behavior)
 - Cross-reference verification
+- Python 3.14, Graphviz for diagram generation
 
 ### 2. Deploy Tagged Release
 **File:** `technical-docs/.github/workflows/deploy-tagged.yml`
@@ -67,7 +69,7 @@ The CI/CD system consists of **three workflows** that handle different aspects o
 ### Standard Development Flow
 
 ```
-Developer → Push to main → CI Build → GitHub Pages
+Developer → Push to main → CI Build → Upload Artifact
                 ↓
            Submodules updated
                 ↓
@@ -75,7 +77,9 @@ Developer → Push to main → CI Build → GitHub Pages
                 ↓
            Master build with intersphinx
                 ↓
-           Deploy to GitHub Pages
+           Warning check (make html-check)
+                ↓
+           Upload build artifact
 ```
 
 ### Release Flow
@@ -96,19 +100,26 @@ Developer → Create tag (v1.0.0-rc.1) → Preview Deployment
 
 **For technical-docs repository:**
 
-Node.js:
-- CI uses `.nvmrc` (via `actions/setup-node` `node-version-file`) for the website workflow Node version.
+1. **Configure `SUBMODULE_PAT` secret:**
+   - Go to Settings → Secrets and variables → Actions
+   - Add a repository secret named `SUBMODULE_PAT`
+   - Value: a GitHub Personal Access Token with `repo` scope (needed to check out private submodules)
 
-1. **Enable GitHub Pages:**
+2. **Enable GitHub Pages (only if using deploy-tagged workflow):**
    - Go to Settings → Pages
    - Source: "GitHub Actions"
-    - Branch: Not needed (Actions deploys directly)
+   - Branch: Not needed (Actions deploys directly)
 
-2. **Configure environments (optional):**
+3. **Configure environments (only if using deploy-tagged workflow):**
    - Settings → Environments
    - Create "github-pages-production"
    - Create "github-pages-preview"
    - Add protection rules if desired
+
+**For cleanroom-website repository:**
+
+Node.js:
+- CI uses `.nvmrc` (via `actions/setup-node` `node-version-file`) for the website workflow Node version.
 
 **For individual project repositories:**
 
@@ -143,7 +154,7 @@ This simulates the GitHub Actions workflow and will:
 
 ```bash
 # Edit content in project docs
-cd technical-docs/<project>-docs
+cd technical-docs/<project>
 # ... make changes ...
 git add .
 git commit -m "Update documentation"
@@ -151,7 +162,7 @@ git push
 
 # Update submodule reference
 cd ..
-git add <project>-docs
+git add <project>
 git commit -m "Update docs submodule"
 git push
 
@@ -180,7 +191,7 @@ git commit -m "Update technical docs"
 git push
 
 # Triggers verify-submodules workflow
-# Does NOT automatically deploy (must push from technical-docs)
+# Does NOT trigger technical-docs CI (must push from technical-docs)
 ```
 
 ### Deploying a Release
@@ -189,7 +200,7 @@ git push
 
 ```bash
 # Tag the docs
-cd technical-docs/<project>-docs
+cd technical-docs/<project>
 git tag v1.0.0-rc.1
 git push origin v1.0.0-rc.1
 
@@ -214,7 +225,7 @@ This triggers:
 
 ```bash
 # Tag the docs (final)
-cd technical-docs/<project>-docs
+cd technical-docs/<project>
 git tag v1.0.0
 git push origin v1.0.0
 
@@ -265,9 +276,10 @@ The workflows use these environment variables:
 - `GITHUB_REF_NAME` - Branch/tag name
 - `GITHUB_EVENT_NAME` - Trigger event (push, pull_request, etc.)
 
-**Custom (none currently):**
+**Secrets:**
+- `SUBMODULE_PAT` - GitHub Personal Access Token with `repo` scope (required for private submodule checkout)
 
-To add custom environment variables:
+To add additional environment variables:
 1. Repository Settings → Secrets and variables → Actions
 2. Add repository secret or variable
 3. Reference in workflow: `${{ secrets.MY_SECRET }}`

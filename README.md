@@ -4,7 +4,7 @@ Documentation aggregation platform using nested git submodules to manage technic
 
 ## Prerequisites
 
-- Python 3.9+
+- Python 3.14+
 - Node.js 20.9+ (required by Next.js 16; see `.nvmrc`)
 - Graphviz (`brew install graphviz` on macOS)
 
@@ -106,12 +106,14 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the submodule structure, de
 
 ## CI/CD
 
-| Workflow | Purpose |
-|----------|---------|
-| `build-all-docs.yml` | Build and verify documentation |
-| `verify-submodules.yml` | Weekly submodule health checks |
+| Workflow | Location | Purpose |
+|----------|----------|---------|
+| `build-all-docs.yml` | `cleanroom-website` | Build and verify all documentation |
+| `verify-submodules.yml` | `cleanroom-website` | Weekly submodule health checks |
+| `sphinx-docs.yml` | `technical-docs` | Build, check warnings, and verify docs |
+| `deploy-tagged.yml` | `technical-docs` | Tag-based deployment to GitHub Pages |
 
-Deployment uses tag-based releases:
+Deployment uses tag-based releases (via `deploy-tagged.yml`):
 - `v*` tags trigger production deployment
 - `v*-rc.*` tags trigger preview deployment
 
