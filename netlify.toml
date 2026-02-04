@@ -1,5 +1,5 @@
 [build]
-  command = "git submodule update --init --recursive && npm run build"
+  command = "git submodule update --init --recursive && find public/ -type l | while read link; do target=$(readlink -f \"$link\"); rm \"$link\"; cp \"$target\" \"$link\"; done && npm run build"
   publish = ".next"
 
 [build.environment]
