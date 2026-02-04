@@ -74,6 +74,10 @@ Generate a comprehensive PDF report from the website content:
 npm run build-docs
 npm run dev  # In a separate terminal
 
+# macOS: install system dependencies and set library path
+brew install pango glib
+export DYLD_LIBRARY_PATH=/opt/homebrew/lib
+
 # Generate PDF
 python -m scripts.generate-pdf
 
@@ -111,11 +115,6 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the submodule structure, de
 | `build-all-docs.yml` | `cleanroom-website` | Build and verify all documentation |
 | `verify-submodules.yml` | `cleanroom-website` | Weekly submodule health checks |
 | `sphinx-docs.yml` | `technical-docs` | Build, check warnings, and verify docs |
-| `deploy-tagged.yml` | `technical-docs` | Tag-based deployment to GitHub Pages |
-
-Deployment uses tag-based releases (via `deploy-tagged.yml`):
-- `v*` tags trigger production deployment
-- `v*-rc.*` tags trigger preview deployment
 
 See [docs/CI_CD_GUIDE.md](docs/CI_CD_GUIDE.md) for details.
 

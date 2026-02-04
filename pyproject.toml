@@ -1,0 +1,4 @@
+[tool.pytest.ini_options]
+testpaths = ["scripts/generate-pdf/tests"]
+pythonpath = ["scripts/generate-pdf"]
+markers = ["integration: requires real repo content (built docs)"]

@@ -1,5 +1,4 @@
 name: Build All Documentation
-
 on:
   push:
     branches: [main]
@@ -12,87 +11,98 @@ on:
     paths:
       - 'technical-docs/**'
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repository with submodules
-      uses: actions/checkout@v4
-      with:
-        submodules: recursive
-        token: ${{ secrets.SUBMODULE_PAT }}
-        fetch-depth: 0
+      - name: Checkout repository with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.SUBMODULE_PAT }}
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+      - name: Install Graphviz
+        run: sudo apt-get update && sudo apt-get install -y graphviz
+      - name: Install Python dependencies
+        run: |
+          cd technical-docs
+          pip install -r requirements.txt
+      - name: Build all documentation
+        env:
+          DOCS_VERSION: dev
+        run: |
+          cd technical-docs
+          make html
+      - name: Check for build warnings
+        run: |
+          cd technical-docs
+          make html-check
+      - name: Copy built docs to public directory
+        run: |
+          echo "Copying built documentation to public/docs/dev/..."
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.14'
+          mkdir -p public/docs/dev
+          cp -r technical-docs/build/html/* public/docs/dev/
 
-    - name: Install Graphviz
-      run: sudo apt-get update && sudo apt-get install -y graphviz
+          echo "Documentation copied to public/docs/dev/"
+      - name: Verify build output
+        run: |
+          echo "## Build Output Verification"
+          echo ""
 
-    - name: Install Python dependencies
-      run: |
-        cd technical-docs
-        pip install -r requirements.txt
+          if [ ! -f public/docs/dev/index.html ]; then
+            echo "ERROR: Master index.html not found"
+            exit 1
+          fi
 
-    - name: Build all documentation
-      env:
-        DOCS_VERSION: dev
-      run: |
-        cd technical-docs
-        make html
+          echo "Built documentation structure:"
+          tree -L 2 public/docs || ls -la public/docs
 
-    - name: Check for build warnings
-      run: |
-        cd technical-docs
-        make html-check
-
-    - name: Copy built docs to public directory
-      run: |
-        echo "Copying built documentation to public/docs/dev/..."
-
-        mkdir -p public/docs/dev
-        cp -r technical-docs/build/html/* public/docs/dev/
-
-        echo "Documentation copied to public/docs/dev/"
-
-    - name: Verify build output
-      run: |
-        echo "## Build Output Verification"
-        echo ""
-
-        if [ ! -f public/docs/dev/index.html ]; then
-          echo "ERROR: Master index.html not found"
-          exit 1
-        fi
-
-        echo "Built documentation structure:"
-        tree -L 2 public/docs || ls -la public/docs
-
-        echo ""
-        echo "Build verification complete"
-
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: documentation
-        path: public/docs
-        retention-days: 30
-
-    - name: Generate build summary
-      run: |
-        echo "# 📚 Documentation Build Summary"
-        echo ""
-        echo "✓ All documentation built successfully"
-        echo ""
-        echo "## Projects Built"
-        echo "- Cleanroom Whisper"
-        echo "- AirGap Deploy"
-        echo "- AirGap Transfer"
-        echo "- Master documentation"
-        echo ""
-        echo "## Output"
-        echo "Built documentation available in artifacts (retention: 30 days)"
+          echo ""
+          echo "Build verification complete"
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation
+          path: public/docs
+          retention-days: 7
+      - name: Generate build summary
+        run: |
+          echo "# 📚 Documentation Build Summary"
+          echo ""
+          echo "✓ All documentation built successfully"
+          echo ""
+          echo "## Projects Built"
+          echo "- Cleanroom Whisper"
+          echo "- AirGap Deploy"
+          echo "- AirGap Transfer"
+          echo "- Master documentation"
+          echo ""
+          echo "## Output"
+          echo "Built documentation available in artifacts (retention: 30 days)"
+  validate-pdf-config:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.SUBMODULE_PAT }}
+      - name: Download built documentation
+        uses: actions/download-artifact@v4
+        with:
+          name: documentation
+          path: public/docs
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+      - name: Install dependencies
+        run: pip install pytest beautifulsoup4 python-frontmatter markdown
+      - name: Validate PDF config against built docs
+        run: pytest scripts/generate-pdf/tests/ -v -m integration
