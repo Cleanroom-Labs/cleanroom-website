@@ -13,7 +13,7 @@ from typing import Optional
 class Paths:
     """Path configuration for PDF generation."""
     # Input paths (relative to repo root)
-    docs_dir: Path = field(default_factory=lambda: Path("public/docs"))
+    docs_dir: Path = field(default_factory=lambda: Path("public/docs/dev"))
     blog_dir: Path = field(default_factory=lambda: Path("content/blog"))
 
     # Output paths
@@ -115,9 +115,9 @@ class DocOrder:
     # Order for project documentation sections
     projects: tuple = (
         "meta",
-        "airgap-transfer",
-        "airgap-deploy",
-        "cleanroom-whisper",
+        "transfer",
+        "deploy",
+        "whisper",
     )
 
 
