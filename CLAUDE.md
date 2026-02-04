@@ -49,6 +49,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the submodule structure, de
 | [docs/DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) | Production deployment steps |
 | [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | Common issues and solutions |
 | [docs/STYLE_GUIDE.md](docs/STYLE_GUIDE.md) | Writing style and terminology conventions |
+| [docs/VERSIONING_GUIDE.md](docs/VERSIONING_GUIDE.md) | Versioning, branching, and multi-version hosting |
 
 ## NPM Scripts
 
