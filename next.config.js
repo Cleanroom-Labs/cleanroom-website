@@ -19,8 +19,14 @@ const nextConfig = {
     return [
       {
         source: '/docs',
-        destination: '/docs/index.html',
-        permanent: true,
+        destination: '/docs/dev/index.html',
+        permanent: false,
+      },
+      {
+        // Redirect non-versioned doc paths to the dev version
+        source: '/docs/:path((?!dev/|latest/|versions\\.json).*)',
+        destination: '/docs/dev/:path',
+        permanent: false,
       },
       {
         source: '/donate',

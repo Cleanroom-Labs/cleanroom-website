@@ -22,11 +22,15 @@ import { dirname, join } from 'path';
 const args = process.argv.slice(2);
 const shouldClean = args.includes('--clean');
 
+// Version flag: --version <version> (defaults to 'dev')
+const versionIndex = args.indexOf('--version');
+const docsVersion = versionIndex !== -1 ? args[versionIndex + 1] : 'dev';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const rootDir = join(__dirname, '..');
 const technicalDocsDir = join(rootDir, 'technical-docs');
-const outputDir = join(rootDir, 'public', 'docs');
+const outputDir = join(rootDir, 'public', 'docs', docsVersion);
 const venvDir = join(technicalDocsDir, '.venv');
 let venvBinDir = null;
 
@@ -62,12 +66,13 @@ function log(message, color = colors.reset) {
   console.log(`${color}${message}${colors.reset}`);
 }
 
-function exec(command, cwd = rootDir, silent = false) {
+function exec(command, cwd = rootDir, silent = false, env = {}) {
   try {
-    const output = execSync(command, { 
-      cwd, 
+    const output = execSync(command, {
+      cwd,
       encoding: 'utf-8',
-      stdio: silent ? 'pipe' : 'inherit'
+      stdio: silent ? 'pipe' : 'inherit',
+      env: { ...process.env, ...env }
     });
     return { success: true, output };
   } catch (error) {
@@ -172,9 +177,13 @@ function buildDocs() {
 
   const sphinxBuild = join(venvBinDir, 'sphinx-build');
 
+  log(`   Version: ${docsVersion}`, colors.blue);
+
   const result = exec(
     `make html SPHINXBUILD="${sphinxBuild}"`,
-    technicalDocsDir
+    technicalDocsDir,
+    false,
+    { DOCS_VERSION: docsVersion }
   );
 
   if (!result.success) {
@@ -185,7 +194,9 @@ function buildDocs() {
   // Check for warnings (same logic as CI)
   const checkResult = exec(
     `make html-check SPHINXBUILD="${sphinxBuild}"`,
-    technicalDocsDir
+    technicalDocsDir,
+    false,
+    { DOCS_VERSION: docsVersion }
   );
 
   if (!checkResult.success) {
@@ -248,7 +259,8 @@ async function main() {
   }
   
   log('\n✅ Documentation build complete!', colors.bright + colors.green);
-  log(`   Output: public/docs/index.html\n`, colors.green);
+  log(`   Version: ${docsVersion}`, colors.green);
+  log(`   Output: public/docs/${docsVersion}/index.html\n`, colors.green);
 }
 
 main().catch(error => {

@@ -10,7 +10,12 @@ This guide covers deploying the documentation to GitHub Pages.
 
 ## Deployment Overview
 
-The `sphinx-docs.yml` workflow builds and verifies documentation but does not deploy. Tagged releases via `deploy-tagged.yml` handle deployment to GitHub Pages.
+Documentation is deployed to GitHub Pages via the `gh-pages` branch in the `technical-docs` repository. Two workflows handle deployment:
+
+- **`sphinx-docs.yml`** — Builds on every push to main; deploys dev docs to `gh-pages/dev/`
+- **`deploy-tagged.yml`** — Builds versioned docs from tags; deploys to `gh-pages/<version>/`
+
+Versions accumulate on the `gh-pages` branch — each deployment adds a new directory without removing existing versions.
 
 ```
 GitHub Organization
@@ -102,15 +107,46 @@ cd .. && git add <project> && git commit -m "Update docs" && git push
 ### Tagged releases
 
 ```bash
-# Tag project docs
-cd technical-docs/<project>
-git tag v1.0.0 && git push origin v1.0.0
+cd technical-docs
 
-# Tag technical-docs
-cd ..
-git add <project>
-git commit -m "Release v1.0.0"
-git tag v1.0.0 && git push origin main && git push origin v1.0.0
+# Release candidate
+git tag v1.0.0-rc.1
+git push origin v1.0.0-rc.1
+# → Deploys to gh-pages/1.0.0-rc.1/ with RC banner
+
+# Stable release
+git tag v1.0.0
+git push origin v1.0.0
+# → Deploys to gh-pages/1.0.0/, updates latest symlink
+```
+
+After tagging, the `deploy-tagged.yml` workflow:
+1. Builds docs with `DOCS_VERSION` set from the tag
+2. Adds the version to `gh-pages/<version>/`
+3. Updates `versions.json` manifest
+4. Updates `latest` symlink (stable releases only)
+5. Deploys via GitHub Pages
+
+### Version management
+
+The `gh-pages` branch accumulates all versions:
+
+```
+gh-pages/
+├── dev/              → Rebuilt on every push to main
+├── 1.0.0/            → Stable release
+├── 1.0.0-rc.1/       → Release candidate
+├── latest -> 1.0.0   → Symlink to newest stable
+└── versions.json     → Version manifest
+```
+
+To manually update `versions.json`:
+```bash
+./scripts/update-versions-json.sh \
+  --version "1.0.0" \
+  --url "/docs/1.0.0/" \
+  --stable \
+  --file gh-pages/versions.json
 ```
 
 ## Rollback

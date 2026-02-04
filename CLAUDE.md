@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 See [README.md](README.md) for complete documentation including build commands, repository structure, and submodule workflows.
 
-**Build docs:** `node scripts/build-docs.mjs`
+**Build docs:** `node scripts/build-docs.mjs` (add `--version <ver>` to build a specific version)
 **Build site only:** `npm run build:web`
 
 **Check submodules:** `./scripts/check-submodules.py`
@@ -21,6 +21,7 @@ See [README.md](README.md) for complete documentation including build commands, 
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the submodule structure, design rationale, and submodule descriptions.
 
+- **Doc versioning**: Docs are versioned monolithically — one tag on `technical-docs` versions all projects together. The `DOCS_VERSION` env var controls the version (defaults to `dev`).
 - **Warnings policy**: Treat Sphinx warnings as failures, except intersphinx inventory fetch warnings which may appear when offline or before deployment
 - **Submodule URLs**: Submodules point to GitHub (e.g., `git@github.com:Cleanroom-Labs/cleanroom-website-common.git`).
 - **Next.js build mode**: Use webpack (`--webpack`) for `dev`/`build` to avoid Turbopack panics in restricted environments.
@@ -37,6 +38,8 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the submodule structure, de
 | `scripts/generate-pdf/` | PDF report generator for website content |
 | `scripts/submodule_visualizer/` | Interactive visualization of submodule relationships |
 | `technical-docs/source/conf.py` | Master Sphinx configuration |
+| `technical-docs/scripts/update-versions-json.sh` | Update versions.json manifest for multi-version docs |
+| `common/theme_config.py` | Shared Sphinx config, version helpers, banner setup |
 | `technical-docs/CLAUDE.md` | Guidance for working with Sphinx docs |
 
 ## Detailed Documentation
