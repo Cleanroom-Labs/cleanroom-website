@@ -72,19 +72,20 @@ Releases use git tags:
 - ❌ Complex configuration
 - ❌ Doesn't solve version coupling
 
-## Future: Multi-Version Support
+## Multi-Version Support
 
-Planned structure for versioned documentation:
+See [VERSIONING_GUIDE.md](./VERSIONING_GUIDE.md) for the full versioning strategy, branching model, IEEE standards alignment, and multi-version hosting approach.
+
+In short: each tagged version is built once by CI and stored as static files. A build-and-archive approach (not `sphinx-multiversion`) keeps old versions immutable while CI handles deployment to versioned directories:
 
 ```
 public/docs/
 ├── <project>/
-│   ├── latest/     → symlink to current version
-│   ├── 2.0.0/
-│   └── 1.0.0/
+│   ├── latest/     → symlink to newest stable release
+│   ├── dev/        → rebuilt on every push to main
+│   ├── 1.0.0/
+│   └── 1.0.0-rc.1/
 ```
-
-Tool: `sphinx-multiversion` extension
 
 ## Submodules
 
