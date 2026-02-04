@@ -182,6 +182,17 @@ function buildDocs() {
     return false;
   }
 
+  // Check for warnings (same logic as CI)
+  const checkResult = exec(
+    `make html-check SPHINXBUILD="${sphinxBuild}"`,
+    technicalDocsDir
+  );
+
+  if (!checkResult.success) {
+    log('❌ Sphinx build produced warnings (see above)', colors.red);
+    return false;
+  }
+
   log('✓ Documentation built successfully', colors.green);
   return true;
 }
