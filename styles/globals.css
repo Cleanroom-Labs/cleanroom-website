@@ -2,7 +2,7 @@
  * Base styles imported from design system
  */
 
-@import '../theme/css/base.css';
+@import '../common/css/base.css';
 
 @tailwind base;
 @tailwind components;
