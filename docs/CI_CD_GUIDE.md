@@ -6,7 +6,7 @@ This guide explains the CI/CD infrastructure for building and deploying the nest
 
 The CI/CD system consists of **three workflows** that handle different aspects of the build and deployment process:
 
-### 1. Build and Verify (Main Branch)
+### 1. Build, Verify, and Deploy Dev (Main Branch)
 **File:** `technical-docs/.github/workflows/sphinx-docs.yml`
 
 **Triggers:**
@@ -17,11 +17,12 @@ The CI/CD system consists of **three workflows** that handle different aspects o
 **What it does:**
 1. Checks out repository with all nested submodules (requires `SUBMODULE_PAT` secret)
 2. Verifies submodule initialization
-3. Builds each project's documentation via `make html`
+3. Builds documentation with `DOCS_VERSION=dev` via `make html`
 4. Checks for warnings via `make html-check`
 5. Verifies project docs are present in build output
 6. Verifies cross-references are working
 7. Uploads build artifact
+8. **On push to main only:** Deploys to `gh-pages` branch under `dev/` directory
 
 **Key features:**
 - Full submodule support with `submodules: recursive`
@@ -29,24 +30,32 @@ The CI/CD system consists of **three workflows** that handle different aspects o
 - Centralized warning detection via `make html-check` (matches local build behavior)
 - Cross-reference verification
 - Python 3.14, Graphviz for diagram generation
+- Automatic dev deployment on every push to main (not PRs)
 
-### 2. Deploy Tagged Release
+### 2. Deploy Tagged Release (Versioned)
 **File:** `technical-docs/.github/workflows/deploy-tagged.yml`
 
 **Triggers:**
-- Git tags matching `v*` (e.g., `v1.0.0`) → Production
-- Git tags matching `v*-rc.*` (e.g., `v1.0.0-rc.1`) → Preview
+- Git tags matching `v*` (e.g., `v1.0.0`, `v1.0.0-rc.1`, `v1.0.0-beta.1`)
 
 **What it does:**
-1. Determines environment (production vs preview) from tag format
-2. Checks if submodules have matching tags
-3. Builds all documentation
-4. Adds version badge to docs
-5. Deploys to appropriate environment
+1. Extracts version and stage (stable/rc/beta) from tag name
+2. Builds all documentation with `DOCS_VERSION` set from the tag
+3. Checks out the `gh-pages` branch (creates it if needed)
+4. Copies build output to a versioned directory (`gh-pages/<version>/`)
+5. Updates `latest` symlink for stable releases
+6. Updates `versions.json` manifest via `scripts/update-versions-json.sh`
+7. Commits to `gh-pages` branch and deploys via GitHub Pages
 
-**Environments:**
-- **Production:** Stable releases (v1.0.0, v2.1.3, etc.)
-- **Preview:** Release candidates (v1.0.0-rc.1, v2.0.0-rc.2, etc.)
+**Version stages:**
+- **Stable** (e.g., `v1.0.0`): Updates `latest` symlink, marked as stable in `versions.json`
+- **Release candidate** (e.g., `v1.0.0-rc.1`): Deployed alongside other versions, RC banner shown
+- **Beta** (e.g., `v1.0.0-beta.1`): Deployed alongside other versions, beta banner shown
+
+**Key features:**
+- Build-and-archive: each tagged version is built once and stored permanently
+- Concurrency group (`pages-deploy`) prevents parallel deploys from corrupting `gh-pages`
+- Versions accumulate on `gh-pages` branch — old versions are never removed
 
 ### 3. Verify Submodule Health
 **File:** `cleanroom-website/.github/workflows/verify-submodules.yml`
@@ -73,25 +82,33 @@ Developer → Push to main → CI Build → Upload Artifact
                 ↓
            Submodules updated
                 ↓
-           Individual builds (project submodules)
-                ↓
-           Master build with intersphinx
+           Build with DOCS_VERSION=dev
                 ↓
            Warning check (make html-check)
                 ↓
            Upload build artifact
+                ↓
+           Deploy to gh-pages/dev/
 ```
 
 ### Release Flow
 
 ```
-Developer → Create tag (v1.0.0-rc.1) → Preview Deployment
+Developer → Create tag (v1.0.0-rc.1) → Versioned Deployment
                 ↓
-           Review in preview
+           Build with DOCS_VERSION=1.0.0-rc.1
                 ↓
-           Create tag (v1.0.0) → Production Deployment
+           Deploy to gh-pages/1.0.0-rc.1/
                 ↓
-           Update submodule references → CI Build
+           Review (RC banner displayed)
+                ↓
+Developer → Create tag (v1.0.0) → Stable Deployment
+                ↓
+           Deploy to gh-pages/1.0.0/
+                ↓
+           Update latest symlink → 1.0.0
+                ↓
+           Update versions.json
 ```
 
 ## Setting Up CI/CD
@@ -105,15 +122,14 @@ Developer → Create tag (v1.0.0-rc.1) → Preview Deployment
    - Add a repository secret named `SUBMODULE_PAT`
    - Value: a GitHub Personal Access Token with `repo` scope (needed to check out private submodules)
 
-2. **Enable GitHub Pages (only if using deploy-tagged workflow):**
+2. **Enable GitHub Pages:**
    - Go to Settings → Pages
    - Source: "GitHub Actions"
-   - Branch: Not needed (Actions deploys directly)
+   - This is required for both dev deployment and tagged releases
 
-3. **Configure environments (only if using deploy-tagged workflow):**
+3. **Configure environment:**
    - Settings → Environments
-   - Create "github-pages-production"
-   - Create "github-pages-preview"
+   - Create "github-pages" environment
    - Add protection rules if desired
 
 **For cleanroom-website repository:**
@@ -199,46 +215,37 @@ git push
 **Step 1: Create Release Candidate**
 
 ```bash
-# Tag the docs
-cd technical-docs/<project>
-git tag v1.0.0-rc.1
-git push origin v1.0.0-rc.1
-
-# Tag the master docs
-cd ..
+cd technical-docs
 git tag v1.0.0-rc.1
 git push origin v1.0.0-rc.1
 ```
 
-This triggers:
-- `deploy-tagged.yml` workflow
-- Deploys to **preview** environment
-- URL: `https://cleanroom-labs.github.io/technical-docs/` (with RC badge)
+This triggers `deploy-tagged.yml` which:
+- Builds with `DOCS_VERSION=1.0.0-rc.1`
+- Deploys to `gh-pages/1.0.0-rc.1/`
+- Updates `versions.json` (no stable flag)
+- RC banner is displayed on all pages
 
-**Step 2: Review Preview**
+**Step 2: Review**
 
-- Test all functionality
-- Verify cross-references
-- Check formatting
+- URL: `https://cleanroom-labs.github.io/technical-docs/1.0.0-rc.1/`
+- Verify content, cross-references, formatting
+- RC banner should read: "This is a release candidate (1.0.0-rc.1). Report issues before final release."
 
-**Step 3: Create Final Release**
+**Step 3: Create Stable Release**
 
 ```bash
-# Tag the docs (final)
-cd technical-docs/<project>
-git tag v1.0.0
-git push origin v1.0.0
-
-# Tag the master docs (final)
-cd ..
+cd technical-docs
 git tag v1.0.0
 git push origin v1.0.0
 ```
 
-This triggers:
-- `deploy-tagged.yml` workflow
-- Deploys to **production** environment
-- URL: `https://cleanroom-labs.github.io/technical-docs/`
+This triggers `deploy-tagged.yml` which:
+- Builds with `DOCS_VERSION=1.0.0`
+- Deploys to `gh-pages/1.0.0/`
+- Updates `latest` symlink to point to `1.0.0`
+- Sets `stable: true` in `versions.json`
+- No banner (stable version)
 
 **Step 4: Update Parent Repository**
 
@@ -292,13 +299,32 @@ See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for CI/CD troubleshooting, includin
 
 ### Multi-Version Documentation
 
-To support multiple versions (not yet implemented):
+The documentation system supports multiple versions simultaneously via a build-and-archive approach:
 
-1. Update `deploy-tagged.yml` to preserve old versions
-2. Add version switcher to Sphinx theme
-3. Configure permalink structure
+**URL structure:**
+```
+/docs/dev/           → Latest from main branch (rebuilt on every push)
+/docs/1.0.0/         → Stable release (built once from v1.0.0 tag)
+/docs/1.0.0-rc.1/    → Release candidate
+/docs/latest/        → Symlink to newest stable version
+/docs/versions.json  → Version manifest for the version switcher
+```
 
-See the plan file for full multi-version architecture.
+**How it works:**
+- Each tagged version is built once and stored permanently on the `gh-pages` branch
+- The `dev` version is rebuilt on every push to main
+- A version switcher dropdown in the navigation bar lets users switch between versions
+- Pre-release banners (dev, beta, RC) warn users when viewing non-stable docs
+- `versions.json` tracks all deployed versions and is updated by `scripts/update-versions-json.sh`
+
+**Key files:**
+- `common/theme_config.py` — `get_docs_version()` and `get_version_stage()` read version from `DOCS_VERSION` env var
+- `common/sphinx/_static/version-switcher.js` — Fetches `versions.json` and populates the dropdown
+- `technical-docs/scripts/update-versions-json.sh` — Adds/updates version entries in the manifest
+- `technical-docs/.github/workflows/deploy-tagged.yml` — Versioned deployment for tagged releases
+- `technical-docs/.github/workflows/sphinx-docs.yml` — Dev deployment on push to main
+
+See [VERSIONING_GUIDE.md](VERSIONING_GUIDE.md) for the full versioning strategy.
 
 ### Custom Deployment Target
 

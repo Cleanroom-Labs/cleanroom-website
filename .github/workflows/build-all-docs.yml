@@ -39,6 +39,8 @@ jobs:
         pip install -r requirements.txt
 
     - name: Build all documentation
+      env:
+        DOCS_VERSION: dev
       run: |
         cd technical-docs
         make html
@@ -50,53 +52,28 @@ jobs:
 
     - name: Copy built docs to public directory
       run: |
-        echo "Copying built documentation to public/docs/..."
+        echo "Copying built documentation to public/docs/dev/..."
 
-        # Create public/docs if it doesn't exist
-        mkdir -p public/docs
+        mkdir -p public/docs/dev
+        cp -r technical-docs/build/html/* public/docs/dev/
 
-        # Copy master docs
-        cp -r technical-docs/build/html/* public/docs/
-
-        # Optionally copy individual project docs
-        # (useful if you want direct links to project docs)
-        # mkdir -p public/docs/projects
-        # cp -r technical-docs/whisper/build/html public/docs/projects/whisper
-        # cp -r technical-docs/deploy/build/html public/docs/projects/deploy
-        # cp -r technical-docs/transfer/build/html public/docs/projects/transfer
-
-        echo "✓ Documentation copied to public/docs/"
+        echo "Documentation copied to public/docs/dev/"
 
     - name: Verify build output
       run: |
         echo "## Build Output Verification"
         echo ""
 
-        # Check that key files exist
-        if [ ! -f public/docs/index.html ]; then
-          echo "❌ ERROR: Master index.html not found"
+        if [ ! -f public/docs/dev/index.html ]; then
+          echo "ERROR: Master index.html not found"
           exit 1
         fi
 
-        if [ ! -f public/docs/projects/whisper.html ]; then
-          echo "⚠️  WARNING: Whisper stub page not found"
-        fi
-
-        if [ ! -f public/docs/projects/deploy.html ]; then
-          echo "⚠️  WARNING: Deploy stub page not found"
-        fi
-
-        if [ ! -f public/docs/projects/transfer.html ]; then
-          echo "⚠️  WARNING: Transfer stub page not found"
-        fi
-
-        # Show directory structure
-        echo ""
         echo "Built documentation structure:"
         tree -L 2 public/docs || ls -la public/docs
 
         echo ""
-        echo "✓ Build verification complete"
+        echo "Build verification complete"
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
