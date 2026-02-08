@@ -79,8 +79,12 @@ class RepoNode:
 
         # Draw rounded rectangle background
         bg_color = '#FFFFFF'
-        border_color = fill_color if self.selected else '#CCCCCC'
-        border_width = 3 if self.selected else 1
+        if self.repo.sync_group_color:
+            border_color = self.repo.sync_group_color
+            border_width = 3 if self.selected else 2
+        else:
+            border_color = fill_color if self.selected else '#CCCCCC'
+            border_width = 3 if self.selected else 1
 
         bg_id = self._draw_rounded_rect(
             left, top, right, bottom,

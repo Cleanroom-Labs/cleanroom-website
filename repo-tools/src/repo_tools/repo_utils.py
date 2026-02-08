@@ -142,6 +142,10 @@ class RepoInfo:
     error_message: str | None = None
     parent: RepoInfo | None = field(default=None, repr=False)
 
+    # Populated by visualizer for sync-group display
+    sync_group: str | None = None
+    sync_group_color: str | None = None
+
     @cached_property
     def rel_path(self) -> str:
         """Get path relative to repo root, or friendly name for root."""

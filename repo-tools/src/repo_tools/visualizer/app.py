@@ -187,6 +187,9 @@ class SubmoduleVisualizerApp:
         details.append(f"Ahead: {ahead}, Behind: {behind}")
         details.append(f"Status: {repo.status.value if repo.status else 'unknown'}")
 
+        if repo.sync_group:
+            details.append(f"Sync group: {repo.sync_group}")
+
         if repo.error_message:
             details.append(f"Error: {repo.error_message}")
 
@@ -208,6 +211,18 @@ class SubmoduleVisualizerApp:
             self.repo_path = Path(path)
             self._load_repos()
 
+    # Palette of visually distinct colors for sync-group borders
+    SYNC_GROUP_PALETTE = [
+        '#2196F3',  # Blue
+        '#9C27B0',  # Purple
+        '#009688',  # Teal
+        '#E91E63',  # Pink
+        '#3F51B5',  # Indigo
+        '#00BCD4',  # Cyan
+        '#795548',  # Brown
+        '#607D8B',  # Blue Gray
+    ]
+
     def _load_repos(self) -> None:
         """Load repositories from the current path."""
         from repo_tools.repo_utils import discover_repos, set_parent_relationships
@@ -215,12 +230,15 @@ class SubmoduleVisualizerApp:
         self._update_status(f"Loading {self.repo_path}...")
 
         try:
-            self.repos = discover_repos(self.repo_path, exclude_theme=False)
+            self.repos = discover_repos(self.repo_path)
             set_parent_relationships(self.repos)
 
             # Validate all repos
             for repo in self.repos:
                 repo.validate(check_sync=True)
+
+            # Populate sync-group membership for visualization
+            self._populate_sync_groups()
 
             self.root.title(f"{self.WINDOW_TITLE} - {self.repo_path.name}")
             self.graph_canvas.set_repos(self.repos)
@@ -229,6 +247,27 @@ class SubmoduleVisualizerApp:
         except Exception as e:
             self._update_status(f"Error loading repositories: {e}")
             self.graph_canvas.clear()
+
+    def _populate_sync_groups(self) -> None:
+        """Tag repos with their sync-group name and color."""
+        try:
+            from repo_tools.config import load_config
+            from repo_tools.sync import discover_sync_submodules
+
+            config = load_config(self.repo_path)
+        except (FileNotFoundError, ValueError):
+            return
+
+        # Build path -> (group_name, color) mapping
+        path_to_group: dict[Path, tuple[str, str]] = {}
+        for i, group in enumerate(config.sync_groups.values()):
+            color = self.SYNC_GROUP_PALETTE[i % len(self.SYNC_GROUP_PALETTE)]
+            for sub in discover_sync_submodules(self.repo_path, group.url_match):
+                path_to_group[sub.path] = (group.name, color)
+
+        for repo in self.repos:
+            if repo.path in path_to_group:
+                repo.sync_group, repo.sync_group_color = path_to_group[repo.path]
 
     def refresh(self) -> None:
         """Refresh the display."""
