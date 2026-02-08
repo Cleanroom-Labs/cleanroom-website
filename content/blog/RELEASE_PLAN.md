@@ -6,7 +6,7 @@ Weekly cadence, starting after v1.0.0 software release. Each post is released on
 
 Lead with standalone, discussion-generating content that provides value independent of the product. Build credibility and audience before introducing the tools. On HackerNews and Reddit, genuinely useful content with an organic connection to a product performs far better than overt advertising.
 
-The sequence follows a narrative arc: **Problem → Philosophy → Strategy → Threats → Solution → Practice**
+The sequence follows a narrative arc: **Problem → Philosophy → Strategy → Threats → Solution → Practice → Community**
 
 ## Release Schedule
 
@@ -55,6 +55,14 @@ The sequence follows a narrative arc: **Problem → Philosophy → Strategy → 
 
 **Social media angle:** Each demo targets a specific community. Whisper → r/selfhosted, r/productivity. Rust deploy → r/rust, r/devops. Ollama → r/LocalLLaMA, r/selfhosted.
 
+### Phase 6: Community (Week 11+)
+
+| Week | Post | Slug | Why This Order |
+|------|------|------|----------------|
+| 11 | **Start a Sneakernet with Your Friends** | `start-a-sneakernet` | A lighter, fun post that reframes the tools for everyday social use. After 10 weeks of establishing the problem, the strategy, and the tools, this shows the human side — sharing files with friends, no cloud required. It's the most shareable post in the series and the best entry point for non-security audiences. |
+
+**Social media angle:** This is the most broadly appealing post. Submit to r/selfhosted, r/datahoarder, r/homelab, and r/privacy. The tone is casual enough for general tech communities. On HN, this is the kind of "why not?" post that generates nostalgic discussion about sneakernets, BBS culture, and the joy of physical media.
+
 ## Platform-Specific Notes
 
 ### HackerNews
@@ -91,3 +99,4 @@ Titles that work on HN are factual, specific, and avoid marketing language:
 | 8 | Offline Voice Transcription with No Cloud — Quick Capture for Air-Gapped Systems |
 | 9 | Packaging Rust Applications for Deployment to Systems Without Internet |
 | 10 | Deploying Ollama and Large Models Across the Air Gap with Multi-USB Orchestration |
+| 11 | Start a Sneakernet with Your Friends — File Sharing Without the Cloud |

@@ -1,0 +1,109 @@
+---
+title: "Start a Sneakernet with Your Friends"
+date: "2026-01-31"
+author: "Lead Dev"
+tags: ["community", "privacy"]
+excerpt: "The oldest file-sharing protocol is still the best one for large transfers, privacy, and fun. Here's how to start a sneakernet with your friends."
+slug: "start-a-sneakernet"
+readTime: "8 min"
+---
+
+---
+
+## Introduction
+
+A sneakernet is the practice of transferring data by physically carrying storage media between computers. The term dates back to the 1980s — a joke about wearing sneakers to walk a floppy disk down the hall. Before broadband, this was just how things worked. Floppy disks, ZIP drives, burned CDs, passed hand to hand.
+
+The funny thing is, sneakernets never really went away. They just stopped being the default. And for certain use cases — large files, privacy-sensitive data, unreliable connections, or just the satisfaction of handing someone a physical thing — they're still the best option. Amazon's now-retired [Snowmobile](https://www.datacenterdynamics.com/en/news/aws-retires-snowmobile-truck-based-data-transfer-service/) service, which physically trucked exabytes of data to AWS data centers in a 45-foot shipping container, was a sneakernet. So is handing your friend a USB drive with photos from last weekend's trip.
+
+This post is an invitation: start a sneakernet with your friends. It's practical, it's private, and it's more fun than you'd expect.
+
+## Why would you want one?
+
+The case for a sneakernet isn't about paranoia. It's about practicality.
+
+**Large file sharing without the wait.** Most home internet connections have asymmetric speeds — downloads are fast, uploads are slow. A 200GB video archive from a group trip could take days to upload to a cloud service on a typical 10 Mbps upload connection. Copy that same archive to a USB 3.0 external drive and it takes minutes. For large transfers, the physical layer wins on raw throughput. As Andrew Tanenbaum [famously put it](https://en.wikipedia.org/wiki/Sneakernet#In_the_media): "Never underestimate the bandwidth of a station wagon full of tapes hurtling down the highway."
+
+**No accounts, no terms of service, no file size limits.** Cloud services decide what you can share, how long it stays, and who can access it. Free tiers impose storage caps. Upload limits are common. Content policies can flag or remove files you've shared. A USB drive doesn't have terms of service. It holds what you put on it, for as long as you want, and nobody else has a say.
+
+**Geographic backup redundancy without monthly fees.** One of the oldest strategies in data protection is the offsite backup — keeping a copy of important data in a physically separate location. Cloud storage solves this, but it costs money every month and requires trusting a third party with your data. A sneakernet solves it too: your friend across town has a copy of your important files. No subscription required. No data center outage can touch it. Swap updated backup drives every month or two and you've got a distributed, resilient storage network for the cost of a couple of USB drives.
+
+**Curated libraries.** This is where sneakernets get fun. Share a collection of development tools, Linux ISOs, ebook archives, music playlists, photography presets, game mods — whatever your group is into. Think of it as a lending library with no late fees. A friend curates a drive of open-source software they've vetted. Another maintains a collection of conference talks and technical podcasts. Each drive reflects someone's taste and effort, which makes it more interesting than a search engine result.
+
+**It's satisfying.** There's something tangible about handing someone a drive. It's a gift, not a notification. You can label it, decorate it, put a sticker on it. The physical exchange creates a moment — a brief conversation about what's on the drive, what's worth checking out, what you've been working on. That social layer doesn't exist when you paste a Google Drive link into a chat window.
+
+## What you need
+
+The barrier to entry is low:
+
+- **A few USB drives.** USB 3.0 flash drives are cheap and widely available. For larger transfers, a portable SSD offers better speed and durability. A 1TB portable SSD costs around the same as a few months of cloud storage — except you own it forever.
+
+- **Friends.** This is the hard part. A sneakernet is a social protocol. You need people who are interested in sharing files, who you see regularly enough to swap drives, and who have things worth sharing. Coworkers, neighbors, members of a local tech meetup, D&D groups, photography clubs — any community with shared interests and regular in-person contact.
+
+- **Optional: [AirGap Transfer](/blog/introducing-airgap-tools) for hash verification and multi-drive chunking.** For casual exchanges — a folder of photos, a few ISOs — you don't need anything beyond drag-and-drop. But when transfers get larger or integrity matters, AirGap Transfer adds cryptographic hash verification to confirm nothing got corrupted in the copy, and automatic multi-drive chunking when your data exceeds a single drive's capacity. It turns a casual sneakernet into a reliable one.
+
+## How it works
+
+A sneakernet exchange is simple. Here's the workflow:
+
+**1. Curate.** Decide what you want to share. Photos from a trip, a software toolkit, a dataset, a backup archive, a music collection. The best sneakernet contributions are things that are useful, large enough that downloading them would be annoying, or personal enough that you wouldn't want to upload them to a cloud service.
+
+**2. Load.** Copy the files onto a drive. If you want peace of mind, use AirGap Transfer — it generates cryptographic hashes during the copy, so you (and the recipient) can verify that every file arrived intact. This is especially useful for large archives where a single corrupted file might not be immediately obvious.
+
+**3. Hand it off.** At the office, at dinner, at a meetup, in the parking lot. The transfer protocol is a handshake. No bandwidth caps, no upload progress bars, no "link expired" messages. The exchange itself is a social interaction — you'll probably end up talking about what's on the drive, which is half the fun.
+
+**4. Verify and copy.** The recipient plugs in the drive and copies what they want. If you used AirGap Transfer, verification is automatic — the tool checks every file's hash against the manifest and flags anything that doesn't match. Otherwise, a quick spot-check of a few files is usually enough for casual exchanges.
+
+**5. Return or circulate.** The drive comes back to you, or it moves on to the next person in the group. Some sneakernets work best as a direct exchange (you lend a drive, it comes back). Others work as a circulating library (a drive makes the rounds, and people add or take content as it passes through).
+
+## Level it up
+
+Once your sneakernet is running, there are ways to make it more interesting.
+
+### The rotating library
+
+Designate a drive as communal. It circulates through your group on a schedule — weekly, biweekly, whenever you see each other. Each person adds content and takes what they want. Over time, the drive becomes a shared archive that reflects the collective interests of the group. One pass it has a folder of conference talks; the next time around, someone's added a photography tutorial series and a collection of zines.
+
+The key is that it's curated. Unlike an infinite cloud folder, a physical drive has a finite capacity, which forces people to be intentional about what they contribute. That constraint makes the library more interesting, not less.
+
+### Neighborhood software mirror
+
+If your group includes developers, sysadmins, or anyone who regularly downloads large software packages, a sneakernet mirror saves everyone time and bandwidth. One person downloads OS updates, development toolchains, container images, language packages, and IDE extensions. The rest of the group copies what they need from the drive instead of each pulling the same gigabytes individually.
+
+This is especially valuable if anyone in the group has bandwidth caps or slow connections. It's also how air-gapped development environments manage software dependencies — see [Packaging Rust Applications for Air-Gapped Systems](/blog/demo-deploy-rust-app) for how to package complete application builds for offline deployment.
+
+### Photo and video co-op
+
+Group trips, weddings, family reunions, and community events generate gigabytes of photos and video across everyone's phones and cameras. The usual approach is "everyone uploads to Google Photos and shares the album." In practice, half the group forgets, the uploads take forever on hotel Wi-Fi, and the cloud service compresses your videos.
+
+A sneakernet co-op is simpler: bring a drive to the event. Everyone dumps their photos and videos onto it at the end of the day. One person takes it home, organizes it, and circulates copies. The full-resolution originals stay intact, no cloud compression, no waiting for uploads, no "storage full" warnings.
+
+### Local AI model sharing
+
+Large language models are huge. A single Ollama model can be 4-8GB, and a full local AI setup with multiple models can easily hit 50GB or more. If your friend group is interested in running local LLMs, a sneakernet means one person downloads the models and passes the drive around instead of everyone pulling the same multi-gigabyte files over the internet.
+
+This is exactly the workflow that [AirGap Transfer was designed for](/blog/demo-transfer-ollama). It handles multi-USB orchestration for packages that exceed a single drive's capacity, with manifest tracking and hash verification across chunks. What works for deploying AI models to secure facilities works just as well for sharing them with friends.
+
+### Game mods and creative assets
+
+Modding communities have been running informal sneakernets for decades — sharing mod packs, texture overhauls, and custom maps on physical media at LAN parties and meetups. A deliberate sneakernet makes this systematic. Maintain a drive of vetted, compatible mod packs for the games your group plays. Add asset libraries for creative work — Blender models, music samples, Lightroom presets. The physical medium encourages curation over hoarding.
+
+## The privacy angle
+
+This isn't the primary reason to start a sneakernet, but it's worth noting: a sneakernet is inherently private.
+
+No cloud provider scans or indexes your shared files. There's no metadata trail of who shared what with whom and when. There are no analytics dashboards tracking how many times a file was accessed. You control the copies — there's no "shared link" that lives forever and can be revoked by a service provider, leaked by a breach, or included in a data request.
+
+The data exists in exactly the places you put it and nowhere else. Not on a server in a data center you've never visited, managed by a company whose privacy policy is 8,000 words long. On your drive, and on your friend's drive. That's it.
+
+This matters more than most people realize. For an evidence-based look at why privacy is important — even when you have "nothing to hide" — see [The Case for Privacy](/blog/the-case-for-privacy).
+
+## Getting started
+
+Start small. One drive. One friend. One batch of files.
+
+Pick something worth sharing — a folder of photos, a curated music collection, a set of useful tools — and load it onto a USB drive. Next time you see your friend, hand it over. That's your sneakernet. See what happens. If it's useful, do it again. If other people are interested, expand the group.
+
+The tools don't need to be complicated. For casual exchanges, drag-and-drop is fine. When your sneakernet grows and integrity matters, [AirGap Transfer](/blog/introducing-airgap-tools) adds hash verification, multi-drive chunking, and manifest tracking. For best practices on keeping your USB drives secure, see [USB Security for Airgap Data Transfers](/blog/usb-security-airgap-transfers).
+
+The oldest file-sharing protocol is still one of the best. It's fast, it's private, it scales to any file size, and it comes with a built-in social layer that no cloud service can replicate. All you need is a drive and a friend.
