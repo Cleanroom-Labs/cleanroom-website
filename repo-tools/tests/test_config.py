@@ -74,10 +74,10 @@ class TestLoadConfig:
         config = load_config(tmp_path)
         assert config.sync_groups == {}
 
-    def test_missing_config_raises(self, tmp_path: Path):
-        """A missing config file should raise FileNotFoundError."""
-        with pytest.raises(FileNotFoundError):
-            load_config(tmp_path)
+    def test_missing_config_returns_empty(self, tmp_path: Path):
+        """A missing config file should return empty config (no sync groups)."""
+        config = load_config(tmp_path)
+        assert config.sync_groups == {}
 
     def test_invalid_toml_raises(self, tmp_path: Path):
         """Invalid TOML should raise ValueError."""

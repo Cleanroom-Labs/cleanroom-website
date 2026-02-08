@@ -261,9 +261,10 @@ class TestRepoInfoHelpers:
 
 class TestFindRepoRoot:
     def test_finds_root_from_subdirectory(self, tmp_submodule_tree: Path):
-        """Should find the repo root from a subdirectory."""
-        # The tmp_submodule_tree has .repo-tools.toml
-        result = find_repo_root(start=tmp_submodule_tree / "technical-docs")
+        """Should find the repo root from a plain subdirectory."""
+        subdir = tmp_submodule_tree / "some-subdir"
+        subdir.mkdir()
+        result = find_repo_root(start=subdir)
         assert result == tmp_submodule_tree
 
     def test_finds_root_from_root(self, tmp_submodule_tree: Path):
@@ -272,7 +273,12 @@ class TestFindRepoRoot:
         assert result == tmp_submodule_tree
 
     def test_raises_when_not_found(self, tmp_path: Path):
-        """Should raise FileNotFoundError when no repo root exists."""
+        """Should raise FileNotFoundError when no git repo exists."""
         import pytest
         with pytest.raises(FileNotFoundError, match="Could not find"):
             find_repo_root(start=tmp_path)
+
+    def test_finds_root_without_config(self, tmp_git_repo: Path):
+        """Should find the repo root even without .repo-tools.toml."""
+        result = find_repo_root(start=tmp_git_repo)
+        assert result == tmp_git_repo

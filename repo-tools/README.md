@@ -4,7 +4,9 @@ Git submodule management tools for the Cleanroom Labs website repository.
 
 ## Overview
 
-`repo-tools` provides a unified CLI for managing the complex git submodule hierarchy in the Cleanroom Labs website. The package includes four subcommands for verifying, synchronizing, pushing, and visualizing nested submodules.
+`repo-tools` provides a unified CLI for managing the complex git submodule hierarchy in the Cleanroom Labs website. The package includes subcommands for verifying, synchronizing, pushing, visualizing, and managing worktrees of nested submodules.
+
+All subcommands can be run from any subdirectory within the repository. Configuration (`.repo-tools.toml`) is optional — commands gracefully handle repos without it.
 
 ## Installation
 
@@ -27,7 +29,7 @@ pip install -e ".[dev]"
 
 ### `repo-tools check`
 
-Verify that all submodules are on branches (not detached HEAD) and that all instances of the common submodule (`cleanroom-website-common`) are at the same commit.
+Verify that all submodules are on branches (not detached HEAD) and that all sync-group submodules are at the same commit. When no sync groups are configured (no `.repo-tools.toml`), the sync-group check is skipped with a warning.
 
 ```bash
 # Basic check
@@ -63,14 +65,17 @@ repo-tools push --force
 
 ### `repo-tools sync`
 
-Synchronize the common submodule (`cleanroom-website-common`) across all locations in the repository tree. By default, syncs to the latest commit on `main` from the standalone theme repository.
+Synchronize submodule sync groups (defined in `.repo-tools.toml`) across all locations in the repository tree. By default, syncs to the latest commit on `main` from the standalone repo or remote URL.
 
 ```bash
-# Sync to latest main, commit, and push
+# Sync all groups to latest
 repo-tools sync
 
-# Sync to specific commit
-repo-tools sync abc1234
+# Sync just the "common" group
+repo-tools sync common
+
+# Sync "common" to a specific commit
+repo-tools sync common abc1234
 
 # Preview changes without making them
 repo-tools sync --dry-run
@@ -80,40 +85,31 @@ repo-tools sync --no-push
 
 # Skip remote sync validation
 repo-tools sync --force
-
-# Specify custom theme repository path
-repo-tools sync --theme-repo ~/custom/path/cleanroom-website-common
-
-# Verify generated files are up-to-date after sync
-repo-tools sync --verify
-
-# Auto-regenerate stale generated files (implies --verify)
-repo-tools sync --rebuild
 ```
 
 **Flags:**
+- `group` (positional) — Sync group name (syncs all groups if omitted)
 - `commit` (positional) — Target commit SHA (optional)
 - `--dry-run` — Preview changes without making them
 - `--no-push` — Commit only, skip pushing to remotes
 - `--force` — Skip remote sync validation
-- `--theme-repo PATH` — Path to standalone theme repository (default: `~/Projects/cleanroom-website-common`)
-- `--verify` — Check for stale generated files after sync
-- `--rebuild` — Auto-regenerate stale files after sync
 
 **Exit codes:**
-- `0` — Sync successful
+- `0` — Sync successful (or no sync groups configured)
 - `1` — Sync failed or validation error
 
 ### `repo-tools visualize`
 
-Open an interactive tkinter GUI showing the git repository hierarchy and submodule relationships. Nodes are color-coded by status:
+Open an interactive tkinter GUI showing the git repository hierarchy and submodule relationships. Can be run from any subdirectory within a repository. Nodes are color-coded by status:
 
 - **Green** — Clean working directory
 - **Yellow** — Uncommitted changes
 - **Red** — Error or detached HEAD
 
+Sync-group submodules are outlined with a distinct border color per group.
+
 ```bash
-# Visualize current repository
+# Visualize current repository (auto-detects repo root)
 repo-tools visualize
 
 # Visualize specific repository
@@ -125,6 +121,24 @@ The GUI supports:
 - Panning (click and drag)
 - Node selection (click node for details)
 - Interactive submodule operations
+
+### `repo-tools worktree`
+
+Create and remove git worktrees with automatic recursive submodule initialization.
+
+```bash
+# Create a new worktree with a new branch
+repo-tools worktree add --branch feature-x ../feature-x-wt
+
+# Create a worktree using an existing branch
+repo-tools worktree add --branch existing-branch --checkout ../wt-path
+
+# Remove a worktree
+repo-tools worktree remove ../feature-x-wt
+
+# Force-remove a worktree with uncommitted changes
+repo-tools worktree remove --force ../feature-x-wt
+```
 
 ## Development
 
@@ -147,10 +161,12 @@ repo-tools/
 │   └── repo_tools/
 │       ├── __init__.py
 │       ├── cli.py              # Main CLI entry point
+│       ├── config.py           # .repo-tools.toml loader
 │       ├── repo_utils.py       # Shared git utilities
 │       ├── check.py            # check subcommand
 │       ├── push.py             # push subcommand
 │       ├── sync.py             # sync subcommand
+│       ├── worktree.py         # worktree subcommand
 │       └── visualizer/         # visualize subcommand
 │           ├── __init__.py
 │           ├── __main__.py
