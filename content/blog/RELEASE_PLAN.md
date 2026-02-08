@@ -6,7 +6,7 @@ Weekly cadence, starting after v1.0.0 software release. Each post is released on
 
 Lead with standalone, discussion-generating content that provides value independent of the product. Build credibility and audience before introducing the tools. On HackerNews and Reddit, genuinely useful content with an organic connection to a product performs far better than overt advertising.
 
-The sequence follows a narrative arc: **Problem → Philosophy → Strategy → Threats → Solution → Practice → Community**
+The sequence follows a narrative arc: **Problem → Philosophy → Strategy → Threats → Solution → Practice → Community → New Features**
 
 ## Release Schedule
 
@@ -63,6 +63,14 @@ The sequence follows a narrative arc: **Problem → Philosophy → Strategy → 
 
 **Social media angle:** This is the most broadly appealing post. Submit to r/selfhosted, r/datahoarder, r/homelab, and r/privacy. The tone is casual enough for general tech communities. On HN, this is the kind of "why not?" post that generates nostalgic discussion about sneakernets, BBS culture, and the joy of physical media.
 
+### Phase 7: New Features (Week 12+)
+
+| Week | Post | Slug | Why This Order |
+|------|------|------|----------------|
+| 12 | **Maintaining Air-Gapped Systems with Bills of Materials** | `maintaining-airgapped-systems-with-boms` | Introduces v1.1 features: SBOM/CBOM generation in Deploy and offline vulnerability scanning. After the initial tool launch and demos, this shows the long-term maintenance story — how to keep air-gapped systems secure and up-to-date using Bills of Materials and offline vulnerability databases. Positions the product as a complete lifecycle tool, not just a deployment tool. |
+
+**Social media angle:** Technical and compliance-focused. Submit to r/netsec, r/cybersecurity, r/devops, and r/programming. The SBOM/CBOM angle is timely given U.S. regulatory requirements (2021 executive order, CISA guidance). On HN, the "offline vulnerability scanning" angle is novel and practical.
+
 ## Platform-Specific Notes
 
 ### HackerNews
@@ -100,3 +108,4 @@ Titles that work on HN are factual, specific, and avoid marketing language:
 | 9 | Packaging Rust Applications for Deployment to Systems Without Internet |
 | 10 | Deploying Ollama and Large Models Across the Air Gap with Multi-USB Orchestration |
 | 11 | Start a Sneakernet with Your Friends — File Sharing Without the Cloud |
+| 12 | Maintaining Air-Gapped Systems with SBOMs, CBOMs, and Offline Vulnerability Scanning |
