@@ -20,25 +20,24 @@ This module:
 6. Pushes all changes (unless --no-push)
 """
 
+from __future__ import annotations
+
 import argparse
-import os
 import re
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 from repo_tools.repo_utils import (
+    DEFAULT_THEME_REPO,
     Colors,
     RepoInfo,
     RepoStatus,
+    find_repo_root,
     print_status_table,
+    run_git,
     topological_sort_repos,
 )
-
-
-# Default standalone theme repo path
-DEFAULT_THEME_REPO = Path.home() / "Projects" / "cleanroom-website-common"
 
 
 @dataclass
@@ -47,14 +46,13 @@ class ThemeSubmodule:
     path: Path
     parent_repo: Path
     submodule_rel_path: str  # Path relative to parent repo (e.g., "source/theme")
-    current_commit: Optional[str] = None
+    current_commit: str | None = None
 
     def git(self, *args: str, check: bool = True, capture: bool = True) -> subprocess.CompletedProcess:
         """Run a git command in this submodule."""
-        cmd = ["git", "-C", str(self.path)] + list(args)
-        return subprocess.run(cmd, capture_output=capture, text=True, check=check)
+        return run_git(self.path, *args, check=check, capture=capture)
 
-    def get_current_commit(self) -> Optional[str]:
+    def get_current_commit(self) -> str | None:
         """Get current HEAD commit."""
         result = self.git("rev-parse", "HEAD", check=False)
         return result.stdout.strip() if result.returncode == 0 else None
@@ -183,7 +181,7 @@ def get_parent_repos_for_submodules(
 
 
 def resolve_target_commit(
-    commit_arg: Optional[str],
+    commit_arg: str | None,
     theme_repo_path: Path
 ) -> tuple[str, str]:
     """
@@ -424,15 +422,11 @@ changes, to prevent repository divergence. Use --force to skip this check.
         args.verify = True
 
     # Validate execution context
-    script_dir = Path(__file__).parent.resolve()
-    repo_root = script_dir.parent.parent.parent
-
-    if not (repo_root / "scripts" / "build-docs.mjs").exists():
-        print(Colors.red("Error: Must run from cleanroom-website repository"))
-        print(f"Current directory: {Path.cwd()}")
+    try:
+        repo_root = find_repo_root()
+    except FileNotFoundError as e:
+        print(Colors.red(str(e)))
         return 1
-
-    os.chdir(repo_root)
 
     # Phase 0: Push ahead theme submodules (before resolving target commit)
     # This handles the local submodule workflow where cleanroom-website/theme

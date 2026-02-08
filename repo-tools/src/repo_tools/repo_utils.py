@@ -3,6 +3,7 @@ repo_tools/repo_utils.py
 Shared utilities for repository operations in cleanroom-website scripts.
 
 Provides:
+
 - Colors: ANSI color helpers for terminal output
 - RepoStatus: Enum for repository validation states
 - RepoInfo: Dataclass representing a git repository with validation/push methods
@@ -10,14 +11,19 @@ Provides:
 - topological_sort_repos(): Sort repos for bottom-up operations
 - print_status_table(): Formatted status output
 """
+from __future__ import annotations
 
 import subprocess
+import sys
 from dataclasses import dataclass, field
 from enum import Enum
 from functools import cached_property
 from graphlib import TopologicalSorter
 from pathlib import Path
-from typing import Optional
+
+
+# Default standalone theme repo path (used by sync and cli)
+DEFAULT_THEME_REPO = Path.home() / "Projects" / "cleanroom-website-common"
 
 
 class Colors:
@@ -27,22 +33,33 @@ class Colors:
     YELLOW = '\033[1;33m'
     BLUE = '\033[0;34m'
     NC = '\033[0m'  # No Color
+    _enabled: bool = True
+
+    @classmethod
+    def disable(cls):
+        """Disable colored output."""
+        cls._enabled = False
 
     @classmethod
     def red(cls, text: str) -> str:
-        return f"{cls.RED}{text}{cls.NC}"
+        return f"{cls.RED}{text}{cls.NC}" if cls._enabled else text
 
     @classmethod
     def green(cls, text: str) -> str:
-        return f"{cls.GREEN}{text}{cls.NC}"
+        return f"{cls.GREEN}{text}{cls.NC}" if cls._enabled else text
 
     @classmethod
     def yellow(cls, text: str) -> str:
-        return f"{cls.YELLOW}{text}{cls.NC}"
+        return f"{cls.YELLOW}{text}{cls.NC}" if cls._enabled else text
 
     @classmethod
     def blue(cls, text: str) -> str:
-        return f"{cls.BLUE}{text}{cls.NC}"
+        return f"{cls.BLUE}{text}{cls.NC}" if cls._enabled else text
+
+
+# Auto-detect TTY for color output
+if not (hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()):
+    Colors.disable()
 
 
 class RepoStatus(Enum):
@@ -57,6 +74,12 @@ class RepoStatus(Enum):
     DIVERGED = "diverged"
 
 
+def run_git(path: Path, *args: str, check: bool = True, capture: bool = True) -> subprocess.CompletedProcess:
+    """Run a git command in the given directory."""
+    cmd = ["git", "-C", str(path)] + list(args)
+    return subprocess.run(cmd, capture_output=capture, text=True, check=check)
+
+
 @dataclass
 class RepoInfo:
     """Information about a git repository."""
@@ -64,12 +87,12 @@ class RepoInfo:
     repo_root: Path
 
     # Populated during validation
-    branch: Optional[str] = None
-    ahead_count: Optional[str] = None
-    behind_count: Optional[str] = None
+    branch: str | None = None
+    ahead_count: str | None = None
+    behind_count: str | None = None
     status: RepoStatus = RepoStatus.OK
-    error_message: Optional[str] = None
-    parent: Optional['RepoInfo'] = field(default=None, repr=False)
+    error_message: str | None = None
+    parent: RepoInfo | None = field(default=None, repr=False)
 
     @cached_property
     def rel_path(self) -> str:
@@ -85,13 +108,7 @@ class RepoInfo:
 
     def git(self, *args: str, check: bool = True, capture: bool = True) -> subprocess.CompletedProcess:
         """Run a git command in this repository."""
-        cmd = ["git", "-C", str(self.path)] + list(args)
-        return subprocess.run(
-            cmd,
-            capture_output=capture,
-            text=True,
-            check=check,
-        )
+        return run_git(self.path, *args, check=check, capture=capture)
 
     def has_uncommitted_changes(self) -> bool:
         """Check if repo has uncommitted changes."""
@@ -99,7 +116,7 @@ class RepoInfo:
         cached_result = self.git("diff", "--cached", "--quiet", check=False)
         return diff_result.returncode != 0 or cached_result.returncode != 0
 
-    def get_branch(self) -> Optional[str]:
+    def get_branch(self) -> str | None:
         """Get current branch name, or None if detached HEAD."""
         result = self.git("branch", "--show-current", check=False)
         branch = result.stdout.strip()
@@ -128,7 +145,7 @@ class RepoInfo:
 
         # No upstream - check if remote branch exists
         ls_result = self.git("ls-remote", "--heads", "origin", branch, check=False)
-        if branch in ls_result.stdout:
+        if f"refs/heads/{branch}" in ls_result.stdout:
             count_result = self.git("rev-list", "--count", "--left-right", f"origin/{branch}...HEAD", check=False)
             if count_result.returncode == 0:
                 parts = count_result.stdout.strip().split()
@@ -207,8 +224,8 @@ class RepoInfo:
 
     def push(self, dry_run: bool = False) -> bool:
         """Push repository to remote. Returns True on success."""
-        # Branch must be set (validation ensures this)
-        assert self.branch is not None, "Cannot push without a branch"
+        if self.branch is None:
+            raise RuntimeError("Cannot push without a branch (call validate() first)")
 
         if self.ahead_count == "new-branch":
             print(f"  {Colors.blue('Pushing')} {self.rel_path} {Colors.yellow(f'(new branch: {self.branch})')}")
@@ -290,7 +307,7 @@ class RepoInfo:
             return "unknown"
         return result.stdout.strip()
 
-    def get_remote_commit_sha(self, branch: str, short: bool = True) -> Optional[str]:
+    def get_remote_commit_sha(self, branch: str, short: bool = True) -> str | None:
         """
         Get the commit SHA of the remote branch.
 
@@ -428,3 +445,22 @@ def print_status_table(repos: list[RepoInfo], show_behind: bool = False) -> None
 
     print("  " + "─" * 70)
     print()
+
+
+def find_repo_root(start: Path | None = None) -> Path:
+    """Walk up from start (default: cwd) to find the cleanroom-website repo root.
+
+    Looks for a directory containing both a .git directory and
+    scripts/build-docs.mjs (the sentinel file for this repository).
+
+    Raises:
+        FileNotFoundError: If no matching directory is found.
+    """
+    current = (start or Path.cwd()).resolve()
+    for directory in [current, *current.parents]:
+        if (directory / ".git").exists() and (directory / "scripts" / "build-docs.mjs").exists():
+            return directory
+    raise FileNotFoundError(
+        "Could not find cleanroom-website repository root.\n"
+        f"Searched from: {current}"
+    )

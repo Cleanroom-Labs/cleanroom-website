@@ -9,13 +9,13 @@ Usage (via entry point):
 """
 
 import argparse
-import os
 from pathlib import Path
 
 from repo_tools.repo_utils import (
     Colors,
     RepoStatus,
     discover_repos,
+    find_repo_root,
     print_status_table,
     topological_sort_repos,
 )
@@ -52,15 +52,11 @@ The script validates that each repo:
         args = parser.parse_args(args)
 
     # Validate execution context
-    script_dir = Path(__file__).parent.resolve()
-    repo_root = script_dir.parent.parent.parent
-
-    if not (repo_root / "scripts" / "build-docs.mjs").exists():
-        print(Colors.red("Error: Must run from cleanroom-website repository"))
-        print(f"Current directory: {Path.cwd()}")
+    try:
+        repo_root = find_repo_root()
+    except FileNotFoundError as e:
+        print(Colors.red(str(e)))
         return 1
-
-    os.chdir(repo_root)
 
     # Discovery phase
     print(Colors.blue("Discovering repositories..."))

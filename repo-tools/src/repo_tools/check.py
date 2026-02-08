@@ -11,7 +11,7 @@ Usage (via entry point):
 import argparse
 from pathlib import Path
 
-from repo_tools.repo_utils import Colors, RepoInfo, discover_repos
+from repo_tools.repo_utils import Colors, RepoInfo, discover_repos, find_repo_root
 
 
 def get_tag_or_branch(repo: RepoInfo) -> str | None:
@@ -109,9 +109,13 @@ def run(args=None) -> int:
         args = parser.parse_args(args)
 
     # Determine repo root
-    repo_root = Path(__file__).parent.parent.parent.parent.resolve()
-    technical_docs = repo_root / "technical-docs"
+    try:
+        repo_root = find_repo_root()
+    except FileNotFoundError as e:
+        print(Colors.red(str(e)))
+        return 1
 
+    technical_docs = repo_root / "technical-docs"
     if not technical_docs.exists():
         print(f"{Colors.red('Error')}: technical-docs not found")
         return 1

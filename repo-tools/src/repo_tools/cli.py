@@ -4,8 +4,11 @@ Main CLI entry point: repo-tools {check,push,sync,visualize}
 """
 
 import argparse
+import os
 import sys
 from pathlib import Path
+
+from repo_tools.repo_utils import Colors, DEFAULT_THEME_REPO
 
 
 def main(argv=None):
@@ -22,6 +25,11 @@ examples:
   repo-tools sync abc1234       Sync to specific commit
   repo-tools visualize          Open interactive submodule visualizer
 """,
+    )
+    parser.add_argument(
+        "--no-color",
+        action="store_true",
+        help="Disable colored output",
     )
     subparsers = parser.add_subparsers(dest="command")
 
@@ -95,7 +103,7 @@ examples:
     sync_parser.add_argument(
         "--theme-repo",
         type=Path,
-        default=Path.home() / "Projects" / "cleanroom-website-common",
+        default=DEFAULT_THEME_REPO,
         help="Path to standalone theme repo",
     )
     sync_parser.add_argument(
@@ -124,6 +132,10 @@ examples:
     )
 
     args = parser.parse_args(argv)
+
+    # Handle --no-color and NO_COLOR env var
+    if args.no_color or os.environ.get("NO_COLOR") is not None:
+        Colors.disable()
 
     if not args.command:
         parser.print_help()
