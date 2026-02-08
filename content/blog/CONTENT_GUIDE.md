@@ -11,6 +11,7 @@ This document describes the layered architecture of the blog content and how pos
 | **Specific threats** | Deep dives into individual threat vectors | Technical, well-sourced, practical | `air-gapping-in-the-quantum-era.mdx`, `air-gapping-your-software-supply-chain.mdx`, `usb-security-airgap-transfers.mdx` |
 | **Tools** | What we built and how they work together | Practical, feature-focused | `introducing-airgap-tools.mdx` |
 | **Demos** | Step-by-step walkthroughs of specific workflows | Tutorial-style, hands-on | `demo-deploy-rust-app.mdx`, `demo-transfer-ollama.mdx`, `demo-whisper-quick-capture.mdx` |
+| **Community** | Fun, approachable use cases that show air-gapping in everyday life | Casual, encouraging, social | `start-a-sneakernet.mdx` |
 
 ## Cross-Referencing Conventions
 
@@ -32,5 +33,6 @@ When writing a new post, consider which layer it belongs to:
 3. **Is it a deep dive into a specific threat?** → "Specific threats" layer
 4. **Is it introducing a tool or capability?** → "Tools" layer
 5. **Is it a walkthrough of how to do something?** → "Demos" layer
+6. **Is it a fun, approachable use case for everyday life?** → "Community" layer
 
-Each layer builds on the ones above it. A demo post can assume the reader has access to the "why" if they want it, but should be self-contained enough to follow without it.
+Each layer builds on the ones above it. A demo post can assume the reader has access to the "why" if they want it, but should be self-contained enough to follow without it. Community posts should be self-contained and accessible to newcomers — they're entry points, not deep dives.
