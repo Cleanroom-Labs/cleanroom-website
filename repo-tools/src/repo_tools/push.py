@@ -1,20 +1,18 @@
-#!/usr/bin/env python3
 """
-scripts/push-submodules.py
+repo_tools/push.py
 Pushes committed changes through nested submodules bottom-up using topological sort.
 
-Usage:
-    ./scripts/push-submodules.py           # Push all repos with unpushed commits
-    ./scripts/push-submodules.py --dry-run # Preview what would be pushed
-    ./scripts/push-submodules.py --force   # Skip validation (recovery scenarios)
+Usage (via entry point):
+    repo-push           # Push all repos with unpushed commits
+    repo-push --dry-run # Preview what would be pushed
+    repo-push --force   # Skip validation (recovery scenarios)
 """
 
 import argparse
 import os
-import sys
 from pathlib import Path
 
-from lib.repo_utils import (
+from repo_tools.repo_utils import (
     Colors,
     RepoStatus,
     discover_repos,
@@ -23,11 +21,12 @@ from lib.repo_utils import (
 )
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Push committed changes through nested submodules bottom-up.",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
+def run(args=None) -> int:
+    if not isinstance(args, argparse.Namespace):
+        parser = argparse.ArgumentParser(
+            description="Push committed changes through nested submodules bottom-up.",
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+            epilog="""
 Examples:
   %(prog)s                    # Push all repos with unpushed commits
   %(prog)s --dry-run          # Preview what would be pushed
@@ -39,22 +38,22 @@ The script validates that each repo:
   - Is on a branch (for repos that will be pushed)
   - Has commits ahead of remote
 """,
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Show what would be pushed without pushing",
-    )
-    parser.add_argument(
-        "--force",
-        action="store_true",
-        help="Skip validation (for recovery scenarios)",
-    )
-    args = parser.parse_args()
+        )
+        parser.add_argument(
+            "--dry-run",
+            action="store_true",
+            help="Show what would be pushed without pushing",
+        )
+        parser.add_argument(
+            "--force",
+            action="store_true",
+            help="Skip validation (for recovery scenarios)",
+        )
+        args = parser.parse_args(args)
 
     # Validate execution context
     script_dir = Path(__file__).parent.resolve()
-    repo_root = script_dir.parent
+    repo_root = script_dir.parent.parent.parent
 
     if not (repo_root / "scripts" / "build-docs.mjs").exists():
         print(Colors.red("Error: Must run from cleanroom-website repository"))
@@ -130,7 +129,7 @@ The script validates that each repo:
         print(f"{Colors.yellow('Dry run complete.')} Would push {pushed_count} repositories.")
         print()
         print(Colors.blue("To execute:"))
-        print("  ./scripts/push-submodules.py")
+        print("  repo-tools push")
     elif push_failed:
         print(Colors.red("Some pushes failed."))
         print()
@@ -143,11 +142,7 @@ The script validates that each repo:
         print(Colors.green(f"Successfully pushed {pushed_count} repositories."))
         print()
         print(Colors.blue("Next steps:"))
-        print("  1. Verify: ./scripts/check-submodules.py")
+        print("  1. Verify: repo-tools check")
         print("  2. Check CI status on GitHub")
 
     return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())

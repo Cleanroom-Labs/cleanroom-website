@@ -11,7 +11,7 @@ from tkinter import messagebox, simpledialog
 from typing import Callable, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from scripts.lib.repo_utils import RepoInfo
+    from repo_tools.repo_utils import RepoInfo
 
 
 class BranchPickerDialog(simpledialog.Dialog):
@@ -222,7 +222,7 @@ class ActionHandler:
     def push_all(self, repos: list['RepoInfo']) -> None:
         """Push all repositories in dependency order."""
         # Import here to avoid circular imports
-        from scripts.lib.repo_utils import topological_sort_repos
+        from repo_tools.repo_utils import topological_sort_repos
 
         # Validate all repos first
         invalid = []

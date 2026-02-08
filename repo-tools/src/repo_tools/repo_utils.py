@@ -1,5 +1,5 @@
 """
-scripts/lib/repo_utils.py
+repo_tools/repo_utils.py
 Shared utilities for repository operations in cleanroom-website scripts.
 
 Provides:

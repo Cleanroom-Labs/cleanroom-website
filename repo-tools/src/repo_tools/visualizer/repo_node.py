@@ -9,7 +9,7 @@ import tkinter as tk
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from scripts.lib.repo_utils import RepoInfo
+    from repo_tools.repo_utils import RepoInfo
 
 # Status colors
 STATUS_COLORS = {

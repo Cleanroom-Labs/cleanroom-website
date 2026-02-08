@@ -3,7 +3,8 @@
 Entry point for the git submodule visualizer.
 
 Usage:
-    python -m scripts.submodule_visualizer [path]
+    python -m repo_tools.visualizer [path]
+    repo-tools visualize [path]
 
 Args:
     path: Path to the git repository (default: current directory)
@@ -14,18 +15,19 @@ import sys
 from pathlib import Path
 
 
-def main() -> int:
-    """Main entry point."""
-    parser = argparse.ArgumentParser(
-        description="Visualize git repositories and their submodules"
-    )
-    parser.add_argument(
-        "path",
-        nargs="?",
-        default=".",
-        help="Path to the git repository (default: current directory)",
-    )
-    args = parser.parse_args()
+def run(args=None) -> int:
+    """Run the visualizer, callable from the CLI entry point."""
+    if not isinstance(args, argparse.Namespace):
+        parser = argparse.ArgumentParser(
+            description="Visualize git repositories and their submodules"
+        )
+        parser.add_argument(
+            "path",
+            nargs="?",
+            default=".",
+            help="Path to the git repository (default: current directory)",
+        )
+        args = parser.parse_args(args)
 
     repo_path = Path(args.path).resolve()
 
@@ -43,6 +45,11 @@ def main() -> int:
     app = SubmoduleVisualizerApp(repo_path)
     app.run()
     return 0
+
+
+def main() -> int:
+    """Main entry point."""
+    return run()
 
 
 if __name__ == "__main__":

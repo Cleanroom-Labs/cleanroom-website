@@ -32,7 +32,7 @@ git submodule update --recursive --remote
 
 ### Check Status
 ```bash
-./scripts/check-submodules.py
+repo-tools check
 ```
 
 ### Update a Project
@@ -99,7 +99,7 @@ For troubleshooting, see [TROUBLESHOOTING.md](TROUBLESHOOTING.md#submodule-issue
 ## Best Practices
 
 1. Use helper scripts for multi-level updates
-2. Run `./scripts/check-submodules.py` before committing
+2. Run `repo-tools check` before committing
 3. Use semantic versioning for documentation releases
 4. Keep docs and code versions synchronized
 5. Test builds locally before pushing
@@ -108,7 +108,7 @@ For troubleshooting, see [TROUBLESHOOTING.md](TROUBLESHOOTING.md#submodule-issue
 
 | Script | Purpose |
 |--------|---------|
-| `check-submodules.py` | Verify submodule health |
+| `repo-tools check` | Verify submodule health |
 | `update-project-docs.sh` | Update project to specific version |
 | `add-new-project.sh` | Add new project documentation |
 | `build-single-project.sh` | Build project docs locally |
