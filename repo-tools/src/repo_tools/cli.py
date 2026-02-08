@@ -24,6 +24,8 @@ examples:
   repo-tools sync               Sync common submodule to latest
   repo-tools sync abc1234       Sync to specific commit
   repo-tools visualize          Open interactive submodule visualizer
+  repo-tools worktree add my-feature ../website-wt1
+  repo-tools worktree remove ../website-wt1
 """,
     )
     parser.add_argument(
@@ -131,6 +133,59 @@ examples:
         help="Path to git repository (default: current directory)",
     )
 
+    # --- repo-tools worktree ---
+    worktree_parser = subparsers.add_parser(
+        "worktree",
+        help="Manage git worktrees with automatic submodule initialization",
+        description="Create and remove git worktrees with recursive submodule "
+        "initialization using the main worktree as a reference.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""\
+examples:
+  repo-tools worktree add my-feature ../cleanroom-website-wt1
+  repo-tools worktree add --checkout existing-branch ../wt2
+  repo-tools worktree remove ../cleanroom-website-wt1
+  repo-tools worktree remove --force ../cleanroom-website-wt1
+""",
+    )
+    worktree_subparsers = worktree_parser.add_subparsers(dest="worktree_command")
+
+    worktree_add_parser = worktree_subparsers.add_parser(
+        "add",
+        help="Create a new worktree with submodules initialized",
+        description="Create a git worktree on a new or existing branch, then "
+        "recursively initialize all submodules with URLs pointing to the main "
+        "worktree's copies.",
+    )
+    worktree_add_parser.add_argument(
+        "branch",
+        help="Branch name to create (or checkout with --checkout)",
+    )
+    worktree_add_parser.add_argument(
+        "path",
+        help="Path where the worktree should be created",
+    )
+    worktree_add_parser.add_argument(
+        "--checkout",
+        action="store_true",
+        help="Checkout an existing branch instead of creating a new one",
+    )
+
+    worktree_remove_parser = worktree_subparsers.add_parser(
+        "remove",
+        help="Remove a worktree and prune stale entries",
+        description="Remove a git worktree and run git worktree prune.",
+    )
+    worktree_remove_parser.add_argument(
+        "path",
+        help="Path to the worktree to remove",
+    )
+    worktree_remove_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Force removal even if the worktree has uncommitted changes",
+    )
+
     args = parser.parse_args(argv)
 
     # Handle --no-color and NO_COLOR env var
@@ -155,6 +210,13 @@ examples:
 
     if args.command == "visualize":
         from repo_tools.visualizer.__main__ import run
+        return run(args)
+
+    if args.command == "worktree":
+        if not args.worktree_command:
+            worktree_parser.print_help()
+            return 2
+        from repo_tools.worktree import run
         return run(args)
 
     parser.print_help()

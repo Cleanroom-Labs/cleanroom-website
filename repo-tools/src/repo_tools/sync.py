@@ -283,9 +283,8 @@ def push_ahead_theme_submodules(
     """
     Push any theme submodules that are ahead of their remotes.
 
-    This handles the local submodule workflow where changes are made in
-    cleanroom-website/common and need to be pushed to the local
-    remote (~/Projects/cleanroom-website-common) before syncing to other locations.
+    Ensures changes are available on the remote before syncing to other
+    locations in the tree.
 
     Returns True if any were pushed.
     """
@@ -429,8 +428,8 @@ changes, to prevent repository divergence. Use --force to skip this check.
         return 1
 
     # Phase 0: Push ahead theme submodules (before resolving target commit)
-    # This handles the local submodule workflow where cleanroom-website/theme
-    # may have commits that need to be pushed to the local remote first.
+    # Ensure any sync-group submodules that are ahead of their remotes are
+    # pushed before we resolve the target commit.
     print(Colors.blue("Checking for ahead theme submodules..."))
     theme_submodules_early = discover_theme_submodules(repo_root)
     if push_ahead_theme_submodules(theme_submodules_early, args.dry_run):

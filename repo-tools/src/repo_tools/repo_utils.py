@@ -193,7 +193,7 @@ class RepoInfo:
         if not self.has_remote():
             self.status = RepoStatus.NO_REMOTE
             self.error_message = "No remote 'origin' configured"
-            # Some repos in this workspace intentionally have no remote (e.g. local-only setups).
+            # Some submodules may not have a remote configured.
             return allow_no_remote
 
         # Check commits ahead/behind
