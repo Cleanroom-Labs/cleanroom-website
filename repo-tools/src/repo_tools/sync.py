@@ -348,19 +348,27 @@ def _sync_group(
 
     # Phase 2: Discover submodules
     print(Colors.blue(f"Discovering {group.name} submodule locations..."))
-    submodules = discover_sync_submodules(repo_root, group.url_match)
+    all_submodules = discover_sync_submodules(repo_root, group.url_match)
 
-    if not submodules:
+    if not all_submodules:
         print(Colors.red(f"Error: No submodules found matching '{group.url_match}'"))
         return 1
 
-    print(f"Found {Colors.green(str(len(submodules)))} submodule locations:")
-    for submodule in submodules:
+    allow_drift = set(group.allow_drift)
+    submodules = [
+        s for s in all_submodules
+        if str(s.path.relative_to(repo_root)) not in allow_drift
+    ]
+
+    print(f"Found {Colors.green(str(len(all_submodules)))} submodule locations:")
+    for submodule in all_submodules:
         rel_path = str(submodule.path.relative_to(repo_root))
         current = submodule.current_commit[:7] if submodule.current_commit else "unknown"
         target_short = target_commit[:7]
 
-        if current == target_short:
+        if rel_path in allow_drift:
+            print(f"  {Colors.yellow('~')} {rel_path} ({current}) {Colors.yellow('(allow-drift, skipped)')}")
+        elif current == target_short:
             print(f"  {Colors.green('✓')} {rel_path} (already at {current})")
         else:
             print(f"  {Colors.yellow('→')} {rel_path} ({current} → {target_short})")
