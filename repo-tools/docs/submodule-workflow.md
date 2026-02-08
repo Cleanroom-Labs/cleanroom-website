@@ -25,7 +25,7 @@ Three levels of nesting, each serving a distinct purpose:
 2. **Level 2: Technical Docs → Project Docs.** The aggregator contains submodules for each project's documentation (`cleanroom-whisper-docs`, `airgap-deploy-docs`, `airgap-transfer-docs`), plus a copy of the shared theme.
 3. **Level 3: Project Docs → Theme.** Each project doc repo embeds the shared theme (`cleanroom-theme`) so it can build independently without the aggregator.
 
-The theme submodule appears at every level. This is intentional—it allows each project to build its own documentation in isolation while maintaining consistent styling. See [ARCHITECTURE.md](ARCHITECTURE.md) for design rationale and alternatives considered.
+The theme submodule appears at every level. This is intentional—it allows each project to build its own documentation in isolation while maintaining consistent styling. See [ARCHITECTURE.md](../../docs/ARCHITECTURE.md) for design rationale and alternatives considered.
 
 ## Complexities of Deeply Nested Submodules
 
@@ -43,7 +43,7 @@ A change to project documentation requires three separate commits to reach the w
 2. Commit in `cleanroom-technical-docs` to update the submodule pointer
 3. Commit in `cleanroom-website` to update its submodule pointer
 
-Each commit records a new SHA, and the parent must be updated to reference it. There's no shortcut. Scripts like `push-submodules.py` automate this, but the fundamental mechanics remain.
+Each commit records a new SHA, and the parent must be updated to reference it. There's no shortcut. The `repo-tools push` command automates this, but the fundamental mechanics remain.
 
 ### Local-Only Submodule URLs
 
@@ -51,11 +51,11 @@ All submodules in this project point to local filesystem paths (e.g., `/Users/..
 
 ### Theme Duplication
 
-The `cleanroom-theme` submodule is referenced six times across the tree—once at the website root, once inside the technical docs aggregator, and once inside each of the three project doc repos. They all point to the same source repo, but each is an independent checkout. Updating the theme means updating it in every location, which is handled by `sync-theme.py`.
+The `cleanroom-theme` submodule is referenced six times across the tree—once at the website root, once inside the technical docs aggregator, and once inside each of the three project doc repos. They all point to the same source repo, but each is an independent checkout. Updating the theme means updating it in every location, which is handled by `repo-tools sync`.
 
 ### Submodule Drift
 
-If you work in a project docs repo directly (outside the website tree), its commits advance independently. The parent repos still point to the old SHAs until you explicitly update them. `git status` in the parent will show `modified: <submodule> (new commits)`, which is easy to miss. The `check-submodules.py` script helps catch this.
+If you work in a project docs repo directly (outside the website tree), its commits advance independently. The parent repos still point to the old SHAs until you explicitly update them. `git status` in the parent will show `modified: <submodule> (new commits)`, which is easy to miss. The `repo-tools check` command helps catch this.
 
 ## Advantages
 
@@ -65,7 +65,7 @@ Despite the complexity, this architecture provides real benefits.
 
 **Independent ownership.** Each project team owns their documentation repo. They can commit, review, and tag releases without coordinating with other teams or the website maintainer.
 
-**Standalone builds.** Because each project embeds the theme, any project can build its documentation in isolation. You don't need the full website tree to work on a single project's docs.
+**Standalone builds.** Because each project embeds the theme, any project can build its own documentation in isolation. You don't need the full website tree to work on a single project's docs.
 
 **Dual-homing.** Code repositories can include their documentation as a submodule. The same docs repo that lives inside the aggregator can also live inside the code repo, so documentation stays close to the code it describes.
 
@@ -164,24 +164,24 @@ git add cleanroom-technical-docs
 git commit -m "Update cleanroom-technical-docs submodule"
 ```
 
-This gets tedious fast—especially when multiple submodules have changed. The `push-submodules.py` script automates the push side of this workflow. It discovers every repo in the hierarchy, performs a topological sort (children before parents), validates that each repo is on a branch with no uncommitted changes, and pushes them in the correct order.
+This gets tedious fast—especially when multiple submodules have changed. The `repo-tools push` command automates the push side of this workflow. It discovers every repo in the hierarchy, performs a topological sort (children before parents), validates that each repo is on a branch with no uncommitted changes, and pushes them in the correct order.
 
 ```bash
 # Preview what would be pushed
-./scripts/push-submodules.py --dry-run
+repo-tools push --dry-run
 
 # Push all repos with unpushed commits
-./scripts/push-submodules.py
+repo-tools push
 
 # Skip validation for recovery scenarios
-./scripts/push-submodules.py --force
+repo-tools push --force
 ```
 
 The topological ordering matters because pushing a parent before its children would create a state where the parent references commits that don't exist on the remote yet.
 
 ## Syncing the Theme
 
-When the shared theme changes—a new color, an updated layout, a bug fix—it needs to be updated in every location it appears. The `sync-theme.py` script handles this end-to-end:
+When the shared theme changes—a new color, an updated layout, a bug fix—it needs to be updated in every location it appears. The `repo-tools sync` command handles this end-to-end:
 
 1. Resolves the target commit (defaults to the latest on `main` in the standalone theme repo, or accepts a specific SHA)
 2. Discovers all theme submodule locations by parsing `.gitmodules` at every level
@@ -192,20 +192,20 @@ When the shared theme changes—a new color, an updated layout, a bug fix—it n
 
 ```bash
 # Sync all theme instances to latest, commit, and push
-./scripts/sync-theme.py
+repo-tools sync
 
 # Sync to a specific commit
-./scripts/sync-theme.py abc1234
+repo-tools sync abc1234
 
 # Preview without making changes
-./scripts/sync-theme.py --dry-run
+repo-tools sync --dry-run
 
 # Commit but don't push
-./scripts/sync-theme.py --no-push
+repo-tools sync --no-push
 
 # Also check for stale generated files (e.g., icons) after syncing
-./scripts/sync-theme.py --verify
-./scripts/sync-theme.py --rebuild  # auto-regenerate stale files
+repo-tools sync --verify
+repo-tools sync --rebuild  # auto-regenerate stale files
 ```
 
 Without this script, you'd need to manually `cd` into six different directories, run `git checkout <sha>` in each, then commit your way back up the tree. The script reduces a fifteen-step process to one command.
@@ -225,7 +225,7 @@ git merge my-feature
 git submodule update --recursive
 
 # Push everything through the hierarchy
-./scripts/push-submodules.py
+repo-tools push
 ```
 
 If you have multiple worktrees with changes to merge, do them sequentially. Each merge may update submodule pointers, and you want to resolve any conflicts at each step rather than accumulating them:
@@ -239,7 +239,7 @@ git merge feature-b
 git submodule update --recursive
 # resolve conflicts if feature-b touched the same submodules as feature-a
 
-./scripts/push-submodules.py
+repo-tools push
 ```
 
 ## Managing Worktrees and Branches
@@ -325,7 +325,7 @@ git merge fix-theme-spacing
 git submodule update --recursive
 
 # Push everything in one pass
-./scripts/push-submodules.py
+repo-tools push
 ```
 
 Then clean up:

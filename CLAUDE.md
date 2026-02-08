@@ -9,9 +9,9 @@ See [README.md](README.md) for complete documentation including build commands, 
 **Build docs:** `node scripts/build-docs.mjs` (add `--version <ver>` to build a specific version)
 **Build site only:** `npm run build:web`
 
-**Check submodules:** `./scripts/check-submodules.py`
+**Check submodules:** `repo-tools check`
 
-**Sync common:** `./scripts/sync-common.py`
+**Sync common:** `repo-tools sync`
 
 **Check theme staleness:** `cd common && npm run check-staleness`
 
@@ -33,10 +33,8 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the submodule structure, de
 | File | Purpose |
 |------|---------|
 | `scripts/build-docs.mjs` | Main build orchestrator |
-| `scripts/sync-common.py` | Propagate common submodule changes to all locations |
-| `scripts/push-submodules.py` | Propagate commits through nested submodules |
+| `repo-tools/` | Git submodule management CLI (`repo-tools check/push/sync/visualize`) |
 | `scripts/generate-pdf/` | PDF report generator for website content |
-| `scripts/submodule_visualizer/` | Interactive visualization of submodule relationships |
 | `technical-docs/source/conf.py` | Master Sphinx configuration |
 | `technical-docs/scripts/update-versions-json.sh` | Update versions.json manifest for multi-version docs |
 | `common/theme_config.py` | Shared Sphinx config, version helpers, banner setup |

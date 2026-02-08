@@ -1,21 +1,17 @@
-#!/usr/bin/env python3
 """
-scripts/check-submodules.py
+repo_tools/check.py
 Verifies all submodules are correctly configured: on a branch (not detached HEAD)
 and all common (cleanroom-website-common) submodules at the same commit.
 
-Usage:
-    ./scripts/check-submodules.py           # Basic check
-    ./scripts/check-submodules.py --verbose # Show additional details
+Usage (via entry point):
+    repo-check           # Basic check
+    repo-check --verbose # Show additional details
 """
 
 import argparse
-import sys
 from pathlib import Path
 
-# Add lib directory to path
-sys.path.insert(0, str(Path(__file__).parent))
-from lib.repo_utils import Colors, RepoInfo, discover_repos
+from repo_tools.repo_utils import Colors, RepoInfo, discover_repos
 
 
 def get_tag_or_branch(repo: RepoInfo) -> str | None:
@@ -100,19 +96,20 @@ def check_common_sync(repo_root: Path, verbose: bool = False) -> bool:
     return False
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Verify all submodules are correctly configured and in sync."
-    )
-    parser.add_argument(
-        "--verbose", "-v",
-        action="store_true",
-        help="Show additional details (commits, remotes)"
-    )
-    args = parser.parse_args()
+def run(args=None) -> int:
+    if not isinstance(args, argparse.Namespace):
+        parser = argparse.ArgumentParser(
+            description="Verify all submodules are correctly configured and in sync."
+        )
+        parser.add_argument(
+            "--verbose", "-v",
+            action="store_true",
+            help="Show additional details (commits, remotes)"
+        )
+        args = parser.parse_args(args)
 
     # Determine repo root
-    repo_root = Path(__file__).parent.parent.resolve()
+    repo_root = Path(__file__).parent.parent.parent.parent.resolve()
     technical_docs = repo_root / "technical-docs"
 
     if not technical_docs.exists():
@@ -174,10 +171,6 @@ def main() -> int:
         if "common-out-of-sync" in issues:
             print()
             print(f"  {Colors.yellow('Common submodule sync fix:')}")
-            print("    ./scripts/sync-common.py")
+            print("    repo-tools sync")
 
     return 0 if all_healthy else 1
-
-
-if __name__ == "__main__":
-    sys.exit(main())

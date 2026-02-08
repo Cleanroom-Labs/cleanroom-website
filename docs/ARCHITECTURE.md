@@ -47,7 +47,7 @@ For operational details, see [technical-docs/README.md](../technical-docs/README
 
 Projects import shared configuration from `common/theme_config.py` (at each repo's root level), allowing:
 - Single source of truth for styling, icons, and Sphinx settings
-- Easy global updates via `sync-common.py`
+- Easy global updates via `repo-tools sync`
 - Project-specific overrides when needed
 
 ### Tag-Based Deployment

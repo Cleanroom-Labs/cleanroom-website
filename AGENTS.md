@@ -45,7 +45,7 @@ For doc-only workflows, `node scripts/build-docs.mjs` generates `public/docs/ind
 - Example nested path: `technical-docs/deploy/common/`.
 - Always sync recursively: `git submodule update --init --recursive`.
 - Inspect nested state with `git submodule status --recursive`.
-- Use `./scripts/check-submodules.py` to verify submodule health.
+- Use `repo-tools check` to verify submodule health.
 Current submodules (top-level and nested):
 - Top-level: `technical-docs/`, `common/`.
 - Under `technical-docs/`: `whisper/`, `deploy/`, `transfer/`, and `common/`.

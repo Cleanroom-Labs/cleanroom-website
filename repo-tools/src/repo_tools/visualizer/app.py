@@ -13,7 +13,7 @@ from .actions import ActionHandler
 from .graph_canvas import GraphCanvas
 
 if TYPE_CHECKING:
-    from scripts.lib.repo_utils import RepoInfo
+    from repo_tools.repo_utils import RepoInfo
 
 
 class SubmoduleVisualizerApp:
@@ -210,7 +210,7 @@ class SubmoduleVisualizerApp:
 
     def _load_repos(self) -> None:
         """Load repositories from the current path."""
-        from scripts.lib.repo_utils import discover_repos, set_parent_relationships
+        from repo_tools.repo_utils import discover_repos, set_parent_relationships
 
         self._update_status(f"Loading {self.repo_path}...")
 

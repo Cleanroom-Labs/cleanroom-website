@@ -12,7 +12,7 @@ from .layout import NodeLayout, TreeLayout, flatten_layouts
 from .repo_node import RepoNode
 
 if TYPE_CHECKING:
-    from scripts.lib.repo_utils import RepoInfo
+    from repo_tools.repo_utils import RepoInfo
 
 
 class GraphCanvas(tk.Canvas):

@@ -1,18 +1,17 @@
-#!/usr/bin/env python3
 """
-scripts/sync-common.py
+repo_tools/sync.py
 Synchronizes cleanroom-website-common submodule across all locations with validation and push support.
 
-Usage:
-    ./scripts/sync-common.py                  # Sync to latest main, commit, and push
-    ./scripts/sync-common.py abc1234          # Sync to specific commit
-    ./scripts/sync-common.py --dry-run        # Preview changes
-    ./scripts/sync-common.py --no-push        # Commit only, skip pushing
-    ./scripts/sync-common.py --force          # Skip remote sync validation
-    ./scripts/sync-common.py --verify         # Check for stale generated files after sync
-    ./scripts/sync-common.py --rebuild        # Auto-regenerate stale files after sync
+Usage (via entry point):
+    repo-sync                          # Sync to latest main, commit, and push
+    repo-sync abc1234                  # Sync to specific commit
+    repo-sync --dry-run                # Preview changes
+    repo-sync --no-push                # Commit only, skip pushing
+    repo-sync --force                  # Skip remote sync validation
+    repo-sync --verify                 # Check for stale generated files after sync
+    repo-sync --rebuild                # Auto-regenerate stale files after sync
 
-This script:
+This module:
 1. Resolves the target common submodule commit (from CLI or standalone repo)
 2. Discovers all cleanroom-website-common submodule locations
 3. Validates parent repos are in sync with remotes (prevents divergence)
@@ -25,12 +24,11 @@ import argparse
 import os
 import re
 import subprocess
-import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
-from lib.repo_utils import (
+from repo_tools.repo_utils import (
     Colors,
     RepoInfo,
     RepoStatus,
@@ -366,11 +364,12 @@ def check_theme_staleness(theme_path: Path, rebuild: bool = False) -> tuple[bool
         return (False, f"error: {e}")
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Synchronize cleanroom-website-common submodule across all locations.",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
+def run(args=None) -> int:
+    if not isinstance(args, argparse.Namespace):
+        parser = argparse.ArgumentParser(
+            description="Synchronize cleanroom-website-common submodule across all locations.",
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+            epilog="""
 Examples:
   %(prog)s                          # Sync to latest main, commit, and push
   %(prog)s abc1234                  # Sync to specific commit
@@ -381,44 +380,44 @@ Examples:
 The script validates parent repos are in sync with remotes before making
 changes, to prevent repository divergence. Use --force to skip this check.
 """,
-    )
-    parser.add_argument(
-        "commit",
-        nargs="?",
-        help="Target commit SHA (defaults to latest main from standalone repo)",
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Preview changes without making them",
-    )
-    parser.add_argument(
-        "--no-push",
-        action="store_true",
-        help="Commit only, skip pushing (push is default)",
-    )
-    parser.add_argument(
-        "--force",
-        action="store_true",
-        help="Skip remote sync validation",
-    )
-    parser.add_argument(
-        "--theme-repo",
-        type=Path,
-        default=DEFAULT_THEME_REPO,
-        help=f"Path to standalone theme repo (default: {DEFAULT_THEME_REPO})",
-    )
-    parser.add_argument(
-        "--verify",
-        action="store_true",
-        help="Check for stale generated files in each theme location after sync",
-    )
-    parser.add_argument(
-        "--rebuild",
-        action="store_true",
-        help="Auto-regenerate stale generated files after sync (implies --verify)",
-    )
-    args = parser.parse_args()
+        )
+        parser.add_argument(
+            "commit",
+            nargs="?",
+            help="Target commit SHA (defaults to latest main from standalone repo)",
+        )
+        parser.add_argument(
+            "--dry-run",
+            action="store_true",
+            help="Preview changes without making them",
+        )
+        parser.add_argument(
+            "--no-push",
+            action="store_true",
+            help="Commit only, skip pushing (push is default)",
+        )
+        parser.add_argument(
+            "--force",
+            action="store_true",
+            help="Skip remote sync validation",
+        )
+        parser.add_argument(
+            "--theme-repo",
+            type=Path,
+            default=DEFAULT_THEME_REPO,
+            help=f"Path to standalone theme repo (default: {DEFAULT_THEME_REPO})",
+        )
+        parser.add_argument(
+            "--verify",
+            action="store_true",
+            help="Check for stale generated files in each theme location after sync",
+        )
+        parser.add_argument(
+            "--rebuild",
+            action="store_true",
+            help="Auto-regenerate stale generated files after sync (implies --verify)",
+        )
+        args = parser.parse_args(args)
 
     # --rebuild implies --verify
     if args.rebuild:
@@ -426,7 +425,7 @@ changes, to prevent repository divergence. Use --force to skip this check.
 
     # Validate execution context
     script_dir = Path(__file__).parent.resolve()
-    repo_root = script_dir.parent
+    repo_root = script_dir.parent.parent.parent
 
     if not (repo_root / "scripts" / "build-docs.mjs").exists():
         print(Colors.red("Error: Must run from cleanroom-website repository"))
@@ -586,9 +585,9 @@ changes, to prevent repository divergence. Use --force to skip this check.
         print(Colors.yellow("Skipping push (--no-push specified)"))
         print()
         print(Colors.blue("Next steps:"))
-        print("  1. Verify: ./scripts/check-submodules.py")
+        print("  1. Verify: repo-tools check")
         print("  2. Build:  node scripts/build-docs.mjs")
-        print("  3. Push:   ./scripts/push-submodules.py")
+        print("  3. Push:   repo-tools push")
         return 0
 
 
@@ -656,7 +655,7 @@ changes, to prevent repository divergence. Use --force to skip this check.
             print("  2. Run: npm run build")
             print("  3. Commit and push the regenerated files")
             print()
-            print("Or run: ./scripts/sync-common.py --rebuild")
+            print("Or run: repo-tools sync --rebuild")
             print()
 
     # Final summary
@@ -670,13 +669,13 @@ changes, to prevent repository divergence. Use --force to skip this check.
         print(f"  Repos to push: {len(repos_to_push)}")
         print()
         print(Colors.blue("To execute:"))
-        print("  ./scripts/sync-common.py")
+        print("  repo-tools sync")
     elif push_failed:
         print(Colors.red("Some pushes failed."))
         print()
         print(Colors.blue("Troubleshooting:"))
         print("  - Check remote connectivity: git remote -v")
-        print("  - Try pushing manually: ./scripts/push-submodules.py")
+        print("  - Try pushing manually: repo-tools push")
         return 1
     else:
         print(Colors.green("Theme sync complete!"))
@@ -687,11 +686,7 @@ changes, to prevent repository divergence. Use --force to skip this check.
         print(f"  Repos pushed: {pushed_count}")
         print()
         print(Colors.blue("Next steps:"))
-        print("  1. Verify: ./scripts/check-submodules.py")
+        print("  1. Verify: repo-tools check")
         print("  2. Build:  node scripts/build-docs.mjs")
 
     return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())
