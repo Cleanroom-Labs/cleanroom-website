@@ -1,0 +1,123 @@
+---
+title: "Wired for Surveillance"
+date: "2026-02-08"
+author: "Lead Dev"
+tags: ["security", "privacy"]
+excerpt: "In 1994, CALEA required telecom carriers to build surveillance into their networks. Three decades later, that infrastructure has been exploited by foreign adversaries and misused from within."
+slug: "wired-for-surveillance"
+readTime: "14 min"
+---
+
+---
+
+## Introduction
+
+In 1994, Congress passed a law most Americans have never heard of. The Communications Assistance for Law Enforcement Act — CALEA — requires every telecommunications carrier in the United States to build surveillance capabilities directly into its network infrastructure. The idea was straightforward: as phone networks transitioned from analog copper to digital switching, law enforcement was losing the ability to execute court-ordered wiretaps. CALEA was meant to preserve that ability.
+
+Three decades later, the scope of CALEA has expanded well beyond telephone switches. The infrastructure it mandates has been exploited by foreign adversaries. And the fundamental tension it embodies — between enabling lawful surveillance and creating systemic vulnerability — has never been more relevant.
+
+This isn't a conspiracy theory. It's federal law, codified at 47 U.S.C. §§ 1001–1010, overseen by the FCC, and its consequences are documented in public court records, government reports, and cybersecurity incident disclosures. Understanding CALEA matters because the tradeoffs it represents affect everyone who uses a phone or connects to the internet in the United States.
+
+## What CALEA Requires
+
+At its core, CALEA mandates that telecommunications carriers design their equipment so that when law enforcement presents a valid court order targeting a specific subscriber, the carrier can isolate that person's communications and deliver them to the requesting agency. The carrier must also be able to provide call-identifying information — metadata showing who called whom, when, and for how long.
+
+The law includes safeguards. Interceptions can only be activated pursuant to a court order, and a designated carrier employee must affirmatively enable each tap after reviewing the order for validity. Carriers are required to file System Security and Integrity plans with the FCC, documenting how they protect their intercept systems from unauthorized access.
+
+Originally, CALEA applied only to traditional telephone carriers. But in 2004, the Department of Justice, FBI, and DEA petitioned the FCC to extend its scope. By 2005, the FCC ruled that CALEA also applies to facilities-based broadband internet access providers and interconnected Voice-over-IP services. What began as a law about phone switches now covered internet infrastructure.
+
+## The Scale of Surveillance
+
+The Administrative Office of the U.S. Courts publishes an annual Wiretap Report to Congress documenting every authorized interception. These reports, available at [uscourts.gov](https://www.uscourts.gov/statistics-reports/analysis-reports/wiretap-reports), provide the most authoritative public data on how often these capabilities are used.
+
+The numbers tell a story of steady growth. Authorized wiretaps peaked at nearly 5,000 per year around 2012 before declining somewhat, though 2024 saw 2,297 authorized wiretaps — a 9% increase over the previous year. Federal wiretaps alone rose 14% year-over-year. Drug offenses remain the primary justification, cited in 49% of all applications. In 2024, 1,600 extensions were authorized, a 15% increase from the prior year.
+
+These figures capture only Title III intercepts — traditional wiretaps requiring individual court orders. They explicitly exclude surveillance conducted under the Foreign Intelligence Surveillance Act (FISA), which operates under a separate, classified reporting structure. The actual volume of communications interception enabled by CALEA infrastructure is certainly higher than what the Wiretap Report reflects.
+
+Encryption is an increasingly common obstacle. In 2024, 350 federal wiretaps encountered encryption, and officials were unable to decrypt the communications in 313 of those cases. On the state side, 258 wiretaps encountered encryption, with 220 proving undecryptable. This growing gap between interception capability and decryption capability is at the heart of the ongoing "going dark" debate in law enforcement and policy circles. It is also worth noting the irony: the "going dark" framing is frequently used to argue for *expanded* mandated access — the very approach that, as the rest of this post documents, creates systemic vulnerabilities exploitable by adversaries. End-to-end encryption represents the architectural alternative: rather than building intercept points into infrastructure and trying to secure them, it removes the centralized access point entirely. That design choice has its own tradeoffs for law enforcement, but it eliminates the class of risk that CALEA creates.
+
+## The Risk That Was Always There
+
+Every security professional understands a basic principle: you cannot build an access mechanism that is available only to authorized parties. Any system designed to allow interception is, by definition, a system that can be exploited by unauthorized actors. This is not a hypothetical concern. It has happened repeatedly.
+
+The most dramatic example predates Salt Typhoon by nearly two decades. In 2004–2005, unknown parties — later linked by Greek investigators to the U.S. Embassy in Athens — compromised Vodafone Greece's Ericsson AXE telephone switches. The attackers installed rogue software that exploited the switches' built-in lawful interception modules to tap more than 100 mobile phones belonging to the Greek Prime Minister, cabinet ministers, military officers, journalists, and others. The surveillance ran for roughly ten months before being detected. A Vodafone network engineer, Kostas Tsalikidis, was found dead in his apartment the day after the company ordered the rogue software removed. The detailed technical analysis of the attack was published by IEEE Spectrum in their article "[The Athens Affair](https://spectrum.ieee.org/the-athens-affair)," and the case remains a landmark example of lawful intercept infrastructure being turned against the very government officials it was ostensibly designed to protect.
+
+## Salt Typhoon
+
+In September 2024, it became public that a Chinese state-sponsored hacking group known as Salt Typhoon had infiltrated at least eight major U.S. telecommunications companies — including AT&T, Verizon, and Lumen Technologies — in what U.S. officials described as one of the most significant cyber-espionage campaigns ever to target American communications infrastructure.
+
+Among the systems compromised were the CALEA-mandated lawful intercept portals themselves. Salt Typhoon gained access to the very systems that carriers had built to comply with court-ordered surveillance, giving the attackers visibility into who was being surveilled, what communications were being intercepted, and the associated metadata. The FBI estimated that fewer than 100 individuals had their actual call content directly intercepted, but the number affected by metadata collection was far larger. Targets included individuals associated with both major presidential campaigns during the 2024 election cycle and numerous government officials identified as "targets of interest."
+
+The breach was not the result of exotic zero-day exploits. According to CISA and a joint cybersecurity advisory published by the U.S. and more than 30 allied nations, the attackers exploited publicly known vulnerabilities — some with patches available for years — and basic security failures. One provider's management system was reportedly protected with the password "1111" [[10]](#references). The attackers used standard "living off the land" techniques, leveraging legitimate administrative tools to blend in with normal network traffic, and maintained access for an estimated one to two years before discovery.
+
+The FCC responded by proposing a Declaratory Ruling clarifying that CALEA's Section 105 creates a legal obligation for carriers to secure their intercept systems from unauthorized access. This may seem obvious, but the ruling was necessary precisely because the existing regulatory framework focused on *building* intercept capability without equivalently rigorous requirements for *securing* it.
+
+The irony was noted widely. The Electronic Frontier Foundation observed that the Salt Typhoon breach meant a foreign government likely possessed more knowledge about who the U.S. government surveils than American citizens themselves have access to. The EFF's assessment was blunt: "You cannot build a backdoor that only lets in good guys and not bad guys."
+
+## The Risk From Within
+
+The external threat is only half the picture. Surveillance infrastructure is also subject to misuse by the people authorized to operate it — and the safeguards designed to prevent that misuse are thinner than they appear.
+
+Consider the court order requirement. CALEA's framework assumes that judicial oversight acts as a meaningful check on surveillance: law enforcement must obtain a court order before a wiretap can be activated. In practice, wiretap applications are almost never denied. The Administrative Office of the U.S. Courts' annual Wiretap Reports document this consistently. In 2015, zero applications were denied out of 4,148 authorized. In 2016, two were denied out of 3,168. In 2018, two out of 2,937. In 2013 and 2014, one each. Across tens of thousands of applications over decades, the denial rate has been functionally zero. This doesn't necessarily mean courts are rubber-stamping requests — prosecutors may simply self-select cases they know will be approved — but it does mean the judicial check operates more as a procedural formality than a meaningful constraint.
+
+Beyond the formal wiretap process, the broader pattern of law enforcement database misuse is well-documented. A 2016 Associated Press investigation found that police officers across the country routinely misuse confidential law enforcement databases — including the FBI's National Crime Information Center (NCIC), which processes an average of 14 million transactions daily — for personal purposes. Officers looked up romantic interests, ex-partners, journalists who covered their departments unfavorably, and personal acquaintances. The AP found that between 2013 and 2015, officers were fired, suspended, or resigned over database misuse more than 325 times. They received lesser discipline more than 250 additional times. The AP emphasized that their count was "unquestionably an undercount," as no single agency tracks misuse nationally and record-keeping is inconsistent. The worst punishment in many cases was a reprimand.
+
+At the intelligence community level, the NSA's own Inspector General documented what analysts internally called "LOVEINT" — a play on intelligence terminology like SIGINT and HUMINT — referring to employees using surveillance tools to monitor romantic interests or ex-partners. In a 2013 letter to Senator Charles Grassley, NSA Inspector General George Ellard disclosed 12 substantiated cases of intentional misuse over the preceding decade. One analyst entered six email addresses belonging to an ex-girlfriend into a surveillance system on his first day of access, claiming he "wanted to practice." The worst administrative sanction was a two-month pay reduction and a demotion. Most employees involved resigned before discipline could be imposed. The Justice Department declined to prosecute the one case referred to it.
+
+These are the documented cases. The NSA noted that most LOVEINT incidents were "self-reported," typically surfacing during polygraph examinations for security clearance renewals — meaning detection depends heavily on the honesty of the people being tested.
+
+Perhaps most concerning is the practice of parallel construction, documented by Reuters in 2013 and subsequently investigated by Human Rights Watch in a 2018 report titled "Dark Side: Secret Origins of Evidence in US Criminal Cases." The DEA's Special Operations Division (SOD) — which includes representatives from the FBI, NSA, CIA, IRS, and DHS — funnels intelligence from surveillance intercepts and classified sources to field agents, who then construct an alternative, seemingly independent evidence trail to use in court. The original surveillance-derived source is hidden from prosecutors, judges, and defense attorneys. A senior DEA official told Reuters that parallel construction is "a law enforcement technique we use every day" and called it "decades old, a bedrock concept."
+
+The constitutional concern is straightforward: if defendants don't know how an investigation actually began, they cannot challenge the legality of the methods used to find them. The fruit of the poisonous tree doctrine — which normally bars illegally obtained evidence — becomes unenforceable when the tree itself is hidden.
+
+None of this proves that CALEA intercept infrastructure is being routinely misused by domestic law enforcement. But it establishes a pattern: when surveillance tools exist, some fraction of the people authorized to use them will use them for unauthorized purposes. The more powerful and centralized the tool, the greater the potential for abuse. And the oversight mechanisms — court orders, internal audits, inspector general reviews — consistently prove to be weaker in practice than they are on paper.
+
+## Where This Leaves Us
+
+CALEA is not going away. It reflects a legitimate law enforcement need — courts issue wiretap orders, and carriers must be able to comply with them. The question is not whether lawful intercept capability should exist, but whether the current approach to implementing, securing, and overseeing it is adequate given both the external threat landscape and the documented history of internal misuse.
+
+The Salt Typhoon breach demonstrated that mandating surveillance infrastructure without equally mandating its security creates a systemic vulnerability in national communications infrastructure. The Greek wiretapping case demonstrated the same thing twenty years earlier. The pattern of domestic misuse — from LOVEINT to parallel construction to routine database abuse — demonstrates that the human factors are just as real as the technical ones. The oversight mechanisms designed to prevent abuse have repeatedly proven insufficient to catch or deter it.
+
+None of this requires a conspiratorial worldview to find concerning. The facts are publicly documented, the risks are well-understood by the technical community, and the policy tradeoffs are real.
+
+The policy response is already underway but far from settled. The FCC has initiated a rulemaking to impose explicit cybersecurity obligations on carriers under CALEA's Section 105 — an acknowledgment that mandating intercept capability without equivalently mandating its security was a structural failure. CISA and allied intelligence agencies have begun recommending end-to-end encrypted messaging — a notable shift from agencies that have historically opposed strong encryption — as a practical defensive measure in light of Salt Typhoon. Meanwhile, the "going dark" debate continues in Congress, with some proposals that would expand mandated access rather than reduce it.
+
+For individuals, the immediate practical step is straightforward: use end-to-end encrypted communications (Signal, iMessage, WhatsApp) wherever possible. For policymakers and engineers, the harder question remains open: whether the CALEA model of centralized, carrier-level intercept capability can ever be made secure enough to justify the systemic risk it creates, or whether the thirty-year experiment has produced its verdict.
+
+## References
+
+1. Communications Assistance for Law Enforcement Act, 47 U.S.C. §§ 1001–1010 (1994). Full text available at [EPIC Archive](https://archive.epic.org/privacy/wiretap/calea/calea_law.html).
+
+2. Federal Communications Commission, "CALEA" — overview and SSI Plan filing requirements. [fcc.gov/calea](https://www.fcc.gov/calea).
+
+3. Administrative Office of the U.S. Courts, "Wiretap Reports" (1997–2024). [uscourts.gov](https://www.uscourts.gov/statistics-reports/analysis-reports/wiretap-reports).
+
+4. Administrative Office of the U.S. Courts, "2024 Wiretap Report: Intercepts and Convictions Rise" (June 30, 2025). [uscourts.gov](https://www.uscourts.gov/data-news/judiciary-news/2025/06/30/2024-wiretap-report-intercepts-and-convictions-rise).
+
+5. FCC Fact Sheet, "Implications of Salt Typhoon Attack and FCC Response" (December 5, 2024). [docs.fcc.gov](https://docs.fcc.gov/public/attachments/DOC-408015A1.pdf).
+
+6. Federal Register, "Protecting the Nation's Communications Systems From Cybersecurity Threats" (December 15, 2025). [federalregister.gov](https://www.federalregister.gov/documents/2025/12/15/2025-22830/protecting-the-nations-communications-systems-from-cybersecurity-threats).
+
+7. Prevelakis, V. and Spinellis, D., "The Athens Affair," IEEE Spectrum (July 2007). [spectrum.ieee.org](https://spectrum.ieee.org/the-athens-affair).
+
+8. Electronic Frontier Foundation, "Salt Typhoon Hack Shows There's No Security Backdoor That's Only For The 'Good Guys'" (October 2024). [eff.org](https://www.eff.org/deeplinks/2024/10/salt-typhoon-hack-shows-theres-no-security-backdoor-thats-only-good-guys).
+
+9. SentinelOne, "Malicious Apprentice: How Two Hackers Went From Cisco Academy to Cisco CVEs" (December 2025). [sentinelone.com](https://www.sentinelone.com/labs/malicious-apprentice-how-two-hackers-went-from-cisco-academy-to-cisco-cves/).
+
+10. Nextgov/FCW, "Hundreds of organizations were notified of potential Salt Typhoon compromise" (December 30, 2024). [nextgov.com](https://www.nextgov.com/cybersecurity/2024/12/hundreds-organizations-were-notified-potential-salt-typhoon-compromise/401843/).
+
+11. Congressional Research Service, "The Communications Assistance for Law Enforcement Act" (Report RL30677). [everycrsreport.com](https://www.everycrsreport.com/reports/RL30677.html).
+
+12. New Lines Institute, "2024: When China's Salt Typhoon Made Cyberspace Tidal Waves" (October 2025). [newlinesinstitute.org](https://newlinesinstitute.org/strategic-technology/2024-when-chinas-salt-typhoon-made-cyberspace-tidal-waves/).
+
+13. Associated Press, "Across US, police officers abuse confidential databases" (September 28, 2016). [cbsnews.com](https://www.cbsnews.com/news/police-sometimes-misuse-confidential-work-databases-for-personal-gain-ap/).
+
+14. NSA Inspector General George Ellard, letter to Sen. Charles Grassley re: intentional misuse of SIGINT authorities (September 2013). Reported by NBC News: [nbcnews.com](https://www.nbcnews.com/news/world/loveint-nsa-letter-discloses-employee-eavesdropping-girlfriends-spouses-flna8c11271620).
+
+15. Shiffman, J. and Cooke, K., "Exclusive: U.S. directs agents to cover up program used to investigate Americans," Reuters (August 5, 2013). Referenced in Human Rights Watch report.
+
+16. Human Rights Watch, "Dark Side: Secret Origins of Evidence in US Criminal Cases" (January 9, 2018). [hrw.org](https://www.hrw.org/report/2018/01/09/dark-side/secret-origins-evidence-us-criminal-cases).
+
+17. MuckRock, "DEA teaches agents to recreate evidence chains to hide methods" (February 3, 2014). [muckrock.com](https://www.muckrock.com/news/archives/2014/feb/03/dea-parallel-construction-guides/).
+
+18. Administrative Office of the U.S. Courts, Wiretap Reports 2013–2018 (denial rate data). Available at [uscourts.gov](https://www.uscourts.gov/statistics-reports/analysis-reports/wiretap-reports).
