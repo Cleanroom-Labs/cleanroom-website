@@ -165,6 +165,57 @@ class TestCliNoColor:
         Colors._enabled = True
 
 
+class TestCliWorktreeSubcommand:
+    def test_worktree_no_subcommand_returns_2(self):
+        """'worktree' with no subcommand should print help and return 2."""
+        result = main(["worktree"])
+        assert result == 2
+
+    def test_parse_worktree_add(self):
+        """'worktree add my-branch ../path' should parse correctly."""
+        mock_run = MagicMock(return_value=0)
+        with patch("repo_tools.worktree.run", mock_run):
+            result = main(["worktree", "add", "my-branch", "../path"])
+
+        mock_run.assert_called_once()
+        args = mock_run.call_args[0][0]
+        assert args.command == "worktree"
+        assert args.worktree_command == "add"
+        assert args.branch == "my-branch"
+        assert args.path == "../path"
+        assert args.checkout is False
+
+    def test_parse_worktree_add_checkout(self):
+        """'worktree add --checkout' should set the checkout flag."""
+        mock_run = MagicMock(return_value=0)
+        with patch("repo_tools.worktree.run", mock_run):
+            main(["worktree", "add", "--checkout", "my-branch", "../path"])
+
+        args = mock_run.call_args[0][0]
+        assert args.checkout is True
+
+    def test_parse_worktree_remove(self):
+        """'worktree remove ../path' should parse correctly."""
+        mock_run = MagicMock(return_value=0)
+        with patch("repo_tools.worktree.run", mock_run):
+            main(["worktree", "remove", "../path"])
+
+        args = mock_run.call_args[0][0]
+        assert args.command == "worktree"
+        assert args.worktree_command == "remove"
+        assert args.path == "../path"
+        assert args.force is False
+
+    def test_parse_worktree_remove_force(self):
+        """'worktree remove --force' should set the force flag."""
+        mock_run = MagicMock(return_value=0)
+        with patch("repo_tools.worktree.run", mock_run):
+            main(["worktree", "remove", "--force", "../path"])
+
+        args = mock_run.call_args[0][0]
+        assert args.force is True
+
+
 class TestCliInvalidSubcommand:
     def test_unknown_subcommand_exits(self):
         """An unrecognised subcommand should cause argparse to exit with code 2."""

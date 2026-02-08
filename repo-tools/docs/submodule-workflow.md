@@ -7,25 +7,25 @@ This project uses a three-level nested submodule architecture to manage document
 The full structure looks like this:
 
 ```
-cleanroom-website/
-├── cleanroom-technical-docs/
-│   ├── cleanroom-whisper-docs/
-│   │   └── source/cleanroom-theme/
-│   ├── airgap-deploy-docs/
-│   │   └── source/cleanroom-theme/
-│   ├── airgap-transfer-docs/
-│   │   └── source/cleanroom-theme/
-│   └── source/cleanroom-theme/
-└── cleanroom-theme/
+my-project/
+├── docs-aggregator/
+│   ├── project-alpha-docs/
+│   │   └── source/shared-theme/
+│   ├── project-beta-docs/
+│   │   └── source/shared-theme/
+│   ├── project-gamma-docs/
+│   │   └── source/shared-theme/
+│   └── source/shared-theme/
+└── shared-theme/
 ```
 
 Three levels of nesting, each serving a distinct purpose:
 
-1. **Level 1: Website → Technical Docs.** The website repo pins a single submodule (`cleanroom-technical-docs`) that aggregates all project documentation into one Sphinx build.
-2. **Level 2: Technical Docs → Project Docs.** The aggregator contains submodules for each project's documentation (`cleanroom-whisper-docs`, `airgap-deploy-docs`, `airgap-transfer-docs`), plus a copy of the shared theme.
-3. **Level 3: Project Docs → Theme.** Each project doc repo embeds the shared theme (`cleanroom-theme`) so it can build independently without the aggregator.
+1. **Level 1: Root → Aggregator.** The root repo pins a single submodule (`docs-aggregator`) that aggregates all project documentation into one build.
+2. **Level 2: Aggregator → Project Docs.** The aggregator contains submodules for each project's documentation (`project-alpha-docs`, `project-beta-docs`, `project-gamma-docs`), plus a copy of the shared theme.
+3. **Level 3: Project Docs → Theme.** Each project doc repo embeds the shared theme (`shared-theme`) so it can build independently without the aggregator.
 
-The theme submodule appears at every level. This is intentional—it allows each project to build its own documentation in isolation while maintaining consistent styling. See [ARCHITECTURE.md](../../docs/ARCHITECTURE.md) for design rationale and alternatives considered.
+The theme submodule appears at every level. This is intentional—it allows each project to build its own documentation in isolation while maintaining consistent styling.
 
 ## Complexities of Deeply Nested Submodules
 
@@ -39,19 +39,15 @@ Every submodule checks out a specific commit, not a branch. Running `git status`
 
 A change to project documentation requires three separate commits to reach the website:
 
-1. Commit in the project docs repo (e.g., `airgap-deploy-docs`)
-2. Commit in `cleanroom-technical-docs` to update the submodule pointer
-3. Commit in `cleanroom-website` to update its submodule pointer
+1. Commit in the project docs repo (e.g., `project-beta-docs`)
+2. Commit in `docs-aggregator` to update the submodule pointer
+3. Commit in `my-project` to update its submodule pointer
 
 Each commit records a new SHA, and the parent must be updated to reference it. There's no shortcut. The `repo-tools push` command automates this, but the fundamental mechanics remain.
 
-### Local-Only Submodule URLs
-
-All submodules in this project point to local filesystem paths (e.g., `/Users/.../cleanroom-theme`), not remote URLs. The main website repo has no remote. This means `git submodule update --init --recursive` resolves against local directories, and cloning the repo on a new machine requires those paths to exist. This is a deliberate choice for an air-gapped development environment where network access is unavailable.
-
 ### Theme Duplication
 
-The `cleanroom-theme` submodule is referenced six times across the tree—once at the website root, once inside the technical docs aggregator, and once inside each of the three project doc repos. They all point to the same source repo, but each is an independent checkout. Updating the theme means updating it in every location, which is handled by `repo-tools sync`.
+The `shared-theme` submodule is referenced six times across the tree—once at the root, once inside the aggregator, and once inside each of the three project doc repos. They all point to the same source repo, but each is an independent checkout. Updating the theme means updating it in every location, which is handled by `repo-tools sync`.
 
 ### Submodule Drift
 
@@ -77,94 +73,43 @@ Despite the complexity, this architecture provides real benefits.
 
 **Tooling assumptions.** Most git GUIs, IDE integrations, and CI systems assume a single-repo workflow. Nested submodules expose edge cases and gaps in tooling. Some operations that should be simple (like "show me what changed") require running commands at multiple levels of the tree.
 
-**Slow clone and init.** `git clone --recursive` must descend through every level and initialize every submodule. With local URLs this is fast, but on a fresh machine you need all source repos present first.
+**Slow clone and init.** `git clone --recursive` must descend through every level and initialize every submodule. The time scales with the number of nesting levels and total submodule count.
 
 ## Git Worktrees to the Rescue
 
 A common scenario: you're working on a documentation update and need to check something on a different branch—maybe to compare output or cherry-pick a fix. With submodules, switching branches is expensive. `git checkout other-branch` in the parent doesn't automatically update submodules, and `git submodule update --recursive` can take a while and clobber local changes.
 
-Git worktrees solve this by letting you check out multiple branches simultaneously in separate directories. Each worktree shares the same `.git` object store, so it's lightweight. But there's a catch: `git worktree add` doesn't initialize submodules, and with local submodule URLs, `git submodule update --init --recursive` in a new worktree fails because the URLs resolve relative to the main worktree's checkout.
+Git worktrees solve this by letting you check out multiple branches simultaneously in separate directories. Each worktree shares the same `.git` object store, so it's lightweight. But there's a catch: `git worktree add` doesn't initialize submodules. You'd need to manually run `git submodule update --init --recursive` in the new worktree, which can fail or require unnecessary network round-trips.
 
-### The `add-worktree` Function
+The `repo-tools worktree add` command handles this. It creates the worktree, then recursively initializes submodules using the main worktree's existing checkout as a reference, avoiding redundant fetches. Original submodule URLs are restored afterward.
 
-This zsh function handles both problems—creating the worktree and recursively initializing submodules with corrected URLs:
+Creating a new worktree with a new branch:
 
-```zsh
-_init_submodules_from_worktree() {
-    local ref_worktree="$1"
-
-    [[ -f .gitmodules ]] || return 0
-
-    git submodule init || return 1
-
-    # Override each submodule URL to point to the main worktree's checked-out copy
-    local key subpath name
-    while read key subpath; do
-        name="${key#submodule.}"
-        name="${name%.path}"
-        git config "submodule.$name.url" "$ref_worktree/$subpath"
-    done < <(git config --file .gitmodules --get-regexp '^submodule\..*\.path$')
-
-    git submodule update || return 1
-
-    # Recurse into each submodule
-    while read key subpath; do
-        (cd "$subpath" && _init_submodules_from_worktree "$ref_worktree/$subpath") || return 1
-    done < <(git config --file .gitmodules --get-regexp '^submodule\..*\.path$')
-
-    # Restore original remote URLs at all levels
-    git submodule sync --recursive
-}
-
-add-worktree() {
-    if [[ $# -ne 2 ]]; then
-        echo "Usage: add-worktree <branch-name> <path>" >&2
-        return 1
-    fi
-
-    local main_worktree
-    main_worktree="$(git rev-parse --show-toplevel)" || return 1
-
-    git worktree add -b "$1" "$2" || return 1
-    cd "$2" || return 1
-
-    _init_submodules_from_worktree "$main_worktree" || {
-        echo "Warning: submodule update failed. Worktree created at $2 on branch $1." >&2
-        return 1
-    }
-}
+```bash
+repo-tools worktree add my-feature ../my-project-my-feature
 ```
 
-Here's what happens when you run `add-worktree my-feature ../cleanroom-website-my-feature`:
+Creating a worktree on an existing branch (without `-b`):
 
-1. `git worktree add` creates a new worktree at the given path on a new branch.
-2. `_init_submodules_from_worktree` runs in the new worktree. It reads `.gitmodules` and temporarily overrides each submodule's URL to point to the **main worktree's** checked-out copy of that submodule. This is the key insight—since submodule URLs are local paths, the new worktree needs to resolve them against an existing checkout rather than the original paths in `.gitmodules`.
-3. After `git submodule update` succeeds, the function recurses into each submodule and repeats the process for nested submodules. This handles all three levels.
-4. Finally, `git submodule sync --recursive` restores the original URLs from `.gitmodules` so that future operations (like pulling updates from the source repos) work correctly.
+```bash
+repo-tools worktree add --checkout existing-branch ../my-project-wt2
+```
 
-The result is a fully initialized worktree with all submodules at all levels checked out and ready to use.
+Removing a worktree (also runs `git worktree prune`):
+
+```bash
+repo-tools worktree remove ../my-project-my-feature
+```
+
+Force-removing a worktree with uncommitted changes:
+
+```bash
+repo-tools worktree remove --force ../my-project-my-feature
+```
 
 ## Propagating Changes Through the Repository
 
-Once you've committed a change inside a nested submodule, it needs to bubble up through every parent. Manually, that means:
-
-```bash
-# 1. Commit inside the project docs repo
-cd cleanroom-technical-docs/airgap-deploy-docs
-git add -A && git commit -m "Update deployment guide"
-
-# 2. Update the pointer in technical-docs
-cd ..
-git add airgap-deploy-docs
-git commit -m "Update airgap-deploy-docs submodule"
-
-# 3. Update the pointer in the website
-cd ..
-git add cleanroom-technical-docs
-git commit -m "Update cleanroom-technical-docs submodule"
-```
-
-This gets tedious fast—especially when multiple submodules have changed. The `repo-tools push` command automates the push side of this workflow. It discovers every repo in the hierarchy, performs a topological sort (children before parents), validates that each repo is on a branch with no uncommitted changes, and pushes them in the correct order.
+Once you've committed a change inside a nested submodule, it needs to bubble up through every parent—each level requires a separate commit and push, and the order matters. The `repo-tools push` command automates this. It discovers every repo in the hierarchy, performs a topological sort (children before parents), validates that each repo is on a branch with no uncommitted changes, and pushes them in the correct order.
 
 ```bash
 # Preview what would be pushed
@@ -208,15 +153,13 @@ repo-tools sync --verify
 repo-tools sync --rebuild  # auto-regenerate stale files
 ```
 
-Without this script, you'd need to manually `cd` into six different directories, run `git checkout <sha>` in each, then commit your way back up the tree. The script reduces a fifteen-step process to one command.
-
 ## Merging Worktree Changes Back
 
 After finishing work in a worktree, you need to integrate the changes into your main branch. The workflow is straightforward:
 
 ```bash
 # From the main worktree
-cd ~/Projects/cleanroom-website
+cd ~/Projects/my-project
 
 # Merge the feature branch
 git merge my-feature
@@ -250,11 +193,8 @@ Worktrees accumulate if you don't clean them up. A few commands to keep things t
 # See all worktrees
 git worktree list
 
-# Remove a worktree after you're done with it
-git worktree remove ../cleanroom-website-my-feature
-
-# Clean up stale entries (e.g., if you deleted the directory manually)
-git worktree prune
+# Remove a worktree after you're done with it (also prunes stale entries)
+repo-tools worktree remove ../my-project-my-feature
 
 # Delete the branch after merging
 git branch -d my-feature
@@ -264,10 +204,10 @@ A naming convention helps keep things organized. Use the project directory name 
 
 ```
 ~/Projects/
-├── cleanroom-website/                  # main worktree (main branch)
-├── cleanroom-website-wt1/              # worktree 1 (feature branch)
-├── cleanroom-website-wt2/              # worktree 2 (another feature)
-└── cleanroom-website-hotfix/           # worktree for a quick fix
+├── my-project/                  # main worktree (main branch)
+├── my-project-wt1/              # worktree 1 (feature branch)
+├── my-project-wt2/              # worktree 2 (another feature)
+└── my-project-hotfix/           # worktree for a quick fix
 ```
 
 Sibling directories make it easy to `cd ../<other-worktree>` and keep everything visible in your file manager. The `-wt1`, `-wt2` pattern works well for short-lived worktrees; use descriptive names for longer-lived ones.
@@ -276,9 +216,8 @@ When you're done with a batch of work, clean up in one pass:
 
 ```bash
 git worktree list                       # see what's active
-git worktree remove ../cleanroom-website-wt1
-git worktree remove ../cleanroom-website-wt2
-git worktree prune
+repo-tools worktree remove ../my-project-wt1
+repo-tools worktree remove ../my-project-wt2
 git branch -d feature-a feature-b      # delete merged branches
 ```
 
@@ -286,26 +225,26 @@ git branch -d feature-a feature-b      # delete merged branches
 
 Worktrees unlock a powerful workflow when combined with AI coding agents: true parallel development on a single repository.
 
-The setup is simple. You have three independent tasks—say, updating the deploy docs, adding a new section to the whisper docs, and fixing a theme issue. Instead of working through them sequentially, you create a worktree for each:
+The setup is simple. You have three independent tasks—say, updating component A, refactoring module B, and fixing a theme issue. Instead of working through them sequentially, you create a worktree for each:
 
 ```bash
-cd ~/Projects/cleanroom-website
-add-worktree update-deploy-docs   ../cleanroom-website-wt1
-add-worktree expand-whisper-docs  ../cleanroom-website-wt2
-add-worktree fix-theme-spacing    ../cleanroom-website-wt3
+cd ~/Projects/my-project
+repo-tools worktree add update-deploy-docs   ../my-project-wt1
+repo-tools worktree add expand-whisper-docs  ../my-project-wt2
+repo-tools worktree add fix-theme-spacing    ../my-project-wt3
 ```
 
 Each worktree has its own fully initialized checkout with all submodules at every level. Now you launch a coding agent in each one—three separate terminal sessions, three instances of Claude Code, each pointed at a different directory:
 
 ```bash
 # Terminal 1
-cd ../cleanroom-website-wt1 && claude
+cd ../my-project-wt1 && claude
 
 # Terminal 2
-cd ../cleanroom-website-wt2 && claude
+cd ../my-project-wt2 && claude
 
 # Terminal 3
-cd ../cleanroom-website-wt3 && claude
+cd ../my-project-wt3 && claude
 ```
 
 The agents work simultaneously without interfering with each other. Each operates in its own worktree with its own branch, its own working directory, and its own submodule state. There are no lock conflicts because git worktrees are designed for concurrent access to the same repository.
@@ -313,7 +252,7 @@ The agents work simultaneously without interfering with each other. Each operate
 When the agents finish, you review each worktree's changes, then merge sequentially from the main worktree:
 
 ```bash
-cd ~/Projects/cleanroom-website
+cd ~/Projects/my-project
 
 git merge update-deploy-docs
 git submodule update --recursive
@@ -331,10 +270,9 @@ repo-tools push
 Then clean up:
 
 ```bash
-git worktree remove ../cleanroom-website-wt1
-git worktree remove ../cleanroom-website-wt2
-git worktree remove ../cleanroom-website-wt3
-git worktree prune
+repo-tools worktree remove ../my-project-wt1
+repo-tools worktree remove ../my-project-wt2
+repo-tools worktree remove ../my-project-wt3
 git branch -d update-deploy-docs expand-whisper-docs fix-theme-spacing
 ```
 
