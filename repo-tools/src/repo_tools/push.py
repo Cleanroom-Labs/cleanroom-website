@@ -11,6 +11,7 @@ Usage (via entry point):
 import argparse
 from pathlib import Path
 
+from repo_tools.check import check_sync_groups
 from repo_tools.config import load_config
 from repo_tools.repo_utils import (
     Colors,
@@ -100,6 +101,19 @@ The script validates that each repo:
 
     if validation_failed and args.force:
         print(Colors.yellow("Warning: Proceeding despite validation failures (--force)"))
+        print()
+
+    # Sync-group consistency check
+    print(Colors.blue("Checking sync-group consistency..."))
+    print()
+    sync_ok = check_sync_groups(repo_root, verbose=False)
+    if not sync_ok and not args.force:
+        print()
+        print(Colors.red("Sync groups are out of sync. Run 'repo-tools sync' first or use --force to skip."))
+        return 1
+    if not sync_ok and args.force:
+        print()
+        print(Colors.yellow("Warning: Proceeding despite sync-group inconsistency (--force)"))
         print()
 
     # Check if anything to push
