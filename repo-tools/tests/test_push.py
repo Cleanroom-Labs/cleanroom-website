@@ -46,3 +46,29 @@ class TestPushRun:
         with patch("repo_tools.push.find_repo_root", return_value=tmp_submodule_tree):
             result = run(args)
         assert result == 0
+
+    def test_sync_check_blocks_push_when_out_of_sync(self, tmp_submodule_tree: Path):
+        """Push should fail when sync groups are out of sync."""
+        from repo_tools.push import run
+        import argparse
+
+        args = argparse.Namespace(dry_run=False, force=False)
+        with (
+            patch("repo_tools.push.find_repo_root", return_value=tmp_submodule_tree),
+            patch("repo_tools.push.check_sync_groups", return_value=False),
+        ):
+            result = run(args)
+        assert result == 1
+
+    def test_force_bypasses_sync_check(self, tmp_submodule_tree: Path):
+        """--force should allow push even when sync groups are out of sync."""
+        from repo_tools.push import run
+        import argparse
+
+        args = argparse.Namespace(dry_run=False, force=True)
+        with (
+            patch("repo_tools.push.find_repo_root", return_value=tmp_submodule_tree),
+            patch("repo_tools.push.check_sync_groups", return_value=False),
+        ):
+            result = run(args)
+        assert result == 0
