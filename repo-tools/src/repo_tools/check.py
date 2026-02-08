@@ -102,27 +102,35 @@ def check_sync_groups(repo_root: Path, verbose: bool = False) -> bool:
             print(f"  {Colors.yellow('⚠')} No submodules found for group '{group.name}'")
             continue
 
+        allow_drift = set(group.allow_drift)
+
         commits: dict[str, str] = {}
+        drifting: dict[str, str] = {}
         for sub in submodules:
             rel = str(sub.path.relative_to(repo_root))
             sha = sub.current_commit[:7] if sub.current_commit else "unknown"
-            commits[rel] = sha
+            if rel in allow_drift:
+                drifting[rel] = sha
+            else:
+                commits[rel] = sha
 
         unique_commits = set(commits.values())
 
-        if len(unique_commits) == 1:
-            commit = next(iter(unique_commits))
-            print(f"  {Colors.green('✓')} All {len(submodules)} {group.name} submodules at {commit}")
+        if len(unique_commits) <= 1:
+            commit = next(iter(unique_commits)) if unique_commits else "—"
+            print(f"  {Colors.green('✓')} All {len(commits)} {group.name} submodules at {commit}")
             if verbose:
                 for rel_path in sorted(commits):
                     print(f"      {rel_path:<40} {commits[rel_path]}")
+            for rel_path in sorted(drifting):
+                print(f"      {rel_path:<40} {drifting[rel_path]}  {Colors.yellow('(allow-drift)')}")
         else:
             all_ok = False
             commit_counts = Counter(commits.values())
             majority_commit = commit_counts.most_common(1)[0][0]
 
             print(f"  {Colors.red('✗')} {group.name} submodules are NOT in sync "
-                  f"({len(unique_commits)} unique commits across {len(submodules)} locations)")
+                  f"({len(unique_commits)} unique commits across {len(commits)} locations)")
 
             for rel_path in sorted(commits):
                 sha = commits[rel_path]
@@ -130,6 +138,8 @@ def check_sync_groups(repo_root: Path, verbose: bool = False) -> bool:
                     print(f"      {rel_path:<40} {sha}  {Colors.red('← differs')}")
                 else:
                     print(f"      {rel_path:<40} {sha}")
+            for rel_path in sorted(drifting):
+                print(f"      {rel_path:<40} {drifting[rel_path]}  {Colors.yellow('(allow-drift)')}")
 
     return all_ok
 

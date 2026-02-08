@@ -19,6 +19,7 @@ class SyncGroup:
     url_match: str
     standalone_repo: Path | None = None
     commit_message: str = DEFAULT_COMMIT_MESSAGE
+    allow_drift: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -64,11 +65,20 @@ def load_config(repo_root: Path) -> RepoToolsConfig:
 
         commit_message = group_data.get("commit-message", DEFAULT_COMMIT_MESSAGE)
 
+        allow_drift_raw = group_data.get("allow-drift", [])
+        if not isinstance(allow_drift_raw, list) or not all(
+            isinstance(p, str) for p in allow_drift_raw
+        ):
+            raise ValueError(
+                f"sync-groups.{name}: 'allow-drift' must be a list of strings"
+            )
+
         sync_groups[name] = SyncGroup(
             name=name,
             url_match=url_match,
             standalone_repo=standalone_repo,
             commit_message=commit_message,
+            allow_drift=allow_drift_raw,
         )
 
     return RepoToolsConfig(sync_groups=sync_groups)

@@ -5,7 +5,9 @@ from pathlib import Path
 from unittest.mock import patch
 
 from repo_tools.check import check_repo_state, check_sync_groups, get_tag_or_branch
+from repo_tools.config import CONFIG_FILENAME, SyncGroup
 from repo_tools.repo_utils import RepoInfo
+from repo_tools.sync import SyncSubmodule
 
 
 # ---------------------------------------------------------------------------
@@ -65,6 +67,39 @@ class TestCheckSyncGroups:
         captured = capsys.readouterr()
         # Should show the common submodule path
         assert "common" in captured.out
+
+    def test_allow_drift_ignores_drifting_instance(self, tmp_path: Path, capsys):
+        """A submodule in allow-drift should not cause sync failure."""
+        repo_root = tmp_path / "repo"
+        repo_root.mkdir()
+
+        # Config with allow-drift
+        (repo_root / CONFIG_FILENAME).write_text(
+            '[sync-groups.common]\n'
+            'url-match = "my-lib"\n'
+            'allow-drift = ["sub-b"]\n'
+        )
+
+        # Mock two submodule instances at different commits
+        sub_a = SyncSubmodule(
+            path=repo_root / "sub-a",
+            parent_repo=repo_root,
+            submodule_rel_path="sub-a",
+            current_commit="aaa1111" + "0" * 33,
+        )
+        sub_b = SyncSubmodule(
+            path=repo_root / "sub-b",
+            parent_repo=repo_root,
+            submodule_rel_path="sub-b",
+            current_commit="bbb2222" + "0" * 33,
+        )
+
+        with patch("repo_tools.check.discover_sync_submodules", return_value=[sub_a, sub_b]):
+            result = check_sync_groups(repo_root, verbose=False)
+
+        assert result is True
+        captured = capsys.readouterr()
+        assert "allow-drift" in captured.out
 
 
 # ---------------------------------------------------------------------------

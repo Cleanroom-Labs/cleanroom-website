@@ -115,6 +115,26 @@ class TestLoadConfig:
         assert group.standalone_repo is None
         assert group.commit_message == DEFAULT_COMMIT_MESSAGE
 
+    def test_allow_drift_loaded(self, tmp_path: Path):
+        """allow-drift paths should be loaded into the SyncGroup."""
+        (tmp_path / CONFIG_FILENAME).write_text(
+            '[sync-groups.common]\n'
+            'url-match = "my-lib"\n'
+            'allow-drift = ["technical-docs/common"]\n'
+        )
+        config = load_config(tmp_path)
+        group = config.sync_groups["common"]
+        assert group.allow_drift == ["technical-docs/common"]
+
+    def test_allow_drift_default_empty(self, tmp_path: Path):
+        """Omitted allow-drift should default to empty list."""
+        (tmp_path / CONFIG_FILENAME).write_text(
+            '[sync-groups.common]\n'
+            'url-match = "my-lib"\n'
+        )
+        config = load_config(tmp_path)
+        assert config.sync_groups["common"].allow_drift == []
+
     def test_non_table_group_raises(self, tmp_path: Path):
         """A sync group that is not a table should raise ValueError."""
         (tmp_path / CONFIG_FILENAME).write_text(
