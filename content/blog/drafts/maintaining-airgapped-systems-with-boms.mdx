@@ -1,0 +1,116 @@
+---
+title: "Maintaining Air-Gapped Systems with Bills of Materials"
+date: "2026-01-31"
+author: "Lead Dev"
+tags: ["security", "privacy"]
+excerpt: "How SBOMs and CBOMs provide the visibility needed to maintain software on systems with no internet access — and how to scan for vulnerabilities across the air gap."
+slug: "maintaining-airgapped-systems-with-boms"
+readTime: "10 min"
+---
+
+---
+
+## Introduction
+
+Air-gapping solves the security problem of network exposure, but it creates a visibility problem. On a connected system, you can run `npm audit`, `cargo audit`, or `trivy` to check for known vulnerabilities in seconds. You can query the National Vulnerability Database, subscribe to security advisories, and set up automated alerts. On an air-gapped system, none of that works. There's no network to reach a vulnerability database, no API to query, no feed to subscribe to.
+
+This doesn't mean air-gapped systems are unmanageable. It means they require a different approach — one based on deliberate inventory and periodic synchronization rather than continuous online monitoring.
+
+Bills of Materials provide the foundation for that approach. Specifically, SBOMs (Software Bills of Materials) and CBOMs (Cryptographic Bills of Materials) give you a structured inventory of what's running on your system: every component, every version, every dependency, every cryptographic algorithm. Combined with offline vulnerability scanning, they let you maintain air-gapped systems with the same rigor as connected ones — just on a different cadence.
+
+## What is an SBOM?
+
+A Software Bill of Materials is a structured inventory of everything in a software package. It lists components, versions, licenses, dependencies (including transitive ones), suppliers, and checksums. If a software package were a product on a shelf, the SBOM would be the ingredients label.
+
+Two standards dominate the SBOM landscape:
+
+- **SPDX** (Linux Foundation) — originated in license compliance and has strong support for documenting licensing relationships between components.
+- **CycloneDX** (OWASP / Ecma International) — designed with security as the primary focus, supporting multiple BOM types including SBOM, CBOM, and VEX (Vulnerability Exploitability eXchange).
+
+For air-gapped environments, CycloneDX is the stronger choice. It's the only standard that natively supports CBOM (since [version 1.6](https://cyclonedx.org/capabilities/cbom/)), which matters when you need to inventory cryptographic usage for post-quantum migration planning. CycloneDX is also an Ecma International standard ([ECMA-424](https://ecma-international.org/publications-and-standards/standards/ecma-424/)) with a royalty-free patent policy, and its security-first design aligns with the air-gap use case.
+
+SBOMs aren't just a best practice — they're increasingly a regulatory expectation. The [2021 U.S. Executive Order on Improving the Nation's Cybersecurity](https://www.whitehouse.gov/briefing-room/presidential-actions/2021/05/12/executive-order-on-improving-the-nations-cybersecurity/) directed NIST to publish minimum elements for SBOMs, and [CISA's guidance on software supply chain security](https://www.cisa.gov/sbom) positions SBOMs as a foundational element of software transparency. For organizations operating air-gapped systems in regulated environments — defense, critical infrastructure, healthcare — SBOM generation is becoming a compliance requirement, not an optional enhancement.
+
+## What is a CBOM?
+
+A Cryptographic Bill of Materials extends the SBOM concept to inventory the cryptographic algorithms, libraries, and implementations in your software. Where an SBOM tells you *what components* your software contains, a CBOM tells you *what cryptography* those components use.
+
+This matters now for a specific reason: NIST has published [post-quantum cryptographic standards](https://www.nist.gov/news-events/news/2024/08/nist-releases-first-3-finalized-post-quantum-encryption-standards) (ML-KEM, ML-DSA, SLH-DSA), and the transition from classical to post-quantum algorithms will take years. You can't plan that transition if you don't know what crypto your software currently uses. "Crypto agility" — the ability to swap algorithms without rearchitecting your system — starts with knowing what you're swapping out.
+
+A CBOM tracks which cryptographic libraries your software depends on (ring, rustls, openssl, aws-lc-rs), which algorithm families they implement (AES-GCM, ChaCha20-Poly1305, Ed25519, X25519), key sizes, and protocol versions. For Rust projects, this starts with identifying cryptographic crate dependencies in `Cargo.lock`.
+
+If you've read [Air-Gapping in the Quantum Era](/blog/air-gapping-in-the-quantum-era), you know why "harvest now, decrypt later" makes this urgent. Adversaries collecting encrypted data today can decrypt it when quantum computers become capable — and the transition window to post-quantum algorithms is narrow. Knowing exactly which components use which algorithms is the prerequisite for planning the upgrade, and a CBOM provides that inventory in a structured, machine-readable format.
+
+## How AirGap Deploy generates BOMs
+
+AirGap Deploy already collects most of the raw data needed for BOM generation during the `prep` phase:
+
+- **Package names and versions** from the `AirGapDeploy.toml` manifest
+- **Vendored Cargo dependencies** from `Cargo.lock` — the full transitive dependency graph
+- **Source URLs** for external binaries and model files
+- **SHA-256 checksums** for all downloaded artifacts
+- **Target platforms** specified in the manifest
+
+The v1.1 enhancement transforms this data into a CycloneDX document:
+
+- **Dependency graph from `Cargo.lock`** becomes the SBOM component list with dependency relationships. Each crate is listed with its name, version, and relationship to other crates.
+- **License fields from `Cargo.toml`** become SBOM license data. Most crates in the Rust ecosystem declare their license in `Cargo.toml`, so this information is readily available.
+- **Known crypto crates in the dependency tree** become CBOM cryptographic asset entries. Deploy maintains a list of recognized cryptographic crates (ring, rustls, aws-lc-rs, openssl-sys, chacha20, aes-gcm, sha2, ed25519-dalek, and others) and flags them when found in the dependency graph.
+- **Deploy's own SHA-256 usage** is documented as a CBOM entry for internal cryptographic operations.
+
+The result is a single `sbom.cdx.json` file — a unified CycloneDX document containing both SBOM and CBOM data, per the CycloneDX specification. This file is included in the deployment archive alongside the application package.
+
+When AirGap Transfer moves the archive across the air gap, the SBOM travels with it — verified by the same hash integrity checks as every other file. The air-gapped system receives not just the software, but a complete, verified inventory of what's in it.
+
+## Vulnerability scanning across the air gap
+
+The key insight is that vulnerability scanning can be split into two independent operations: maintaining the vulnerability database (which requires internet) and running the scan (which doesn't).
+
+**On the connected side:**
+
+1. Download vulnerability database updates. [Grype](https://github.com/anchore/grype) databases are approximately 65MB; [Trivy](https://github.com/aquasecurity/trivy) databases are approximately 34MB. Both support offline operation.
+2. Optionally pre-scan known SBOMs if copies are available on the connected side, generating alert summaries before the next transfer window.
+
+**Transfer:**
+
+3. Move the vulnerability database across the air gap via USB. The database fits on any drive. Daily incremental updates are typically well under 10MB. Bundle it alongside regular software updates — the same disciplined transfer workflow that manages your [software dependencies](/blog/air-gapping-your-software-supply-chain) manages your vulnerability intelligence.
+
+**On the air-gapped side:**
+
+4. Run `airgap-deploy scan --sbom sbom.cdx.json --db /path/to/grype-db` against local SBOMs. The scan runs entirely offline — no network calls, no cloud service, no API keys.
+5. Review the vulnerability report. JSON output is available for automation; human-readable output is available for review.
+6. Prioritize and plan patches based on severity and exploitability.
+
+For CI/CD integration in air-gapped build pipelines, the `scan` subcommand returns a non-zero exit code when vulnerabilities exceed a configurable severity threshold. Running `airgap-deploy scan --sbom sbom.cdx.json --db /path/to/grype-db --fail-on critical` will fail the pipeline if any critical vulnerabilities are found, enabling automated gates without network access.
+
+## Staying current: the update cycle
+
+Air-gapping doesn't mean freezing. It means updating deliberately.
+
+The practical workflow for maintaining vulnerability awareness across the air gap follows a regular cadence:
+
+1. **Connected side monitors.** Poll [OSV](https://osv.dev/) (Google's open-source vulnerability database), the [RustSec Advisory Database](https://rustsec.org/), and the [National Vulnerability Database](https://nvd.nist.gov/) for new vulnerabilities affecting your deployed SBOMs. This can run as a daily cron job, producing dated vulnerability database snapshots (e.g., `vuln-db-2026-02-08.tar.gz`).
+
+2. **Generate transfer-ready packages.** Bundle the vulnerability database updates and any alert summaries into a single archive, ready for physical transfer.
+
+3. **Transfer on cadence.** Weekly or biweekly, include database updates in your regular software update transfers. The same USB drives, the same chain of custody, the same verification process.
+
+4. **Re-scan on the air-gapped side.** Run `airgap-deploy scan` against all deployed SBOMs with the updated database. Compare results against previous scans to identify newly disclosed vulnerabilities.
+
+5. **Patch prioritization.** Review reports, identify affected components, and plan remediation transfers. When a patch is ready, the same deployment workflow that originally delivered the software handles the update: prepare a new package on the connected side, transfer it across the gap, install it on the isolated side.
+
+For the cryptographic components tracked in your CBOM, the same cycle applies to post-quantum migration. When NIST-approved post-quantum implementations are available in your dependency ecosystem — for example, when `ring` or `rustls` adds ML-KEM support — your CBOM tells you exactly which deployed systems use those libraries and need updating. You can plan the transfer and rollout with precision rather than guessing which systems are affected.
+
+The cadence you choose depends on your threat model. Weekly updates are appropriate for most environments. Daily updates may be warranted for systems processing sensitive data. Monthly updates may be sufficient for isolated test environments. The point is that the cadence is explicit and deliberate — not left to chance or convenience.
+
+## Conclusion
+
+Bills of Materials make the air gap manageable, not just secure. Without them, an air-gapped system is a black box — you know it's isolated, but you don't know what's running inside it or whether any of it is vulnerable. With SBOMs and CBOMs generated at package time and vulnerability scanning available offline, you get the same visibility that connected systems take for granted.
+
+The tools already exist. CycloneDX provides the standard. Grype and Trivy provide offline-capable vulnerability databases. AirGap Deploy and Transfer provide the air-gap workflow. The v1.1 enhancement connects them into a single, deliberate maintenance cycle: generate the inventory at package time, transfer it with the software, scan it on the air-gapped side, and update on a cadence that matches your threat model.
+
+Air-gapping is a commitment to deliberate security. Bills of Materials are what make that commitment sustainable over time.
+
+---
+
+For the broader case for air-gapping, see [Why Air-Gapping?](/blog/why-air-gapping). For how air-gapping applies to software supply chain security, see [Air-Gapping Your Software Supply Chain](/blog/air-gapping-your-software-supply-chain). For how it addresses quantum threats, see [Air-Gapping in the Quantum Era](/blog/air-gapping-in-the-quantum-era). For the full suite of tools, see [Privacy-First Tools for Air-Gapped Environments](/blog/introducing-airgap-tools).
