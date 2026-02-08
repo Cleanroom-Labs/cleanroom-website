@@ -1,8 +1,10 @@
-"""Tests for repo_tools.sync (minimal)."""
+"""Tests for repo_tools.sync."""
 
+import pytest
 from pathlib import Path
 
-from repo_tools.sync import DEFAULT_THEME_REPO, parse_gitmodules
+from repo_tools.repo_utils import DEFAULT_THEME_REPO
+from repo_tools.sync import parse_gitmodules, resolve_target_commit
 
 
 class TestDefaultThemeRepoPath:
@@ -74,3 +76,37 @@ class TestParseGitmodules:
         gitmodules.write_text("")
         results = parse_gitmodules(gitmodules)
         assert results == []
+
+
+# ---------------------------------------------------------------------------
+# resolve_target_commit
+# ---------------------------------------------------------------------------
+
+class TestResolveTargetCommit:
+    def test_explicit_sha_returned_as_is(self):
+        """An explicit commit SHA should be returned without modification."""
+        sha = "abc1234"
+        result_sha, source = resolve_target_commit(sha, Path("/nonexistent"))
+        assert result_sha == sha
+        assert source == "CLI argument"
+
+    def test_full_sha_returned(self):
+        """A full 40-char SHA should be accepted."""
+        sha = "a" * 40
+        result_sha, _ = resolve_target_commit(sha, Path("/nonexistent"))
+        assert result_sha == sha
+
+    def test_invalid_sha_raises(self):
+        """A non-hex string should raise ValueError."""
+        with pytest.raises(ValueError, match="Invalid commit SHA"):
+            resolve_target_commit("not-a-sha!", Path("/nonexistent"))
+
+    def test_too_short_sha_raises(self):
+        """A SHA shorter than 7 chars should raise ValueError."""
+        with pytest.raises(ValueError, match="Invalid commit SHA"):
+            resolve_target_commit("abc12", Path("/nonexistent"))
+
+    def test_missing_theme_repo_raises(self, tmp_path: Path):
+        """When no commit is given and theme repo doesn't exist, should raise."""
+        with pytest.raises(ValueError, match="not found"):
+            resolve_target_commit(None, tmp_path / "nonexistent")

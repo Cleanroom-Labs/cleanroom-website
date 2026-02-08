@@ -8,7 +8,7 @@ Handles click events for node selection.
 import tkinter as tk
 from typing import Callable, TYPE_CHECKING
 
-from .layout import NodeLayout, TreeLayout, flatten_layouts
+from .layout import NodeLayout, TreeLayout
 from .repo_node import RepoNode
 
 if TYPE_CHECKING:

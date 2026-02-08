@@ -1,5 +1,6 @@
 """Tests for repo_tools.repo_utils."""
 
+import sys
 from pathlib import Path
 
 from repo_tools.repo_utils import (
@@ -7,6 +8,7 @@ from repo_tools.repo_utils import (
     RepoInfo,
     RepoStatus,
     discover_repos,
+    find_repo_root,
     topological_sort_repos,
 )
 
@@ -16,6 +18,14 @@ from repo_tools.repo_utils import (
 # ---------------------------------------------------------------------------
 
 class TestColors:
+    def setup_method(self):
+        """Ensure colors are enabled for testing (pytest stdout is not a TTY)."""
+        Colors._enabled = True
+
+    def teardown_method(self):
+        """Re-detect TTY state after each test."""
+        Colors._enabled = hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()
+
     def test_red_formatting(self):
         result = Colors.red("hello")
         assert result == "\033[0;31mhello\033[0m"
@@ -35,6 +45,13 @@ class TestColors:
     def test_empty_string(self):
         result = Colors.red("")
         assert result == "\033[0;31m\033[0m"
+
+    def test_disable(self):
+        Colors.disable()
+        assert Colors.red("hello") == "hello"
+        assert Colors.green("hello") == "hello"
+        assert Colors.yellow("hello") == "hello"
+        assert Colors.blue("hello") == "hello"
 
 
 # ---------------------------------------------------------------------------
@@ -229,3 +246,26 @@ class TestRepoInfoHelpers:
     def test_has_remote_false(self, tmp_git_repo: Path):
         info = RepoInfo(path=tmp_git_repo, repo_root=tmp_git_repo)
         assert info.has_remote() is False
+
+
+# ---------------------------------------------------------------------------
+# find_repo_root
+# ---------------------------------------------------------------------------
+
+class TestFindRepoRoot:
+    def test_finds_root_from_subdirectory(self, tmp_submodule_tree: Path):
+        """Should find the repo root from a subdirectory."""
+        # The tmp_submodule_tree has scripts/build-docs.mjs
+        result = find_repo_root(start=tmp_submodule_tree / "technical-docs")
+        assert result == tmp_submodule_tree
+
+    def test_finds_root_from_root(self, tmp_submodule_tree: Path):
+        """Should find the repo root when starting from root itself."""
+        result = find_repo_root(start=tmp_submodule_tree)
+        assert result == tmp_submodule_tree
+
+    def test_raises_when_not_found(self, tmp_path: Path):
+        """Should raise FileNotFoundError when no repo root exists."""
+        import pytest
+        with pytest.raises(FileNotFoundError, match="Could not find"):
+            find_repo_root(start=tmp_path)

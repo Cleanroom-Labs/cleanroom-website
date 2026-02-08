@@ -138,6 +138,33 @@ class TestCliVisualizeSubcommand:
         assert args.path == "."
 
 
+class TestCliNoColor:
+    def test_no_color_flag(self):
+        """'--no-color check' should disable colors and still dispatch."""
+        from repo_tools.repo_utils import Colors
+
+        mock_run = MagicMock(return_value=0)
+        with patch("repo_tools.check.run", mock_run):
+            main(["--no-color", "check"])
+
+        assert Colors._enabled is False
+        # Restore for other tests
+        Colors._enabled = True
+
+    def test_no_color_env_var(self):
+        """NO_COLOR env var should disable colors."""
+        import os
+        from repo_tools.repo_utils import Colors
+
+        mock_run = MagicMock(return_value=0)
+        with patch("repo_tools.check.run", mock_run), \
+             patch.dict(os.environ, {"NO_COLOR": "1"}):
+            main(["check"])
+
+        assert Colors._enabled is False
+        Colors._enabled = True
+
+
 class TestCliInvalidSubcommand:
     def test_unknown_subcommand_exits(self):
         """An unrecognised subcommand should cause argparse to exit with code 2."""
