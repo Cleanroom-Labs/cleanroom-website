@@ -7,7 +7,6 @@ Provides:
 - RepoStatus: Enum for repository validation states
 - RepoInfo: Dataclass representing a git repository with validation/push methods
 - discover_repos(): Find all git repos (excluding theme submodules)
-- build_dependency_graph(): Build parent→child relationships
 - topological_sort_repos(): Sort repos for bottom-up operations
 - print_status_table(): Formatted status output
 """
@@ -184,7 +183,7 @@ class RepoInfo:
         self.ahead_count, self.behind_count = self.get_ahead_behind_count(self.branch)
 
         # Check if behind remote (if requested)
-        if check_sync and self.behind_count and self.behind_count != "0":
+        if check_sync and self.behind_count != "0":
             if self.ahead_count and self.ahead_count not in ("0", "new-branch"):
                 self.status = RepoStatus.DIVERGED
                 self.error_message = (
@@ -380,11 +379,6 @@ def set_parent_relationships(repos: list[RepoInfo]) -> None:
             if parent_path in path_to_repo:
                 repo.parent = path_to_repo[parent_path]
                 break
-
-
-def get_children(repo: RepoInfo, repos: list[RepoInfo]) -> list[RepoInfo]:
-    """Get direct children of a repo."""
-    return [r for r in repos if r.parent is repo]
 
 
 def topological_sort_repos(repos: list[RepoInfo]) -> list[RepoInfo]:
