@@ -1,17 +1,20 @@
 """
 repo_tools/check.py
 Verifies all submodules are correctly configured: on a branch (not detached HEAD)
-and all common (cleanroom-website-common) submodules at the same commit.
+and all sync-group submodules at the same commit.
 
 Usage (via entry point):
-    repo-check           # Basic check
-    repo-check --verbose # Show additional details
+    repo-tools check           # Basic check
+    repo-tools check --verbose # Show additional details
 """
 
 import argparse
+from collections import Counter
 from pathlib import Path
 
-from repo_tools.repo_utils import Colors, RepoInfo, discover_repos, find_repo_root
+from repo_tools.config import load_config
+from repo_tools.repo_utils import Colors, RepoInfo, find_repo_root, parse_gitmodules
+from repo_tools.sync import discover_sync_submodules
 
 
 def get_tag_or_branch(repo: RepoInfo) -> str | None:
@@ -47,53 +50,88 @@ def check_repo_state(repo: RepoInfo, name: str, verbose: bool = False) -> bool:
         return False
 
 
-def check_common_sync(repo_root: Path, verbose: bool = False) -> bool:
-    """
-    Verify all common (cleanroom-website-common) submodules are at the same commit.
-    Returns True if all in sync, False if any differ.
-    """
-    # Discover all repos including common submodules
-    all_repos = discover_repos(repo_root, exclude_theme=False)
+def _discover_branch_check_repos(
+    repo_root: Path,
+    exclude_paths: set[Path],
+) -> list[tuple[str, RepoInfo]]:
+    """Recursively discover submodule repos that should be on a branch.
 
-    # Filter to common submodules only
-    common_repos = [r for r in all_repos if r.name == "common"]
+    Walks .gitmodules at each level and returns ``(display_name, RepoInfo)``
+    pairs for every submodule whose path is not in *exclude_paths*.
+    """
+    results: list[tuple[str, RepoInfo]] = []
 
-    if not common_repos:
-        print(f"  {Colors.yellow('⚠')} No common submodules found")
+    def _walk(parent: Path) -> None:
+        gitmodules = parent / ".gitmodules"
+        if not gitmodules.exists():
+            return
+
+        entries = parse_gitmodules(gitmodules)
+        for _name, subpath, _url in entries:
+            full_path = parent / subpath
+            if not (full_path / ".git").exists():
+                continue
+            if full_path in exclude_paths:
+                continue
+
+            rel = str(full_path.relative_to(repo_root))
+            results.append((rel, RepoInfo(path=full_path, repo_root=repo_root)))
+
+            # Recurse into this submodule's own submodules
+            _walk(full_path)
+
+    _walk(repo_root)
+    return results
+
+
+def check_sync_groups(repo_root: Path, verbose: bool = False) -> bool:
+    """
+    Verify all sync-group submodules are at the same commit within each group.
+    Returns True if all groups are in sync, False if any differ.
+    """
+    config = load_config(repo_root)
+
+    if not config.sync_groups:
         return True
 
-    # Get commit for each
-    commits: dict[str, str] = {}
-    for repo in common_repos:
-        sha = repo.get_commit_sha(short=True)
-        commits[repo.rel_path] = sha
+    all_ok = True
+    for group in config.sync_groups.values():
+        submodules = discover_sync_submodules(repo_root, group.url_match)
 
-    unique_commits = set(commits.values())
+        if not submodules:
+            print(f"  {Colors.yellow('⚠')} No submodules found for group '{group.name}'")
+            continue
 
-    if len(unique_commits) == 1:
-        commit = next(iter(unique_commits))
-        print(f"  {Colors.green('✓')} All {len(common_repos)} common submodules at {commit}")
-        if verbose:
-            for rel_path in sorted(commits):
-                print(f"      {rel_path:<40} {commits[rel_path]}")
-        return True
+        commits: dict[str, str] = {}
+        for sub in submodules:
+            rel = str(sub.path.relative_to(repo_root))
+            sha = sub.current_commit[:7] if sub.current_commit else "unknown"
+            commits[rel] = sha
 
-    # Out of sync — find the most common commit (majority)
-    from collections import Counter
-    commit_counts = Counter(commits.values())
-    majority_commit = commit_counts.most_common(1)[0][0]
+        unique_commits = set(commits.values())
 
-    print(f"  {Colors.red('✗')} Common submodules are NOT in sync "
-          f"({len(unique_commits)} unique commits across {len(common_repos)} locations)")
-
-    for rel_path in sorted(commits):
-        sha = commits[rel_path]
-        if sha != majority_commit:
-            print(f"      {rel_path:<40} {sha}  {Colors.red('← differs')}")
+        if len(unique_commits) == 1:
+            commit = next(iter(unique_commits))
+            print(f"  {Colors.green('✓')} All {len(submodules)} {group.name} submodules at {commit}")
+            if verbose:
+                for rel_path in sorted(commits):
+                    print(f"      {rel_path:<40} {commits[rel_path]}")
         else:
-            print(f"      {rel_path:<40} {sha}")
+            all_ok = False
+            commit_counts = Counter(commits.values())
+            majority_commit = commit_counts.most_common(1)[0][0]
 
-    return False
+            print(f"  {Colors.red('✗')} {group.name} submodules are NOT in sync "
+                  f"({len(unique_commits)} unique commits across {len(submodules)} locations)")
+
+            for rel_path in sorted(commits):
+                sha = commits[rel_path]
+                if sha != majority_commit:
+                    print(f"      {rel_path:<40} {sha}  {Colors.red('← differs')}")
+                else:
+                    print(f"      {rel_path:<40} {sha}")
+
+    return all_ok
 
 
 def run(args=None) -> int:
@@ -108,52 +146,45 @@ def run(args=None) -> int:
         )
         args = parser.parse_args(args)
 
-    # Determine repo root
     try:
         repo_root = find_repo_root()
     except FileNotFoundError as e:
         print(Colors.red(str(e)))
         return 1
 
-    technical_docs = repo_root / "technical-docs"
-    if not technical_docs.exists():
-        print(f"{Colors.red('Error')}: technical-docs not found")
-        return 1
+    config = load_config(repo_root)
 
     all_healthy = True
     issues: list[str] = []
 
+    # Collect sync-group submodule paths to exclude from branch checks
+    # (sync-group submodules are expected to be on detached HEAD)
+    sync_submodule_paths: set[Path] = set()
+    for group in config.sync_groups.values():
+        for sub in discover_sync_submodules(repo_root, group.url_match):
+            sync_submodule_paths.add(sub.path)
+
     # Section 1: Check project submodules are on branches
     print(Colors.blue("Checking submodule branches..."))
 
-    # Check technical-docs submodule
-    tech_docs_repo = RepoInfo(path=technical_docs, repo_root=repo_root)
-    if not check_repo_state(tech_docs_repo, "technical-docs", args.verbose):
-        all_healthy = False
-        issues.append("detached-head")
+    branch_repos = _discover_branch_check_repos(repo_root, sync_submodule_paths)
 
-    # Check each project submodule within technical-docs
-    for project_dir in sorted(technical_docs.iterdir()):
-        if not project_dir.is_dir():
-            continue
-
-        # Check if it's a git submodule (has .git file) — skip common submodules
-        git_indicator = project_dir / ".git"
-        if git_indicator.exists() and project_dir.name != "common":
-            project_repo = RepoInfo(path=project_dir, repo_root=repo_root)
-
-            if not check_repo_state(project_repo, project_dir.name, args.verbose):
+    if not branch_repos:
+        print(f"  {Colors.yellow('⚠')} No submodules found")
+    else:
+        for name, repo in branch_repos:
+            if not check_repo_state(repo, name, args.verbose):
                 all_healthy = False
                 issues.append("detached-head")
 
     print()
 
-    # Section 2: Check common submodule sync
-    print(Colors.blue("Checking common submodule sync..."))
+    # Section 2: Check sync group sync
+    print(Colors.blue("Checking sync group consistency..."))
 
-    if not check_common_sync(repo_root, args.verbose):
+    if not check_sync_groups(repo_root, args.verbose):
         all_healthy = False
-        issues.append("common-out-of-sync")
+        issues.append("sync-group-out-of-sync")
 
     print()
 
@@ -166,15 +197,12 @@ def run(args=None) -> int:
         if "detached-head" in issues:
             print()
             print(f"  {Colors.yellow('Detached HEAD fix:')}")
-            print("    cd technical-docs/<project>")
+            print("    cd <submodule>")
             print("    git checkout <branch-or-tag>")
-            print("    cd ../..")
-            print("    git add technical-docs")
-            print('    git commit -m "Update submodule reference"')
 
-        if "common-out-of-sync" in issues:
+        if "sync-group-out-of-sync" in issues:
             print()
-            print(f"  {Colors.yellow('Common submodule sync fix:')}")
+            print(f"  {Colors.yellow('Sync group fix:')}")
             print("    repo-tools sync")
 
     return 0 if all_healthy else 1

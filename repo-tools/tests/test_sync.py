@@ -1,66 +1,73 @@
 """Tests for repo_tools.sync."""
 
 import pytest
+import subprocess
 from pathlib import Path
+from unittest.mock import patch
 
-from repo_tools.repo_utils import DEFAULT_THEME_REPO
-from repo_tools.sync import parse_gitmodules, resolve_target_commit
-
-
-class TestDefaultThemeRepoPath:
-    def test_is_path_object(self):
-        assert isinstance(DEFAULT_THEME_REPO, Path)
-
-    def test_points_to_expected_location(self):
-        expected = Path.home() / "Projects" / "cleanroom-website-common"
-        assert DEFAULT_THEME_REPO == expected
+from repo_tools.repo_utils import parse_gitmodules
+from repo_tools.sync import resolve_remote_url, resolve_target_commit
 
 
 class TestParseGitmodules:
-    def test_extracts_common_submodule(self, tmp_path: Path):
-        """parse_gitmodules should return entries whose URL contains
-        'cleanroom-website-common'."""
+    def test_extracts_matching_submodule(self, tmp_path: Path):
+        """parse_gitmodules with url_match should return only matching entries."""
         gitmodules = tmp_path / ".gitmodules"
         gitmodules.write_text(
             '[submodule "common"]\n'
             "    path = common\n"
-            "    url = git@github.com:Cleanroom-Labs/cleanroom-website-common.git\n"
+            "    url = git@github.com:Org/my-shared-lib.git\n"
+        )
+        results = parse_gitmodules(gitmodules, url_match="my-shared-lib")
+        assert len(results) == 1
+        name, path, url = results[0]
+        assert name == "common"
+        assert path == "common"
+        assert "my-shared-lib" in url
+
+    def test_returns_all_without_url_match(self, tmp_path: Path):
+        """parse_gitmodules without url_match should return all entries."""
+        gitmodules = tmp_path / ".gitmodules"
+        gitmodules.write_text(
+            '[submodule "common"]\n'
+            "    path = common\n"
+            "    url = git@github.com:Org/my-shared-lib.git\n"
+            '[submodule "other"]\n'
+            "    path = other\n"
+            "    url = git@github.com:Org/other-repo.git\n"
         )
         results = parse_gitmodules(gitmodules)
-        assert len(results) == 1
-        path, url = results[0]
-        assert path == "common"
-        assert "cleanroom-website-common" in url
+        assert len(results) == 2
 
-    def test_ignores_non_common_submodule(self, tmp_path: Path):
-        """Submodules whose URL does not contain 'cleanroom-website-common'
+    def test_ignores_non_matching_submodule(self, tmp_path: Path):
+        """Submodules whose URL does not contain the url_match string
         should be excluded."""
         gitmodules = tmp_path / ".gitmodules"
         gitmodules.write_text(
             '[submodule "other"]\n'
             "    path = other\n"
-            "    url = git@github.com:Cleanroom-Labs/other-repo.git\n"
+            "    url = git@github.com:Org/other-repo.git\n"
         )
-        results = parse_gitmodules(gitmodules)
+        results = parse_gitmodules(gitmodules, url_match="my-shared-lib")
         assert len(results) == 0
 
     def test_multiple_submodules_mixed(self, tmp_path: Path):
-        """Only submodules matching cleanroom-website-common should appear."""
+        """Only submodules matching url_match should appear."""
         gitmodules = tmp_path / ".gitmodules"
         gitmodules.write_text(
             '[submodule "common"]\n'
             "    path = source/common\n"
-            "    url = git@github.com:Cleanroom-Labs/cleanroom-website-common.git\n"
+            "    url = git@github.com:Org/my-shared-lib.git\n"
             '[submodule "other"]\n'
             "    path = other\n"
-            "    url = git@github.com:Cleanroom-Labs/other-repo.git\n"
+            "    url = git@github.com:Org/other-repo.git\n"
             '[submodule "theme2"]\n'
             "    path = theme2\n"
-            "    url = https://github.com/Cleanroom-Labs/cleanroom-website-common.git\n"
+            "    url = https://github.com/Org/my-shared-lib.git\n"
         )
-        results = parse_gitmodules(gitmodules)
+        results = parse_gitmodules(gitmodules, url_match="my-shared-lib")
         assert len(results) == 2
-        paths = [r[0] for r in results]
+        paths = [r[1] for r in results]
         assert "source/common" in paths
         assert "theme2" in paths
 
@@ -76,6 +83,21 @@ class TestParseGitmodules:
         gitmodules.write_text("")
         results = parse_gitmodules(gitmodules)
         assert results == []
+
+    def test_returns_name_path_url_tuples(self, tmp_path: Path):
+        """Each entry should be a (name, path, url) tuple."""
+        gitmodules = tmp_path / ".gitmodules"
+        gitmodules.write_text(
+            '[submodule "my-sub"]\n'
+            "    path = libs/my-sub\n"
+            "    url = git@github.com:Org/my-sub.git\n"
+        )
+        results = parse_gitmodules(gitmodules)
+        assert len(results) == 1
+        name, path, url = results[0]
+        assert name == "my-sub"
+        assert path == "libs/my-sub"
+        assert url == "git@github.com:Org/my-sub.git"
 
 
 # ---------------------------------------------------------------------------
@@ -106,7 +128,76 @@ class TestResolveTargetCommit:
         with pytest.raises(ValueError, match="Invalid commit SHA"):
             resolve_target_commit("abc12", Path("/nonexistent"))
 
-    def test_missing_theme_repo_raises(self, tmp_path: Path):
-        """When no commit is given and theme repo doesn't exist, should raise."""
+    def test_missing_standalone_repo_raises(self, tmp_path: Path):
+        """When no commit is given and standalone repo doesn't exist, should raise."""
         with pytest.raises(ValueError, match="not found"):
             resolve_target_commit(None, tmp_path / "nonexistent")
+
+    def test_none_standalone_and_no_remote_url_raises(self):
+        """When standalone_repo is None and no remote_url, should raise."""
+        with pytest.raises(ValueError, match="Cannot resolve target commit"):
+            resolve_target_commit(None, None)
+
+    def test_ls_remote_resolves_commit(self):
+        """When standalone_repo is None and remote_url is given, should use git ls-remote."""
+        fake_sha = "a" * 40
+        fake_output = f"{fake_sha}\trefs/heads/main\n"
+
+        with patch("repo_tools.sync.subprocess.run") as mock_run:
+            mock_run.return_value = subprocess.CompletedProcess(
+                args=[], returncode=0, stdout=fake_output, stderr=""
+            )
+            sha, source = resolve_target_commit(None, None, remote_url="https://example.com/repo.git")
+
+        assert sha == fake_sha
+        assert "example.com" in source
+        mock_run.assert_called_once()
+
+    def test_ls_remote_failure_raises(self):
+        """When git ls-remote fails, should raise ValueError."""
+        with patch("repo_tools.sync.subprocess.run") as mock_run:
+            mock_run.return_value = subprocess.CompletedProcess(
+                args=[], returncode=128, stdout="", stderr="fatal: could not read"
+            )
+            with pytest.raises(ValueError, match="ls-remote failed"):
+                resolve_target_commit(None, None, remote_url="https://example.com/repo.git")
+
+    def test_ls_remote_no_main_branch_raises(self):
+        """When ls-remote returns empty output (no main branch), should raise."""
+        with patch("repo_tools.sync.subprocess.run") as mock_run:
+            mock_run.return_value = subprocess.CompletedProcess(
+                args=[], returncode=0, stdout="", stderr=""
+            )
+            with pytest.raises(ValueError, match="No 'main' branch"):
+                resolve_target_commit(None, None, remote_url="https://example.com/repo.git")
+
+
+# ---------------------------------------------------------------------------
+# resolve_remote_url
+# ---------------------------------------------------------------------------
+
+class TestResolveRemoteUrl:
+    def test_returns_matching_url(self, tmp_path: Path):
+        """Should return the URL of the first matching submodule."""
+        (tmp_path / ".gitmodules").write_text(
+            '[submodule "common"]\n'
+            "    path = common\n"
+            "    url = https://github.com/Org/my-shared-lib.git\n"
+        )
+        url = resolve_remote_url(tmp_path, "my-shared-lib")
+        assert url == "https://github.com/Org/my-shared-lib.git"
+
+    def test_returns_none_no_match(self, tmp_path: Path):
+        """Should return None when no submodule matches."""
+        (tmp_path / ".gitmodules").write_text(
+            '[submodule "other"]\n'
+            "    path = other\n"
+            "    url = https://github.com/Org/other-repo.git\n"
+        )
+        url = resolve_remote_url(tmp_path, "my-shared-lib")
+        assert url is None
+
+    def test_returns_none_no_gitmodules(self, tmp_path: Path):
+        """Should return None when .gitmodules doesn't exist."""
+        url = resolve_remote_url(tmp_path, "anything")
+        assert url is None

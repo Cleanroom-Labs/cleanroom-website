@@ -5,9 +5,9 @@ import subprocess
 from pathlib import Path
 from unittest.mock import patch
 
+from repo_tools.repo_utils import parse_gitmodules
 from repo_tools.worktree import (
     _init_submodules,
-    _parse_gitmodules_all,
     add_worktree,
     remove_worktree,
 )
@@ -21,19 +21,19 @@ def _git(cwd: Path, *args: str) -> subprocess.CompletedProcess:
 
 
 # ---------------------------------------------------------------------------
-# _parse_gitmodules_all
+# parse_gitmodules (shared from repo_utils, used by worktree)
 # ---------------------------------------------------------------------------
 
 class TestParseGitmodulesAll:
     def test_missing_file(self, tmp_path: Path):
         """Nonexistent .gitmodules should return empty list."""
-        result = _parse_gitmodules_all(tmp_path / ".gitmodules")
+        result = parse_gitmodules(tmp_path / ".gitmodules")
         assert result == []
 
     def test_empty_file(self, tmp_path: Path):
         """Empty .gitmodules should return empty list."""
         (tmp_path / ".gitmodules").write_text("")
-        result = _parse_gitmodules_all(tmp_path / ".gitmodules")
+        result = parse_gitmodules(tmp_path / ".gitmodules")
         assert result == []
 
     def test_single_submodule(self, tmp_path: Path):
@@ -42,11 +42,15 @@ class TestParseGitmodulesAll:
             "    path = technical-docs\n"
             "    url = /path/to/technical-docs\n"
         )
-        result = _parse_gitmodules_all(tmp_path / ".gitmodules")
-        assert result == [("technical-docs", "technical-docs")]
+        result = parse_gitmodules(tmp_path / ".gitmodules")
+        assert len(result) == 1
+        name, path, url = result[0]
+        assert name == "technical-docs"
+        assert path == "technical-docs"
+        assert url == "/path/to/technical-docs"
 
     def test_multiple_submodules(self, tmp_path: Path):
-        """Should return ALL submodules, not just theme ones."""
+        """Should return ALL submodules when no url_match is given."""
         (tmp_path / ".gitmodules").write_text(
             '[submodule "technical-docs"]\n'
             "    path = technical-docs\n"
@@ -55,10 +59,11 @@ class TestParseGitmodulesAll:
             "    path = source/common\n"
             "    url = /path/to/common\n"
         )
-        result = _parse_gitmodules_all(tmp_path / ".gitmodules")
+        result = parse_gitmodules(tmp_path / ".gitmodules")
         assert len(result) == 2
-        assert ("technical-docs", "technical-docs") in result
-        assert ("common", "source/common") in result
+        names = [r[0] for r in result]
+        assert "technical-docs" in names
+        assert "common" in names
 
 
 # ---------------------------------------------------------------------------

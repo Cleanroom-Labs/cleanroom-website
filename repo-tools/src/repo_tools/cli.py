@@ -6,23 +6,23 @@ Main CLI entry point: repo-tools {check,push,sync,visualize}
 import argparse
 import os
 import sys
-from pathlib import Path
 
-from repo_tools.repo_utils import Colors, DEFAULT_THEME_REPO
+from repo_tools.repo_utils import Colors
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(
         prog="repo-tools",
-        description="Git submodule management tools for Cleanroom Labs.",
+        description="Git submodule management tools.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""\
 examples:
-  repo-tools check              Check submodule health and common sync
+  repo-tools check              Check submodule health and sync groups
   repo-tools check -v           Verbose check with commit SHAs
   repo-tools push --dry-run     Preview what would be pushed
-  repo-tools sync               Sync common submodule to latest
-  repo-tools sync abc1234       Sync to specific commit
+  repo-tools sync               Sync all groups to latest
+  repo-tools sync common        Sync just "common" group
+  repo-tools sync common abc123 Sync "common" to specific commit
   repo-tools visualize          Open interactive submodule visualizer
   repo-tools worktree add my-feature ../website-wt1
   repo-tools worktree remove ../website-wt1
@@ -38,9 +38,9 @@ examples:
     # --- repo-tools check ---
     check_parser = subparsers.add_parser(
         "check",
-        help="Verify submodules are on branches and common submodules are in sync",
+        help="Verify submodules are on branches and sync groups are consistent",
         description="Verify all submodules are correctly configured: on a branch "
-        "(not detached HEAD) and all common submodules at the same commit.",
+        "(not detached HEAD) and all sync-group submodules at the same commit.",
     )
     check_parser.add_argument(
         "--verbose", "-v",
@@ -69,18 +69,24 @@ examples:
     # --- repo-tools sync ---
     sync_parser = subparsers.add_parser(
         "sync",
-        help="Synchronize common submodule across all locations",
-        description="Synchronize cleanroom-website-common submodule across all "
+        help="Synchronize submodule sync groups across all locations",
+        description="Synchronize submodule sync groups across all "
         "locations with validation and push support.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""\
 examples:
-  repo-tools sync                       Sync to latest main, commit, and push
-  repo-tools sync abc1234               Sync to specific commit
+  repo-tools sync                       Sync all groups to latest
+  repo-tools sync common                Sync just "common" group
+  repo-tools sync common abc1234        Sync "common" to specific commit
   repo-tools sync --dry-run             Preview what would happen
   repo-tools sync --no-push             Commit only, skip pushing
   repo-tools sync --force               Skip remote sync validation
 """,
+    )
+    sync_parser.add_argument(
+        "group",
+        nargs="?",
+        help="Sync group name (syncs all groups if omitted)",
     )
     sync_parser.add_argument(
         "commit",
@@ -101,22 +107,6 @@ examples:
         "--force",
         action="store_true",
         help="Skip remote sync validation",
-    )
-    sync_parser.add_argument(
-        "--theme-repo",
-        type=Path,
-        default=DEFAULT_THEME_REPO,
-        help="Path to standalone theme repo",
-    )
-    sync_parser.add_argument(
-        "--verify",
-        action="store_true",
-        help="Check for stale generated files after sync",
-    )
-    sync_parser.add_argument(
-        "--rebuild",
-        action="store_true",
-        help="Auto-regenerate stale generated files after sync (implies --verify)",
     )
 
     # --- repo-tools visualize ---
@@ -142,10 +132,10 @@ examples:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""\
 examples:
-  repo-tools worktree add my-feature ../cleanroom-website-wt1
+  repo-tools worktree add my-feature ../my-project-wt1
   repo-tools worktree add --checkout existing-branch ../wt2
-  repo-tools worktree remove ../cleanroom-website-wt1
-  repo-tools worktree remove --force ../cleanroom-website-wt1
+  repo-tools worktree remove ../my-project-wt1
+  repo-tools worktree remove --force ../my-project-wt1
 """,
     )
     worktree_subparsers = worktree_parser.add_subparsers(dest="worktree_command")

@@ -67,14 +67,15 @@ class TestCliPushSubcommand:
 
 class TestCliSyncSubcommand:
     def test_parse_sync_full(self):
-        """'sync abc1234 --dry-run --no-push --force' should parse correctly."""
+        """'sync common abc1234 --dry-run --no-push --force' should parse correctly."""
         mock_run = MagicMock(return_value=0)
         with patch("repo_tools.sync.run", mock_run):
-            main(["sync", "abc1234", "--dry-run", "--no-push", "--force"])
+            main(["sync", "common", "abc1234", "--dry-run", "--no-push", "--force"])
 
         mock_run.assert_called_once()
         args = mock_run.call_args[0][0]
         assert args.command == "sync"
+        assert args.group == "common"
         assert args.commit == "abc1234"
         assert args.dry_run is True
         assert args.no_push is True
@@ -87,33 +88,31 @@ class TestCliSyncSubcommand:
             main(["sync"])
 
         args = mock_run.call_args[0][0]
+        assert args.group is None
         assert args.commit is None
         assert args.dry_run is False
         assert args.no_push is False
         assert args.force is False
-        assert args.verify is False
-        assert args.rebuild is False
 
-    def test_parse_sync_verify_rebuild(self):
-        """'sync --verify --rebuild' should set both flags."""
+    def test_parse_sync_group_only(self):
+        """'sync common' should set group='common' and commit=None."""
         mock_run = MagicMock(return_value=0)
         with patch("repo_tools.sync.run", mock_run):
-            main(["sync", "--verify", "--rebuild"])
+            main(["sync", "common"])
 
         args = mock_run.call_args[0][0]
-        assert args.verify is True
-        assert args.rebuild is True
+        assert args.group == "common"
+        assert args.commit is None
 
-    def test_parse_sync_theme_repo(self):
-        """'sync --theme-repo /custom/path' should set theme_repo."""
-        from pathlib import Path
-
+    def test_parse_sync_group_and_commit(self):
+        """'sync common abc1234' should set both group and commit."""
         mock_run = MagicMock(return_value=0)
         with patch("repo_tools.sync.run", mock_run):
-            main(["sync", "--theme-repo", "/custom/path"])
+            main(["sync", "common", "abc1234"])
 
         args = mock_run.call_args[0][0]
-        assert args.theme_repo == Path("/custom/path")
+        assert args.group == "common"
+        assert args.commit == "abc1234"
 
 
 class TestCliVisualizeSubcommand:

@@ -1,0 +1,74 @@
+"""
+repo_tools/config.py
+Load and validate .repo-tools.toml configuration.
+"""
+from __future__ import annotations
+
+import tomllib
+from dataclasses import dataclass, field
+from pathlib import Path
+
+CONFIG_FILENAME = ".repo-tools.toml"
+DEFAULT_COMMIT_MESSAGE = "chore: sync {group} submodule to {sha}"
+
+
+@dataclass
+class SyncGroup:
+    """A group of submodules that should all be at the same commit."""
+    name: str
+    url_match: str
+    standalone_repo: Path | None = None
+    commit_message: str = DEFAULT_COMMIT_MESSAGE
+
+
+@dataclass
+class RepoToolsConfig:
+    """Top-level configuration loaded from .repo-tools.toml."""
+    sync_groups: dict[str, SyncGroup] = field(default_factory=dict)
+
+
+def load_config(repo_root: Path) -> RepoToolsConfig:
+    """Load .repo-tools.toml from *repo_root*.
+
+    Returns a config with an empty ``sync_groups`` dict when the
+    ``[sync-groups]`` section is absent (push/worktree still work).
+
+    Raises:
+        FileNotFoundError: If .repo-tools.toml does not exist.
+        ValueError: If the file contains invalid or incomplete configuration.
+    """
+    config_path = repo_root / CONFIG_FILENAME
+    if not config_path.exists():
+        raise FileNotFoundError(f"Configuration file not found: {config_path}")
+
+    try:
+        with open(config_path, "rb") as f:
+            raw = tomllib.load(f)
+    except tomllib.TOMLDecodeError as e:
+        raise ValueError(f"Invalid TOML in {config_path}: {e}") from e
+
+    sync_groups: dict[str, SyncGroup] = {}
+
+    for name, group_data in raw.get("sync-groups", {}).items():
+        if not isinstance(group_data, dict):
+            raise ValueError(
+                f"sync-groups.{name}: expected a table, got {type(group_data).__name__}"
+            )
+
+        url_match = group_data.get("url-match")
+        if not url_match:
+            raise ValueError(f"sync-groups.{name}: 'url-match' is required")
+
+        standalone_repo_str = group_data.get("standalone-repo")
+        standalone_repo = Path(standalone_repo_str).expanduser() if standalone_repo_str else None
+
+        commit_message = group_data.get("commit-message", DEFAULT_COMMIT_MESSAGE)
+
+        sync_groups[name] = SyncGroup(
+            name=name,
+            url_match=url_match,
+            standalone_repo=standalone_repo,
+            commit_message=commit_message,
+        )
+
+    return RepoToolsConfig(sync_groups=sync_groups)
