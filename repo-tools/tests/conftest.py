@@ -43,20 +43,18 @@ def tmp_git_repo(tmp_path: Path) -> Path:
 
 @pytest.fixture()
 def tmp_submodule_tree(tmp_path: Path) -> Path:
-    """Create a parent repo with nested submodules mimicking the
-    cleanroom-website structure.
+    """Create a parent repo with nested submodules.
 
     Layout::
 
-        parent/                     (main repo -- "website root")
+        parent/                     (main repo -- project root)
         +-- technical-docs/         (submodule pointing at child repo)
         |   +-- common/             (submodule pointing at grandchild repo)
-        +-- scripts/
-        |   +-- build-docs.mjs      (sentinel used by push/sync context checks)
+        +-- .repo-tools.toml        (config sentinel)
 
     Returns the *parent* repository path.
     """
-    # ---- grandchild repo (stands in for cleanroom-website-common) ----
+    # ---- grandchild repo (stands in for a shared submodule) ----
     grandchild = tmp_path / "grandchild_origin"
     grandchild.mkdir()
     _git(grandchild, "init")
@@ -80,19 +78,23 @@ def tmp_submodule_tree(tmp_path: Path) -> Path:
     _git(child, "submodule", "add", str(grandchild), "common")
     _git(child, "commit", "-m", "Add common submodule")
 
-    # ---- parent repo (stands in for cleanroom-website) ----
+    # ---- parent repo (stands in for the project root) ----
     parent = tmp_path / "parent"
     parent.mkdir()
     _git(parent, "init")
     _git(parent, "config", "user.email", "test@example.com")
     _git(parent, "config", "user.name", "Test User")
 
-    # Create the sentinel file that push.py / sync.py look for.
-    scripts_dir = parent / "scripts"
-    scripts_dir.mkdir()
-    (scripts_dir / "build-docs.mjs").write_text("// placeholder\n")
+    # Create the .repo-tools.toml config sentinel.
+    # The grandchild repo URL will be a local path; url-match uses a
+    # substring that appears in that path.
+    (parent / ".repo-tools.toml").write_text(
+        '[sync-groups.common]\n'
+        f'url-match = "grandchild_origin"\n'
+        f'standalone-repo = "{grandchild}"\n'
+    )
 
-    _git(parent, "add", "scripts/build-docs.mjs")
+    _git(parent, "add", ".repo-tools.toml")
     _git(parent, "commit", "-m", "Initial parent commit")
 
     # Add child as a submodule named "technical-docs" inside parent.

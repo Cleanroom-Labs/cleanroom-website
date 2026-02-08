@@ -7,47 +7,9 @@ docs/submodule-workflow.md) to Python so it works from any shell.
 """
 from __future__ import annotations
 
-import re
 from pathlib import Path
 
-from repo_tools.repo_utils import Colors, find_repo_root, run_git
-
-
-def _parse_gitmodules_all(gitmodules_path: Path) -> list[tuple[str, str]]:
-    """Parse a .gitmodules file and return (name, path) for ALL submodules.
-
-    Returns an empty list when the file is missing or empty.
-    """
-    if not gitmodules_path.exists():
-        return []
-
-    content = gitmodules_path.read_text()
-    results: list[tuple[str, str]] = []
-
-    current_name: str | None = None
-    current_path: str | None = None
-
-    for line in content.split("\n"):
-        line = line.strip()
-
-        if line.startswith("[submodule"):
-            # Save previous section
-            if current_name and current_path:
-                results.append((current_name, current_path))
-            current_name = None
-            current_path = None
-            # Extract name from [submodule "name"]
-            m = re.search(r'"(.+)"', line)
-            if m:
-                current_name = m.group(1)
-        elif line.startswith("path = "):
-            current_path = line[7:].strip()
-
-    # Don't forget the last section
-    if current_name and current_path:
-        results.append((current_name, current_path))
-
-    return results
+from repo_tools.repo_utils import Colors, find_repo_root, parse_gitmodules, run_git
 
 
 def _init_submodules(worktree_path: Path, ref_worktree: Path) -> bool:
@@ -68,12 +30,12 @@ def _init_submodules(worktree_path: Path, ref_worktree: Path) -> bool:
         print(f"  {Colors.red('git submodule init failed')} in {worktree_path}")
         return False
 
-    entries = _parse_gitmodules_all(gitmodules)
+    entries = parse_gitmodules(gitmodules)
 
     # Override each submodule URL to point to the main worktree's copy
     # (only when the reference path exists; otherwise let git use the
     # original URL from .gitmodules, which works for remote URLs)
-    for name, subpath in entries:
+    for name, subpath, _url in entries:
         ref_path = ref_worktree / subpath
         if ref_path.exists():
             run_git(
@@ -89,7 +51,7 @@ def _init_submodules(worktree_path: Path, ref_worktree: Path) -> bool:
         return False
 
     # Recurse into each submodule
-    for _name, subpath in entries:
+    for _name, subpath, _url in entries:
         sub_worktree = worktree_path / subpath
         sub_ref = ref_worktree / subpath
         if not _init_submodules(sub_worktree, sub_ref):

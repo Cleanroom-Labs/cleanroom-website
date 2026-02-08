@@ -4,7 +4,7 @@ import subprocess
 from pathlib import Path
 from unittest.mock import patch
 
-from repo_tools.check import check_repo_state, get_tag_or_branch, run
+from repo_tools.check import check_repo_state, check_sync_groups, get_tag_or_branch
 from repo_tools.repo_utils import RepoInfo
 
 
@@ -50,40 +50,41 @@ class TestCheckRepoState:
 
 
 # ---------------------------------------------------------------------------
+# check_sync_groups
+# ---------------------------------------------------------------------------
+
+class TestCheckSyncGroups:
+    def test_in_sync(self, tmp_submodule_tree: Path, capsys):
+        """When there's only one submodule location per group, sync check passes."""
+        result = check_sync_groups(tmp_submodule_tree, verbose=False)
+        assert result is True
+
+    def test_verbose_output(self, tmp_submodule_tree: Path, capsys):
+        """Verbose mode should show individual submodule paths."""
+        check_sync_groups(tmp_submodule_tree, verbose=True)
+        captured = capsys.readouterr()
+        # Should show the common submodule path
+        assert "common" in captured.out
+
+
+# ---------------------------------------------------------------------------
 # run() -- integration with the real check module
 # ---------------------------------------------------------------------------
 
 class TestCheckRun:
     def test_all_healthy(self, tmp_submodule_tree: Path, capsys):
-        """When the submodule tree is healthy, run() should exit 0.
-
-        We patch __file__ resolution inside check.py so it uses our
-        temporary tree as the repo root.
-        """
-        import argparse
-
-        args = argparse.Namespace(verbose=False)
-
-        # Patch the repo_root derivation inside check.run.
-        # check.run computes: repo_root = Path(__file__).parent.parent.parent.parent.resolve()
-        # We mock Path(__file__) by patching the function-level code.
-        # Easier: call the helper functions directly with our tree.
-
-        # Instead of calling run() (which hard-codes its repo_root from __file__),
-        # we test the building blocks individually.
-        from repo_tools.check import check_common_sync, check_repo_state
+        """When the submodule tree is healthy, helpers should pass."""
         from repo_tools.repo_utils import RepoInfo
 
         td = tmp_submodule_tree / "technical-docs"
         repo = RepoInfo(path=td, repo_root=tmp_submodule_tree)
         assert check_repo_state(repo, "technical-docs", verbose=False) is True
 
-        # common sync should pass (only one common submodule, trivially in sync)
-        assert check_common_sync(tmp_submodule_tree, verbose=False) is True
+        # sync groups should pass (only one common submodule, trivially in sync)
+        assert check_sync_groups(tmp_submodule_tree, verbose=False) is True
 
     def test_verbose_output(self, tmp_submodule_tree: Path, capsys):
         """Verbose check should include commit SHAs in the output."""
-        from repo_tools.check import check_repo_state
         from repo_tools.repo_utils import RepoInfo
 
         td = tmp_submodule_tree / "technical-docs"

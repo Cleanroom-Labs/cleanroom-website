@@ -1,18 +1,20 @@
 """
 repo_tools/repo_utils.py
-Shared utilities for repository operations in cleanroom-website scripts.
+Shared utilities for repository operations.
 
 Provides:
 
 - Colors: ANSI color helpers for terminal output
 - RepoStatus: Enum for repository validation states
 - RepoInfo: Dataclass representing a git repository with validation/push methods
-- discover_repos(): Find all git repos (excluding theme submodules)
+- parse_gitmodules(): Parse .gitmodules files with optional URL filtering
+- discover_repos(): Find all git repos in a submodule tree
 - topological_sort_repos(): Sort repos for bottom-up operations
 - print_status_table(): Formatted status output
 """
 from __future__ import annotations
 
+import re
 import subprocess
 import sys
 from dataclasses import dataclass, field
@@ -21,9 +23,7 @@ from functools import cached_property
 from graphlib import TopologicalSorter
 from pathlib import Path
 
-
-# Default standalone theme repo path (used by sync and cli)
-DEFAULT_THEME_REPO = Path.home() / "Projects" / "cleanroom-website-common"
+from repo_tools.config import CONFIG_FILENAME
 
 
 class Colors:
@@ -80,6 +80,54 @@ def run_git(path: Path, *args: str, check: bool = True, capture: bool = True) ->
     return subprocess.run(cmd, capture_output=capture, text=True, check=check)
 
 
+def parse_gitmodules(
+    gitmodules_path: Path,
+    url_match: str | None = None,
+) -> list[tuple[str, str, str]]:
+    """Parse a .gitmodules file and return submodule entries.
+
+    Returns a list of ``(name, path, url)`` tuples.  When *url_match* is
+    provided, only entries whose URL contains that string are included.
+
+    Returns an empty list when the file is missing or empty.
+    """
+    if not gitmodules_path.exists():
+        return []
+
+    content = gitmodules_path.read_text()
+    results: list[tuple[str, str, str]] = []
+
+    current_name: str | None = None
+    current_path: str | None = None
+    current_url: str | None = None
+
+    for line in content.split("\n"):
+        line = line.strip()
+
+        if line.startswith("[submodule"):
+            # Save previous section
+            if current_name and current_path and current_url is not None:
+                if url_match is None or url_match in current_url:
+                    results.append((current_name, current_path, current_url))
+            current_name = None
+            current_path = None
+            current_url = None
+            m = re.search(r'"(.+)"', line)
+            if m:
+                current_name = m.group(1)
+        elif line.startswith("path = "):
+            current_path = line[7:].strip()
+        elif line.startswith("url = "):
+            current_url = line[6:].strip()
+
+    # Don't forget the last section
+    if current_name and current_path and current_url is not None:
+        if url_match is None or url_match in current_url:
+            results.append((current_name, current_path, current_url))
+
+    return results
+
+
 @dataclass
 class RepoInfo:
     """Information about a git repository."""
@@ -98,7 +146,7 @@ class RepoInfo:
     def rel_path(self) -> str:
         """Get path relative to repo root, or friendly name for root."""
         if self.path == self.repo_root:
-            return "(website root)"
+            return "(root)"
         return str(self.path.relative_to(self.repo_root))
 
     @property
@@ -333,13 +381,16 @@ class RepoInfo:
         return self.path.name
 
 
-def discover_repos(repo_root: Path, exclude_theme: bool = True) -> list[RepoInfo]:
+def discover_repos(
+    repo_root: Path,
+    exclude_paths: set[Path] | None = None,
+) -> list[RepoInfo]:
     """
     Discover all git repositories (main repo + submodules).
 
     Args:
         repo_root: Root directory of the main repository
-        exclude_theme: If True, exclude common (cleanroom-website-common) submodules (default)
+        exclude_paths: Absolute paths to skip (e.g. sync-group submodules)
     """
     repos = [RepoInfo(path=repo_root, repo_root=repo_root)]
 
@@ -353,8 +404,7 @@ def discover_repos(repo_root: Path, exclude_theme: bool = True) -> list[RepoInfo
         if git_file.is_file():
             submodule_path = git_file.parent
 
-            # Skip common (cleanroom-website-common) submodules if requested
-            if exclude_theme and submodule_path.name == "common":
+            if exclude_paths and submodule_path in exclude_paths:
                 continue
 
             repos.append(RepoInfo(path=submodule_path, repo_root=repo_root))
@@ -448,19 +498,19 @@ def print_status_table(repos: list[RepoInfo], show_behind: bool = False) -> None
 
 
 def find_repo_root(start: Path | None = None) -> Path:
-    """Walk up from start (default: cwd) to find the cleanroom-website repo root.
+    """Walk up from *start* (default: cwd) to find the project root.
 
-    Looks for a directory containing both a .git directory and
-    scripts/build-docs.mjs (the sentinel file for this repository).
+    Looks for a directory containing both a ``.git`` directory and a
+    ``.repo-tools.toml`` configuration file.
 
     Raises:
         FileNotFoundError: If no matching directory is found.
     """
     current = (start or Path.cwd()).resolve()
     for directory in [current, *current.parents]:
-        if (directory / ".git").exists() and (directory / "scripts" / "build-docs.mjs").exists():
+        if (directory / ".git").exists() and (directory / CONFIG_FILENAME).exists():
             return directory
     raise FileNotFoundError(
-        "Could not find cleanroom-website repository root.\n"
+        f"Could not find project root (no {CONFIG_FILENAME} found).\n"
         f"Searched from: {current}"
     )

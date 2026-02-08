@@ -98,7 +98,7 @@ class TestRepoInfoRelPath:
     def test_root_repo(self, tmp_git_repo: Path):
         """When path == repo_root the friendly name should be returned."""
         info = RepoInfo(path=tmp_git_repo, repo_root=tmp_git_repo)
-        assert info.rel_path == "(website root)"
+        assert info.rel_path == "(root)"
 
     def test_nested_path(self, tmp_submodule_tree: Path):
         """A deeply nested submodule should show the full relative path."""
@@ -113,21 +113,28 @@ class TestRepoInfoRelPath:
 
 class TestDiscoverRepos:
     def test_finds_repos(self, tmp_submodule_tree: Path):
-        """discover_repos should find the parent and child (excluding common)."""
-        repos = discover_repos(tmp_submodule_tree, exclude_theme=True)
+        """discover_repos should find all repos in the tree."""
+        repos = discover_repos(tmp_submodule_tree)
         paths = {r.path for r in repos}
 
         # Must include the root and the technical-docs submodule.
         assert tmp_submodule_tree in paths
         assert tmp_submodule_tree / "technical-docs" in paths
 
-        # "common" should be excluded by default.
-        common_paths = {p for p in paths if p.name == "common"}
-        assert len(common_paths) == 0
+    def test_exclude_paths(self, tmp_submodule_tree: Path):
+        """Passing exclude_paths should skip those submodules."""
+        common_path = tmp_submodule_tree / "technical-docs" / "common"
+        repos = discover_repos(tmp_submodule_tree, exclude_paths={common_path})
+        paths = {r.path for r in repos}
 
-    def test_exclude_theme_false(self, tmp_submodule_tree: Path):
-        """With exclude_theme=False, common submodules should be included."""
-        repos = discover_repos(tmp_submodule_tree, exclude_theme=False)
+        assert common_path not in paths
+        # The rest should still be present
+        assert tmp_submodule_tree in paths
+        assert tmp_submodule_tree / "technical-docs" in paths
+
+    def test_no_exclusion_includes_all(self, tmp_submodule_tree: Path):
+        """Without exclude_paths, all submodules should be included."""
+        repos = discover_repos(tmp_submodule_tree)
         paths = {r.path for r in repos}
 
         common_paths = {p for p in paths if p.name == "common"}
@@ -146,7 +153,7 @@ class TestDiscoverRepos:
 class TestTopologicalSort:
     def test_children_before_parents(self, tmp_submodule_tree: Path):
         """After topological sort, children must appear before their parents."""
-        repos = discover_repos(tmp_submodule_tree, exclude_theme=False)
+        repos = discover_repos(tmp_submodule_tree)
         sorted_repos = topological_sort_repos(repos)
 
         # Build an index mapping path -> position
@@ -255,7 +262,7 @@ class TestRepoInfoHelpers:
 class TestFindRepoRoot:
     def test_finds_root_from_subdirectory(self, tmp_submodule_tree: Path):
         """Should find the repo root from a subdirectory."""
-        # The tmp_submodule_tree has scripts/build-docs.mjs
+        # The tmp_submodule_tree has .repo-tools.toml
         result = find_repo_root(start=tmp_submodule_tree / "technical-docs")
         assert result == tmp_submodule_tree
 

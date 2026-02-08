@@ -18,7 +18,7 @@ class TestPushDiscovery:
 
     def test_validation_detects_uncommitted(self, tmp_submodule_tree: Path):
         """Repos with uncommitted changes should fail validation."""
-        (tmp_submodule_tree / "scripts" / "build-docs.mjs").write_text("modified\n")
+        (tmp_submodule_tree / ".repo-tools.toml").write_text("# modified\n")
         info = RepoInfo(path=tmp_submodule_tree, repo_root=tmp_submodule_tree)
         result = info.validate(allow_no_remote=True)
         assert result is False
