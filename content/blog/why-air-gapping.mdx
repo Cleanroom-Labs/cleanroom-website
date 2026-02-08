@@ -14,19 +14,17 @@ readTime: "6 min"
 
 Air-gapping isn't perfect. No security measure is. But it solves a specific problem better than any alternative: it collapses a distributed, continuous attack surface into discrete, auditable events.
 
-## The Problem with Connected Development
+## The Threat Landscape
 
-Modern development workflows assume constant network access. Your editor phones home for updates. Your package manager pulls dependencies on every build. Your clipboard syncs across devices. Telemetry flows silently in the background.
+The network is hostile by default. Not because any single tool or service is malicious, but because connectivity itself creates exposure — and that exposure is being exploited across multiple vectors simultaneously.
 
-Each of these is a potential vector. Not because the tools are malicious—most aren't—but because the network is hostile by default. Supply chain attacks exploit exactly this: the implicit trust we place in automated systems that fetch, update, and execute code without explicit permission.
+**Network surveillance by design.** U.S. telecommunications infrastructure is legally required to include surveillance capabilities under federal law. Those capabilities have been [compromised by foreign adversaries](/blog/wired-for-surveillance), giving hostile actors access to the very systems built for court-ordered wiretaps. The infrastructure meant to enable lawful intercept has become a systemic vulnerability.
 
-Consider recent examples:
+**Harvest now, decrypt later.** Encrypted network traffic collected today may be decryptable by quantum computers tomorrow. Adversaries are [already stockpiling encrypted data](/blog/air-gapping-in-the-quantum-era), banking on future capabilities to read it. For data with long-term sensitivity — medical records, intellectual property, classified information — the collection is happening now, even if the decryption comes later.
 
-- **xz-utils (2024)** — A backdoor was inserted into a widely-used compression library by a long-time contributor. It spread through normal update channels and nearly compromised SSH authentication on most Linux systems. ([CVE-2024-3094](https://en.wikipedia.org/wiki/XZ_Utils_backdoor), [Technical Analysis](https://gist.github.com/thesamesam/223949d5a074ebc3dce9ee78baad9e27))
-- **event-stream (2018)** — A malicious maintainer gained control of a popular npm package and inserted code targeting cryptocurrency wallets. ([npm Security Advisory](https://blog.npmjs.org/post/180565383195/details-about-the-event-stream-incident), [Post-mortem Analysis](https://snyk.io/blog/a-post-mortem-of-the-malicious-event-stream-backdoor/))
-- **SolarWinds (2020)** — Attackers compromised the build pipeline of a trusted vendor, distributing malware to thousands of organizations through routine software updates. ([CISA Advisory](https://www.cisa.gov/news-events/cybersecurity-advisories/aa20-352a), [SolarWinds Investigation](https://www.solarwinds.com/blog/an-investigative-update-of-the-cyberattack))
+**Software supply chain compromise.** Package managers, build systems, and update channels are [increasingly targeted](/blog/air-gapping-your-software-supply-chain). A single compromised dependency — a backdoored library, a hijacked maintainer account, a poisoned build pipeline — can propagate to thousands of downstream systems through the same automated workflows developers rely on every day.
 
-These attacks share a common thread: they exploited the continuous, implicit trust that connected systems place in their dependencies.
+These threats share a common thread: they exploit the continuous, implicit trust that connected systems place in their network infrastructure.
 
 ## What Air-Gapping Actually Provides
 
