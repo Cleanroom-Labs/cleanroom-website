@@ -51,11 +51,6 @@ class ThemeSubmodule:
     submodule_rel_path: str  # Path relative to parent repo (e.g., "source/theme")
     current_commit: Optional[str] = None
 
-    @property
-    def rel_path(self) -> str:
-        """Get path relative to repo root for display."""
-        return str(self.path)
-
     def git(self, *args: str, check: bool = True, capture: bool = True) -> subprocess.CompletedProcess:
         """Run a git command in this submodule."""
         cmd = ["git", "-C", str(self.path)] + list(args)
@@ -135,12 +130,9 @@ def discover_theme_submodules(repo_root: Path) -> list[ThemeSubmodule]:
         for submodule_path, _ in theme_entries:
             full_path = parent_repo / submodule_path
 
-            # Verify the submodule exists (has .git file)
-            if not (full_path / ".git").exists() and not (full_path / ".git").is_file():
-                # Check if it exists as a file (submodule style)
-                git_file = full_path / ".git"
-                if not git_file.exists():
-                    continue
+            # Verify the submodule exists (has .git file or directory)
+            if not (full_path / ".git").exists():
+                continue
 
             submodule = ThemeSubmodule(
                 path=full_path,
@@ -577,7 +569,7 @@ changes, to prevent repository divergence. Use --force to skip this check.
             if result.returncode == 0 and result.stdout.strip():
                 # Stage all submodule changes
                 changed_files = result.stdout.strip().split("\n")
-                subpaths = [f for f in changed_files if f and "/" not in f or f.endswith("-docs")]
+                subpaths = [f for f in changed_files if f and ("/" not in f or f.endswith("-docs"))]
 
         if subpaths:
             if commit_submodule_changes(

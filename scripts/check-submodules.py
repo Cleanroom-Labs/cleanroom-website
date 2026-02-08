@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 scripts/check-submodules.py
-Verifies all submodules are correctly configured and not in detached HEAD.
+Verifies all submodules are correctly configured: on a branch (not detached HEAD)
+and all common (cleanroom-website-common) submodules at the same commit.
 
 Usage:
     ./scripts/check-submodules.py           # Basic check
@@ -14,7 +15,7 @@ from pathlib import Path
 
 # Add lib directory to path
 sys.path.insert(0, str(Path(__file__).parent))
-from lib.repo_utils import Colors, RepoInfo
+from lib.repo_utils import Colors, RepoInfo, discover_repos
 
 
 def get_tag_or_branch(repo: RepoInfo) -> str | None:
@@ -31,12 +32,6 @@ def get_tag_or_branch(repo: RepoInfo) -> str | None:
     return repo.get_branch()
 
 
-def get_short_commit(repo: RepoInfo) -> str:
-    """Get short commit hash for current HEAD."""
-    result = repo.git("rev-parse", "--short", "HEAD", check=False)
-    return result.stdout.strip() if result.returncode == 0 else "unknown"
-
-
 def check_repo_state(repo: RepoInfo, name: str, verbose: bool = False) -> bool:
     """
     Check if a repo is on a branch or tag.
@@ -45,26 +40,69 @@ def check_repo_state(repo: RepoInfo, name: str, verbose: bool = False) -> bool:
     current = get_tag_or_branch(repo)
 
     if current:
-        print(f"✓ {name} is on: {current}")
+        commit_info = ""
         if verbose:
-            commit = get_short_commit(repo)
-            print(f"    Commit: {commit}")
+            commit_info = f" ({repo.get_commit_sha(short=True)})"
+        print(f"  {Colors.green('✓')} {name} is on: {current}{commit_info}")
         return True
     else:
-        print(f"⚠️  {name} is in detached HEAD state")
-        print(f"    Current commit: {get_short_commit(repo)}")
+        print(f"  {Colors.red('✗')} {name} is in detached HEAD state")
+        print(f"      Current commit: {repo.get_commit_sha(short=True)}")
         return False
 
 
-def get_submodule_status(repo: RepoInfo) -> str:
-    """Get git submodule status output."""
-    result = repo.git("submodule", "status", check=False)
-    return result.stdout if result.returncode == 0 else ""
+def check_common_sync(repo_root: Path, verbose: bool = False) -> bool:
+    """
+    Verify all common (cleanroom-website-common) submodules are at the same commit.
+    Returns True if all in sync, False if any differ.
+    """
+    # Discover all repos including common submodules
+    all_repos = discover_repos(repo_root, exclude_theme=False)
+
+    # Filter to common submodules only
+    common_repos = [r for r in all_repos if r.name == "common"]
+
+    if not common_repos:
+        print(f"  {Colors.yellow('⚠')} No common submodules found")
+        return True
+
+    # Get commit for each
+    commits: dict[str, str] = {}
+    for repo in common_repos:
+        sha = repo.get_commit_sha(short=True)
+        commits[repo.rel_path] = sha
+
+    unique_commits = set(commits.values())
+
+    if len(unique_commits) == 1:
+        commit = next(iter(unique_commits))
+        print(f"  {Colors.green('✓')} All {len(common_repos)} common submodules at {commit}")
+        if verbose:
+            for rel_path in sorted(commits):
+                print(f"      {rel_path:<40} {commits[rel_path]}")
+        return True
+
+    # Out of sync — find the most common commit (majority)
+    from collections import Counter
+    commit_counts = Counter(commits.values())
+    majority_commit = commit_counts.most_common(1)[0][0]
+
+    print(f"  {Colors.red('✗')} Common submodules are NOT in sync "
+          f"({len(unique_commits)} unique commits across {len(common_repos)} locations)")
+
+    for rel_path in sorted(commits):
+        sha = commits[rel_path]
+        if sha != majority_commit:
+            print(f"      {rel_path:<40} {sha}  {Colors.red('← differs')}")
+        else:
+            print(f"      {rel_path:<40} {sha}")
+
+    return False
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Verify all submodules are correctly configured and not in detached HEAD."
+        description="Verify all submodules are correctly configured and in sync."
     )
     parser.add_argument(
         "--verbose", "-v",
@@ -81,43 +119,62 @@ def main() -> int:
         print(f"{Colors.red('Error')}: technical-docs not found")
         return 1
 
-    print("Checking submodule health...")
-    print("")
-
     all_healthy = True
+    issues: list[str] = []
+
+    # Section 1: Check project submodules are on branches
+    print(Colors.blue("Checking submodule branches..."))
 
     # Check technical-docs submodule
     tech_docs_repo = RepoInfo(path=technical_docs, repo_root=repo_root)
     if not check_repo_state(tech_docs_repo, "technical-docs", args.verbose):
         all_healthy = False
+        issues.append("detached-head")
 
     # Check each project submodule within technical-docs
     for project_dir in sorted(technical_docs.iterdir()):
         if not project_dir.is_dir():
             continue
 
-        # Check if it's a git submodule (has .git file or directory)
+        # Check if it's a git submodule (has .git file) — skip common submodules
         git_indicator = project_dir / ".git"
-        if git_indicator.exists():
-            project_name = project_dir.name
+        if git_indicator.exists() and project_dir.name != "common":
             project_repo = RepoInfo(path=project_dir, repo_root=repo_root)
 
-            if not check_repo_state(project_repo, project_name, args.verbose):
+            if not check_repo_state(project_repo, project_dir.name, args.verbose):
                 all_healthy = False
+                issues.append("detached-head")
 
-    print("")
-    print("Submodule status:")
-    submodule_status = get_submodule_status(tech_docs_repo)
-    if submodule_status:
-        print(submodule_status, end="")
+    print()
 
-    print("")
-    print("To fix detached HEAD state:")
-    print("  cd technical-docs/<project>-docs")
-    print("  git checkout <branch-or-tag>")
-    print("  cd ../..")
-    print("  git add technical-docs")
-    print('  git commit -m "Update submodule reference"')
+    # Section 2: Check common submodule sync
+    print(Colors.blue("Checking common submodule sync..."))
+
+    if not check_common_sync(repo_root, args.verbose):
+        all_healthy = False
+        issues.append("common-out-of-sync")
+
+    print()
+
+    # Section 3: Summary and remediation
+    if all_healthy:
+        print(Colors.green("All checks passed."))
+    else:
+        print(Colors.red("Issues found:"))
+
+        if "detached-head" in issues:
+            print()
+            print(f"  {Colors.yellow('Detached HEAD fix:')}")
+            print("    cd technical-docs/<project>")
+            print("    git checkout <branch-or-tag>")
+            print("    cd ../..")
+            print("    git add technical-docs")
+            print('    git commit -m "Update submodule reference"')
+
+        if "common-out-of-sync" in issues:
+            print()
+            print(f"  {Colors.yellow('Common submodule sync fix:')}")
+            print("    ./scripts/sync-common.py")
 
     return 0 if all_healthy else 1
 
