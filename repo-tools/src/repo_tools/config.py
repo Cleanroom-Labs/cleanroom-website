@@ -31,16 +31,15 @@ class RepoToolsConfig:
 def load_config(repo_root: Path) -> RepoToolsConfig:
     """Load .repo-tools.toml from *repo_root*.
 
-    Returns a config with an empty ``sync_groups`` dict when the
-    ``[sync-groups]`` section is absent (push/worktree still work).
+    Returns a config with an empty ``sync_groups`` dict when the file
+    is missing or the ``[sync-groups]`` section is absent.
 
     Raises:
-        FileNotFoundError: If .repo-tools.toml does not exist.
         ValueError: If the file contains invalid or incomplete configuration.
     """
     config_path = repo_root / CONFIG_FILENAME
     if not config_path.exists():
-        raise FileNotFoundError(f"Configuration file not found: {config_path}")
+        return RepoToolsConfig()
 
     try:
         with open(config_path, "rb") as f:

@@ -3,6 +3,9 @@ repo_tools/check.py
 Verifies all submodules are correctly configured: on a branch (not detached HEAD)
 and all sync-group submodules at the same commit.
 
+When no sync groups are configured (no .repo-tools.toml), the sync-group
+consistency check is skipped with a warning.
+
 Usage (via entry point):
     repo-tools check           # Basic check
     repo-tools check --verbose # Show additional details
@@ -163,6 +166,7 @@ def run(args=None) -> int:
         return 1
 
     config = load_config(repo_root)
+    has_sync_groups = bool(config.sync_groups)
 
     all_healthy = True
     issues: list[str] = []
@@ -192,7 +196,9 @@ def run(args=None) -> int:
     # Section 2: Check sync group sync
     print(Colors.blue("Checking sync group consistency..."))
 
-    if not check_sync_groups(repo_root, args.verbose):
+    if not has_sync_groups:
+        print(f"  {Colors.yellow('⚠')} No sync groups configured — skipping sync-group checks")
+    elif not check_sync_groups(repo_root, args.verbose):
         all_healthy = False
         issues.append("sync-group-out-of-sync")
 

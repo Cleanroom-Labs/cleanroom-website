@@ -23,7 +23,6 @@ from functools import cached_property
 from graphlib import TopologicalSorter
 from pathlib import Path
 
-from repo_tools.config import CONFIG_FILENAME
 
 
 class Colors:
@@ -502,19 +501,24 @@ def print_status_table(repos: list[RepoInfo], show_behind: bool = False) -> None
 
 
 def find_repo_root(start: Path | None = None) -> Path:
-    """Walk up from *start* (default: cwd) to find the project root.
+    """Find the git repository root using ``git rev-parse --show-toplevel``.
 
-    Looks for a directory containing both a ``.git`` directory and a
-    ``.repo-tools.toml`` configuration file.
+    Args:
+        start: Directory to resolve from (default: cwd).
 
     Raises:
-        FileNotFoundError: If no matching directory is found.
+        FileNotFoundError: If not inside a git repository.
     """
-    current = (start or Path.cwd()).resolve()
-    for directory in [current, *current.parents]:
-        if (directory / ".git").exists() and (directory / CONFIG_FILENAME).exists():
-            return directory
-    raise FileNotFoundError(
-        f"Could not find project root (no {CONFIG_FILENAME} found).\n"
-        f"Searched from: {current}"
+    import subprocess
+
+    cwd = str((start or Path.cwd()).resolve())
+    result = subprocess.run(
+        ["git", "rev-parse", "--show-toplevel"],
+        capture_output=True, text=True, cwd=cwd,
     )
+    if result.returncode != 0:
+        raise FileNotFoundError(
+            f"Could not find git repository root.\n"
+            f"Searched from: {cwd}"
+        )
+    return Path(result.stdout.strip())

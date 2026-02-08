@@ -606,8 +606,8 @@ changes, to prevent repository divergence. Use --force to skip this check.
     config = load_config(repo_root)
 
     if not config.sync_groups:
-        print(Colors.red("No sync groups defined in .repo-tools.toml"))
-        return 1
+        print(Colors.yellow("No sync groups configured. Nothing to sync."))
+        return 0
 
     # Disambiguate: if group arg doesn't match a sync group name and
     # looks like a commit SHA, treat it as a commit for all groups.

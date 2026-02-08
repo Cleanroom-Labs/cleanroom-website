@@ -50,7 +50,7 @@ def tmp_submodule_tree(tmp_path: Path) -> Path:
         parent/                     (main repo -- project root)
         +-- technical-docs/         (submodule pointing at child repo)
         |   +-- common/             (submodule pointing at grandchild repo)
-        +-- .repo-tools.toml        (config sentinel)
+        +-- .repo-tools.toml        (optional config)
 
     Returns the *parent* repository path.
     """
@@ -85,7 +85,7 @@ def tmp_submodule_tree(tmp_path: Path) -> Path:
     _git(parent, "config", "user.email", "test@example.com")
     _git(parent, "config", "user.name", "Test User")
 
-    # Create the .repo-tools.toml config sentinel.
+    # Create .repo-tools.toml with a sync group for testing.
     # The grandchild repo URL will be a local path; url-match uses a
     # substring that appears in that path.
     (parent / ".repo-tools.toml").write_text(

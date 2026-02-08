@@ -7,7 +7,8 @@ Usage:
     repo-tools visualize [path]
 
 Args:
-    path: Path to the git repository (default: current directory)
+    path: Path to the git repository (default: auto-detected from cwd).
+          Can be run from any subdirectory within a repository.
 """
 
 import argparse
@@ -29,14 +30,17 @@ def run(args=None) -> int:
         )
         args = parser.parse_args(args)
 
-    repo_path = Path(args.path).resolve()
+    from repo_tools.repo_utils import find_repo_root
 
-    if not repo_path.exists():
-        print(f"Error: Path does not exist: {repo_path}", file=sys.stderr)
+    start_path = Path(args.path).resolve()
+    if not start_path.exists():
+        print(f"Error: Path does not exist: {start_path}", file=sys.stderr)
         return 1
 
-    if not (repo_path / ".git").exists():
-        print(f"Error: Not a git repository: {repo_path}", file=sys.stderr)
+    try:
+        repo_path = find_repo_root(start_path)
+    except FileNotFoundError as e:
+        print(f"Error: {e}", file=sys.stderr)
         return 1
 
     # Import here to avoid tkinter import on --help
