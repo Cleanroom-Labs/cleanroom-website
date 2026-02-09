@@ -61,7 +61,11 @@ def tmp_submodule_tree(tmp_path: Path) -> Path:
     _git(grandchild, "config", "user.email", "test@example.com")
     _git(grandchild, "config", "user.name", "Test User")
     (grandchild / "theme.txt").write_text("theme content\n")
-    _git(grandchild, "add", "theme.txt")
+    (grandchild / ".repo-tools.toml").write_text(
+        '[worktree-merge]\n'
+        'test-command = "true"\n'
+    )
+    _git(grandchild, "add", "theme.txt", ".repo-tools.toml")
     _git(grandchild, "commit", "-m", "Initial grandchild commit")
 
     # ---- child repo (stands in for technical-docs) ----
@@ -71,7 +75,11 @@ def tmp_submodule_tree(tmp_path: Path) -> Path:
     _git(child, "config", "user.email", "test@example.com")
     _git(child, "config", "user.name", "Test User")
     (child / "index.rst").write_text("index\n")
-    _git(child, "add", "index.rst")
+    (child / ".repo-tools.toml").write_text(
+        '[worktree-merge]\n'
+        'test-command = "true"\n'
+    )
+    _git(child, "add", "index.rst", ".repo-tools.toml")
     _git(child, "commit", "-m", "Initial child commit")
 
     # Add grandchild as a submodule named "common" inside child.
@@ -92,6 +100,9 @@ def tmp_submodule_tree(tmp_path: Path) -> Path:
         '[sync-groups.common]\n'
         f'url-match = "grandchild_origin"\n'
         f'standalone-repo = "{grandchild}"\n'
+        '\n'
+        '[worktree-merge]\n'
+        'test-command = "true"\n'
     )
 
     _git(parent, "add", ".repo-tools.toml")
@@ -110,5 +121,59 @@ def tmp_submodule_tree(tmp_path: Path) -> Path:
         if (sub / ".git").exists():
             _git(sub, "config", "user.email", "test@example.com")
             _git(sub, "config", "user.name", "Test User")
+
+    return parent
+
+
+@pytest.fixture()
+def tmp_submodule_tree_with_branches(tmp_submodule_tree: Path) -> Path:
+    """Extend tmp_submodule_tree by creating a ``my-feature`` branch in each
+    repo with divergent commits, then switching back to ``main``.
+
+    Layout after this fixture:
+
+    - Each repo (parent, technical-docs, technical-docs/common) has a
+      ``my-feature`` branch with one extra commit beyond ``main``.
+    - All repos are checked out on their original branch (main-equivalent).
+
+    Returns the *parent* (root) repository path.
+    """
+    parent = tmp_submodule_tree
+    grandchild = parent / "technical-docs" / "common"
+    child = parent / "technical-docs"
+
+    # Submodules are in detached HEAD after init. Put them on a named
+    # branch so merge operations can work on them.
+    for sub in [grandchild, child]:
+        # Try to checkout an existing main branch; create one if it doesn't exist
+        result = subprocess.run(
+            ["git", "-C", str(sub), "checkout", "main"],
+            capture_output=True, text=True,
+        )
+        if result.returncode != 0:
+            _git(sub, "checkout", "-b", "main")
+
+    # Create feature branches with divergent commits, bottom-up
+
+    # Grandchild
+    _git(grandchild, "checkout", "-b", "my-feature")
+    (grandchild / "feature.txt").write_text("grandchild feature\n")
+    _git(grandchild, "add", "feature.txt")
+    _git(grandchild, "commit", "-m", "grandchild feature commit")
+    _git(grandchild, "checkout", "main")
+
+    # Child
+    _git(child, "checkout", "-b", "my-feature")
+    (child / "feature.txt").write_text("child feature\n")
+    _git(child, "add", "feature.txt")
+    _git(child, "commit", "-m", "child feature commit")
+    _git(child, "checkout", "main")
+
+    # Parent (root)
+    _git(parent, "checkout", "-b", "my-feature")
+    (parent / "feature.txt").write_text("parent feature\n")
+    _git(parent, "add", "feature.txt")
+    _git(parent, "commit", "-m", "parent feature commit")
+    _git(parent, "checkout", "main")
 
     return parent

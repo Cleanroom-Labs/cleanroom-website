@@ -1,2 +1,9 @@
 [sync-groups.common]
 url-match = "cleanroom-website-common"
+
+[worktree-merge]
+test-command = "npm run build"
+
+[worktree-merge.test-overrides]
+"common" = "npm run check-staleness"
+"technical-docs" = "make html"

@@ -23,9 +23,17 @@ class SyncGroup:
 
 
 @dataclass
+class MergeConfig:
+    """Configuration for ``repo-tools worktree merge``."""
+    test_command: str | None = None
+    test_overrides: dict[str, str] = field(default_factory=dict)
+
+
+@dataclass
 class RepoToolsConfig:
     """Top-level configuration loaded from .repo-tools.toml."""
     sync_groups: dict[str, SyncGroup] = field(default_factory=dict)
+    merge: MergeConfig = field(default_factory=MergeConfig)
 
 
 def load_config(repo_root: Path) -> RepoToolsConfig:
@@ -80,4 +88,28 @@ def load_config(repo_root: Path) -> RepoToolsConfig:
             allow_drift=allow_drift_raw,
         )
 
-    return RepoToolsConfig(sync_groups=sync_groups)
+    # --- [worktree-merge] section ---
+    merge_raw = raw.get("worktree-merge", {})
+    if not isinstance(merge_raw, dict):
+        raise ValueError(
+            f"worktree-merge: expected a table, got {type(merge_raw).__name__}"
+        )
+    test_command = merge_raw.get("test-command")
+    if test_command is not None and not isinstance(test_command, str):
+        raise ValueError("worktree-merge.test-command: expected a string")
+
+    test_overrides_raw = merge_raw.get("test-overrides", {})
+    if not isinstance(test_overrides_raw, dict):
+        raise ValueError("worktree-merge.test-overrides: expected a table")
+    for key, val in test_overrides_raw.items():
+        if not isinstance(val, str):
+            raise ValueError(
+                f"worktree-merge.test-overrides.{key}: expected a string, "
+                f"got {type(val).__name__}"
+            )
+    merge = MergeConfig(
+        test_command=test_command,
+        test_overrides=dict(test_overrides_raw),
+    )
+
+    return RepoToolsConfig(sync_groups=sync_groups, merge=merge)

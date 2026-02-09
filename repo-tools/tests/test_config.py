@@ -6,6 +6,7 @@ from pathlib import Path
 from repo_tools.config import (
     CONFIG_FILENAME,
     DEFAULT_COMMIT_MESSAGE,
+    MergeConfig,
     RepoToolsConfig,
     SyncGroup,
     load_config,
@@ -143,3 +144,93 @@ class TestLoadConfig:
         )
         with pytest.raises(ValueError, match="expected a table"):
             load_config(tmp_path)
+
+
+class TestMergeConfig:
+    def test_default_merge_config(self, tmp_path: Path):
+        """Missing [worktree-merge] section should return defaults."""
+        (tmp_path / CONFIG_FILENAME).write_text("# empty\n")
+        config = load_config(tmp_path)
+        assert config.merge.test_command is None
+        assert config.merge.test_overrides == {}
+
+    def test_missing_config_has_default_merge(self, tmp_path: Path):
+        """Missing config file should include default merge config."""
+        config = load_config(tmp_path)
+        assert isinstance(config.merge, MergeConfig)
+        assert config.merge.test_command is None
+
+    def test_test_command(self, tmp_path: Path):
+        """test-command should be loaded."""
+        (tmp_path / CONFIG_FILENAME).write_text(
+            '[worktree-merge]\n'
+            'test-command = "pytest"\n'
+        )
+        config = load_config(tmp_path)
+        assert config.merge.test_command == "pytest"
+
+    def test_test_overrides(self, tmp_path: Path):
+        """test-overrides should be loaded as a dict."""
+        (tmp_path / CONFIG_FILENAME).write_text(
+            '[worktree-merge]\n'
+            'test-command = "pytest"\n'
+            '\n'
+            '[worktree-merge.test-overrides]\n'
+            '"." = "npm test"\n'
+            '"technical-docs" = "make html"\n'
+            '"technical-docs/whisper" = ""\n'
+        )
+        config = load_config(tmp_path)
+        assert config.merge.test_overrides["."] == "npm test"
+        assert config.merge.test_overrides["technical-docs"] == "make html"
+        assert config.merge.test_overrides["technical-docs/whisper"] == ""
+
+    def test_test_overrides_without_default(self, tmp_path: Path):
+        """Overrides can exist without a default test-command."""
+        (tmp_path / CONFIG_FILENAME).write_text(
+            '[worktree-merge.test-overrides]\n'
+            '"." = "npm test"\n'
+        )
+        config = load_config(tmp_path)
+        assert config.merge.test_command is None
+        assert config.merge.test_overrides["."] == "npm test"
+
+    def test_invalid_test_command_type_raises(self, tmp_path: Path):
+        """Non-string test-command should raise ValueError."""
+        (tmp_path / CONFIG_FILENAME).write_text(
+            '[worktree-merge]\n'
+            'test-command = 42\n'
+        )
+        with pytest.raises(ValueError, match="test-command"):
+            load_config(tmp_path)
+
+    def test_invalid_test_overrides_type_raises(self, tmp_path: Path):
+        """Non-table test-overrides should raise ValueError."""
+        (tmp_path / CONFIG_FILENAME).write_text(
+            '[worktree-merge]\n'
+            'test-overrides = "bad"\n'
+        )
+        with pytest.raises(ValueError, match="test-overrides"):
+            load_config(tmp_path)
+
+    def test_invalid_override_value_raises(self, tmp_path: Path):
+        """Non-string override value should raise ValueError."""
+        (tmp_path / CONFIG_FILENAME).write_text(
+            '[worktree-merge.test-overrides]\n'
+            '"." = 42\n'
+        )
+        with pytest.raises(ValueError, match="test-overrides"):
+            load_config(tmp_path)
+
+    def test_merge_config_alongside_sync_groups(self, tmp_path: Path):
+        """Both sections should coexist."""
+        (tmp_path / CONFIG_FILENAME).write_text(
+            '[sync-groups.common]\n'
+            'url-match = "my-lib"\n'
+            '\n'
+            '[worktree-merge]\n'
+            'test-command = "pytest"\n'
+        )
+        config = load_config(tmp_path)
+        assert "common" in config.sync_groups
+        assert config.merge.test_command == "pytest"

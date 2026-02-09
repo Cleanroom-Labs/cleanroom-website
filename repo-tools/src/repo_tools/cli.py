@@ -136,6 +136,10 @@ examples:
   repo-tools worktree add --checkout existing-branch ../wt2
   repo-tools worktree remove ../my-project-wt1
   repo-tools worktree remove --force ../my-project-wt1
+  repo-tools worktree merge my-feature
+  repo-tools worktree merge --continue
+  repo-tools worktree merge --abort
+  repo-tools worktree merge --status
 """,
     )
     worktree_subparsers = worktree_parser.add_subparsers(dest="worktree_command")
@@ -181,6 +185,54 @@ examples:
         help="Force removal even if the worktree has uncommitted changes",
     )
 
+    worktree_merge_parser = worktree_subparsers.add_parser(
+        "merge",
+        help="Merge a branch across all submodules bottom-up",
+        description="Merge a feature branch into the current branch across all "
+        "repos in the submodule tree, processing leaves first.",
+    )
+    worktree_merge_parser.add_argument(
+        "branch",
+        nargs="?",
+        help="Branch to merge into the current branch",
+    )
+    worktree_merge_parser.add_argument(
+        "--continue",
+        action="store_true",
+        dest="continue_merge",
+        help="Resume after resolving a conflict or test failure",
+    )
+    worktree_merge_parser.add_argument(
+        "--abort",
+        action="store_true",
+        help="Undo all merges and restore pre-merge state",
+    )
+    worktree_merge_parser.add_argument(
+        "--status",
+        action="store_true",
+        help="Show current merge progress",
+    )
+    worktree_merge_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would happen without merging",
+    )
+    worktree_merge_parser.add_argument(
+        "--no-recurse",
+        action="store_true",
+        help="Only operate on the root repo",
+    )
+    worktree_merge_parser.add_argument(
+        "--no-ff",
+        action="store_true",
+        help="Always create a merge commit (even for fast-forwards)",
+    )
+    worktree_merge_parser.add_argument(
+        "--no-test",
+        action="store_true",
+        help="Skip running test commands",
+    )
+
     args = parser.parse_args(argv)
 
     # Handle --no-color and NO_COLOR env var
@@ -211,6 +263,9 @@ examples:
         if not args.worktree_command:
             worktree_parser.print_help()
             return 2
+        if args.worktree_command == "merge":
+            from repo_tools.worktree_merge import run
+            return run(args)
         from repo_tools.worktree import run
         return run(args)
 
