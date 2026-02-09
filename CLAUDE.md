@@ -43,7 +43,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the submodule structure, de
 | File | Purpose |
 |------|---------|
 | `scripts/build-docs.mjs` | Main build orchestrator |
-| `grove/` | Git submodule management CLI (`grove check/push/sync/visualize/worktree/claude`) |
+| [`grove`](https://github.com/Cleanroom-Labs/grove) | Git submodule management CLI (external dep; install via `pip install -r requirements.txt`) |
 | `.grove.toml` | Grove configuration: sync groups, worktree merge test commands |
 | `scripts/generate-pdf/` | PDF report generator for website content |
 | `technical-docs/source/conf.py` | Master Sphinx configuration |
