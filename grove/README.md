@@ -27,6 +27,25 @@ pip install -e ".[dev]"
 
 ## Usage
 
+### `grove init`
+
+Generate a template `.grove.toml` configuration file with all available options documented as comments.
+
+```bash
+# Generate in current directory
+grove init
+
+# Generate at a specific path
+grove init ../other-repo
+
+# Overwrite an existing .grove.toml
+grove init --force
+```
+
+**Exit codes:**
+- `0` — Template written successfully
+- `1` — File already exists (use `--force`) or invalid path
+
 ### `grove check`
 
 Verify that all submodules are on branches (not detached HEAD) and that all sync-group submodules are at the same commit. When no sync groups are configured (no `.grove.toml`), the sync-group check is skipped with a warning.

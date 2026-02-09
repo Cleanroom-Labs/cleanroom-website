@@ -23,6 +23,8 @@ examples:
   grove sync               Sync all groups to latest
   grove sync common        Sync just "common" group
   grove sync common abc123 Sync "common" to specific commit
+  grove init               Generate template .grove.toml in current directory
+  grove init ../other-repo  Generate template .grove.toml at specified path
   grove visualize          Open interactive submodule visualizer
   grove worktree add my-feature ../website-wt1
   grove worktree remove ../website-wt1
@@ -34,6 +36,25 @@ examples:
         help="Disable colored output",
     )
     subparsers = parser.add_subparsers(dest="command")
+
+    # --- grove init ---
+    init_parser = subparsers.add_parser(
+        "init",
+        help="Generate a template .grove.toml configuration file",
+        description="Write a commented .grove.toml template showing all "
+        "available configuration options.",
+    )
+    init_parser.add_argument(
+        "path",
+        nargs="?",
+        default=".",
+        help="Directory to write .grove.toml to (default: current directory)",
+    )
+    init_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite an existing .grove.toml",
+    )
 
     # --- grove check ---
     check_parser = subparsers.add_parser(
@@ -140,6 +161,9 @@ examples:
   grove worktree merge --continue
   grove worktree merge --abort
   grove worktree merge --status
+  grove claude install
+  grove claude install --user
+  grove claude install --check
 """,
     )
     worktree_subparsers = worktree_parser.add_subparsers(dest="worktree_command")
@@ -233,6 +257,39 @@ examples:
         help="Skip running test commands",
     )
 
+    # --- grove claude ---
+    claude_parser = subparsers.add_parser(
+        "claude",
+        help="Manage Claude Code skills shipped with grove",
+        description="Install or check Claude Code skills that teach Claude "
+        "how to use grove workflows.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""\
+examples:
+  grove claude install           Install skills to .claude/skills/ in current project
+  grove claude install --user    Install skills to ~/.claude/skills/
+  grove claude install --check   Check if installed skills are up to date
+""",
+    )
+    claude_subparsers = claude_parser.add_subparsers(dest="claude_command")
+
+    claude_install_parser = claude_subparsers.add_parser(
+        "install",
+        help="Install Claude Code skills from grove's package data",
+        description="Copy skill files to the project's .claude/skills/ "
+        "directory (or ~/.claude/skills/ with --user).",
+    )
+    claude_install_parser.add_argument(
+        "--user",
+        action="store_true",
+        help="Install to ~/.claude/skills/ instead of the project",
+    )
+    claude_install_parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Check if installed skills match shipped versions",
+    )
+
     args = parser.parse_args(argv)
 
     # Handle --no-color and NO_COLOR env var
@@ -242,6 +299,10 @@ examples:
     if not args.command:
         parser.print_help()
         return 2
+
+    if args.command == "init":
+        from grove.init import run
+        return run(args)
 
     if args.command == "check":
         from grove.check import run
@@ -268,6 +329,14 @@ examples:
             return run(args)
         from grove.worktree import run
         return run(args)
+
+    if args.command == "claude":
+        if not args.claude_command:
+            claude_parser.print_help()
+            return 2
+        if args.claude_command == "install":
+            from grove.claude import run_install
+            return run_install(args)
 
     parser.print_help()
     return 2

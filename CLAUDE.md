@@ -9,9 +9,19 @@ See [README.md](README.md) for complete documentation including build commands, 
 **Build docs:** `node scripts/build-docs.mjs` (add `--version <ver>` to build a specific version)
 **Build site only:** `npm run build:web`
 
-**Check submodules:** `grove check`
+**Check submodules:** `grove check` (add `-v` for verbose)
 
 **Sync common:** `grove sync`
+
+**Push changes:** `grove push` (bottom-up through submodules; `--dry-run` to preview)
+
+**Feature worktree:** `grove worktree add <branch> <path>`
+
+**Merge feature:** `grove worktree merge <branch>` (`--continue`/`--abort`/`--status`)
+
+**Init config:** `grove init` (generates template `.grove.toml` with all options documented)
+
+**Install grove skills:** `grove claude install`
 
 **Check theme staleness:** `cd common && npm run check-staleness`
 
@@ -33,12 +43,24 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the submodule structure, de
 | File | Purpose |
 |------|---------|
 | `scripts/build-docs.mjs` | Main build orchestrator |
-| `grove/` | Git submodule management CLI (`grove check/push/sync/visualize`) |
+| `grove/` | Git submodule management CLI (`grove check/push/sync/visualize/worktree/claude`) |
+| `.grove.toml` | Grove configuration: sync groups, worktree merge test commands |
 | `scripts/generate-pdf/` | PDF report generator for website content |
 | `technical-docs/source/conf.py` | Master Sphinx configuration |
 | `technical-docs/scripts/update-versions-json.sh` | Update versions.json manifest for multi-version docs |
 | `common/theme_config.py` | Shared Sphinx config, version helpers, banner setup |
 | `technical-docs/CLAUDE.md` | Guidance for working with Sphinx docs |
+
+## Grove Skills
+
+Grove ships Claude Code skills for common submodule workflows. Install with `grove claude install`. Use these skills instead of running grove commands manually:
+
+| Skill | When to use |
+|-------|-------------|
+| `/grove-ship` | Before pushing — runs health check, then pushes if clean |
+| `/grove-feature <branch> [path]` | Starting feature work — creates worktree with submodule init |
+| `/grove-sync [group] [commit]` | Syncing shared submodules — dry-run preview before executing |
+| `/grove-merge <branch>` | Merging feature branches — bottom-up merge with conflict handling |
 
 ## Detailed Documentation
 

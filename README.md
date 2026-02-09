@@ -18,6 +18,9 @@ cd cleanroom-website
 # Or initialize submodules after cloning
 git submodule update --init --recursive
 
+# Install grove (submodule management CLI)
+cd grove && pip install -e . && cd ..
+
 # Build documentation
 node scripts/build-docs.mjs
 ```
@@ -42,13 +45,71 @@ Output is generated to `public/docs/index.html`.
 
 | Command | Description |
 |---------|-------------|
-| `grove check` | Verify submodule health |
 | `./scripts/build-single-project.sh <project>` | Build single project docs |
 | `./scripts/update-project-docs.sh <project> <version>` | Update project to version |
 | `./scripts/add-new-project.sh <project> <repo-url>` | Add new project |
 | `./scripts/deploy-release.sh <project> <version>` | Deploy tagged release |
 | `./scripts/test-ci-locally.sh` | Simulate CI locally |
 | `python -m scripts.generate-pdf` | Generate comprehensive PDF from website |
+
+## Grove (Submodule Management)
+
+Grove is a CLI for managing the nested git submodule hierarchy in this repository. It handles verification, synchronization, pushing, visualization, and worktree management across all submodules.
+
+### Installation
+
+```bash
+cd grove && pip install -e .
+
+# With test dependencies
+pip install -e ".[dev]"
+```
+
+Requires Python 3.11+. All commands can be run from any subdirectory.
+
+### Commands
+
+| Command | Description |
+|---------|-------------|
+| `grove init` | Generate a template `.grove.toml` with all options documented |
+| `grove check` | Verify submodule health and sync group consistency |
+| `grove check -v` | Verbose check with commit SHAs and remotes |
+| `grove push` | Push changes bottom-up through nested submodules |
+| `grove push --dry-run` | Preview what would be pushed |
+| `grove sync` | Sync all submodule sync groups to latest |
+| `grove sync common` | Sync a specific group |
+| `grove visualize` | Open interactive submodule visualizer GUI |
+| `grove worktree add <branch> <path>` | Create worktree with submodule init |
+| `grove worktree remove <path>` | Remove a worktree |
+| `grove worktree merge <branch>` | Merge feature branch across all submodules bottom-up |
+| `grove worktree merge --continue` | Resume after resolving conflicts |
+| `grove worktree merge --abort` | Abort and restore pre-merge state |
+| `grove claude install` | Install Claude Code skills for grove workflows |
+
+### Configuration
+
+Grove reads `.grove.toml` in the repository root for sync group definitions and worktree merge test commands. Configuration is optional — commands gracefully handle repos without it.
+
+See [grove/README.md](grove/README.md) for full documentation including flags, exit codes, and configuration format.
+
+### Claude Code Skills
+
+Grove ships Claude Code skills for common workflows. Install them with:
+
+```bash
+grove claude install          # Project scope (.claude/skills/)
+grove claude install --user   # User scope (~/.claude/skills/)
+grove claude install --check  # Check if skills are up to date
+```
+
+Installed skills:
+
+| Skill | Description |
+|-------|-------------|
+| `/grove-ship` | Health check all submodules, then push if clean |
+| `/grove-feature <branch> [path]` | Create a feature branch worktree with submodule init |
+| `/grove-sync [group] [commit]` | Sync submodule groups with dry-run preview |
+| `/grove-merge <branch>` | Merge feature branch bottom-up with conflict handling |
 
 ## Mobile Testing with ngrok
 
