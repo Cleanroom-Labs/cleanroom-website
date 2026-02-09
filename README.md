@@ -42,7 +42,7 @@ Output is generated to `public/docs/index.html`.
 
 | Command | Description |
 |---------|-------------|
-| `repo-tools check` | Verify submodule health |
+| `grove check` | Verify submodule health |
 | `./scripts/build-single-project.sh <project>` | Build single project docs |
 | `./scripts/update-project-docs.sh <project> <version>` | Update project to version |
 | `./scripts/add-new-project.sh <project> <repo-url>` | Add new project |

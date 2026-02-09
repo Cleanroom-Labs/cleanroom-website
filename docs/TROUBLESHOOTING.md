@@ -228,7 +228,7 @@ node scripts/build-docs.mjs
 
 ```bash
 # Check submodule health
-repo-tools check
+grove check
 
 # Test CI locally
 ./scripts/test-ci-locally.sh
