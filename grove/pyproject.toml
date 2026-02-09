@@ -17,5 +17,8 @@ grove = "grove.cli:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+"grove.claude_skills" = ["*.md"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
