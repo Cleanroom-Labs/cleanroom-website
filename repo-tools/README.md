@@ -143,6 +143,65 @@ repo-tools worktree remove ../feature-x-wt
 repo-tools worktree remove --force ../feature-x-wt
 ```
 
+### `repo-tools worktree merge`
+
+Merge a feature branch into the current branch across all repos in the submodule tree, processing leaves first (topological order). Supports pause/resume on conflicts or test failures, full abort/rollback, and conflict prediction.
+
+```bash
+# Start a merge
+repo-tools worktree merge my-feature
+
+# Dry run: show what would happen (includes conflict prediction)
+repo-tools worktree merge my-feature --dry-run
+
+# Merge only the root repo (skip submodules)
+repo-tools worktree merge my-feature --no-recurse
+
+# Always create merge commits (no fast-forward)
+repo-tools worktree merge my-feature --no-ff
+
+# Skip test commands
+repo-tools worktree merge my-feature --no-test
+
+# Resume after resolving a conflict or fixing a test
+repo-tools worktree merge --continue
+
+# Abort and restore all repos to pre-merge state
+repo-tools worktree merge --abort
+
+# Show current merge progress
+repo-tools worktree merge --status
+```
+
+**Test commands** can be configured in `.repo-tools.toml`:
+
+```toml
+[worktree-merge]
+test-command = "pytest"                    # default for all repos
+
+[worktree-merge.test-overrides]
+"." = "npm test"                           # override for root repo
+"technical-docs" = "make html"             # override for a submodule
+"technical-docs/whisper" = ""              # empty string = skip tests
+```
+
+Test command resolution order (highest priority first):
+1. Root's `test-overrides[repo's rel_path]`
+2. Repo's own `.repo-tools.toml` `test-command`
+3. Root's `test-command`
+4. No test command — skip testing
+
+**Merge journal:** Actions are logged to `.git/repo-tools/merge-journal-YYYY-MM.log` with monthly rotation. Useful for post-mortems. The journal is stored under `--git-common-dir`, so it is shared across all worktrees.
+
+**Topology cache:** Submodule tree structure is cached at `.git/repo-tools/topology.json`, enabling quick detection of structural divergence between branches. Also shared across worktrees via `--git-common-dir`.
+
+**Merge state:** In-progress merge state is stored at `.git/repo-tools/merge-state.json` (per-worktree via `--absolute-git-dir`), so each worktree can have its own independent merge in progress.
+
+**Exit codes:**
+- `0` — Merge complete (or dry run)
+- `1` — Paused (conflict or test failure), or error
+- `2` — Usage error
+
 ## Development
 
 ### Running Tests
@@ -169,7 +228,9 @@ repo-tools/
 │       ├── check.py            # check subcommand
 │       ├── push.py             # push subcommand
 │       ├── sync.py             # sync subcommand
-│       ├── worktree.py         # worktree subcommand
+│       ├── topology.py         # Topology caching for submodule structure
+│       ├── worktree.py         # worktree add/remove subcommand
+│       ├── worktree_merge.py   # worktree merge subcommand
 │       └── visualizer/         # visualize subcommand
 │           ├── __init__.py
 │           ├── __main__.py

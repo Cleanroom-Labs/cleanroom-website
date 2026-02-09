@@ -215,6 +215,79 @@ class TestCliWorktreeSubcommand:
         assert args.force is True
 
 
+class TestCliWorktreeMergeSubcommand:
+    def test_parse_worktree_merge_branch(self):
+        """'worktree merge my-feature' should parse correctly."""
+        mock_run = MagicMock(return_value=0)
+        with patch("repo_tools.worktree_merge.run", mock_run):
+            result = main(["worktree", "merge", "my-feature"])
+
+        mock_run.assert_called_once()
+        args = mock_run.call_args[0][0]
+        assert args.command == "worktree"
+        assert args.worktree_command == "merge"
+        assert args.branch == "my-feature"
+        assert args.continue_merge is False
+        assert args.abort is False
+        assert args.status is False
+        assert args.dry_run is False
+        assert args.no_recurse is False
+        assert args.no_ff is False
+        assert args.no_test is False
+
+    def test_parse_worktree_merge_continue(self):
+        """'worktree merge --continue' should set continue_merge=True."""
+        mock_run = MagicMock(return_value=0)
+        with patch("repo_tools.worktree_merge.run", mock_run):
+            main(["worktree", "merge", "--continue"])
+
+        args = mock_run.call_args[0][0]
+        assert args.continue_merge is True
+        assert args.branch is None
+
+    def test_parse_worktree_merge_abort(self):
+        """'worktree merge --abort' should set abort=True."""
+        mock_run = MagicMock(return_value=0)
+        with patch("repo_tools.worktree_merge.run", mock_run):
+            main(["worktree", "merge", "--abort"])
+
+        args = mock_run.call_args[0][0]
+        assert args.abort is True
+
+    def test_parse_worktree_merge_status(self):
+        """'worktree merge --status' should set status=True."""
+        mock_run = MagicMock(return_value=0)
+        with patch("repo_tools.worktree_merge.run", mock_run):
+            main(["worktree", "merge", "--status"])
+
+        args = mock_run.call_args[0][0]
+        assert args.status is True
+
+    def test_parse_worktree_merge_all_flags(self):
+        """'worktree merge my-feature --dry-run --no-recurse --no-ff --no-test' should set all."""
+        mock_run = MagicMock(return_value=0)
+        with patch("repo_tools.worktree_merge.run", mock_run):
+            main(["worktree", "merge", "my-feature",
+                  "--dry-run", "--no-recurse", "--no-ff", "--no-test"])
+
+        args = mock_run.call_args[0][0]
+        assert args.branch == "my-feature"
+        assert args.dry_run is True
+        assert args.no_recurse is True
+        assert args.no_ff is True
+        assert args.no_test is True
+
+    def test_worktree_merge_no_args(self):
+        """'worktree merge' with no branch should still dispatch."""
+        mock_run = MagicMock(return_value=2)
+        with patch("repo_tools.worktree_merge.run", mock_run):
+            result = main(["worktree", "merge"])
+
+        mock_run.assert_called_once()
+        args = mock_run.call_args[0][0]
+        assert args.branch is None
+
+
 class TestCliInvalidSubcommand:
     def test_unknown_subcommand_exits(self):
         """An unrecognised subcommand should cause argparse to exit with code 2."""
