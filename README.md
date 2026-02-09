@@ -19,7 +19,8 @@ cd cleanroom-website
 git submodule update --init --recursive
 
 # Install grove (submodule management CLI)
-cd grove && pip install -e . && cd ..
+pip install -r requirements.txt
+# Or for active grove development: pip install -e ~/Projects/cleanroom-labs/grove
 
 # Build documentation
 node scripts/build-docs.mjs
@@ -59,10 +60,13 @@ Grove is a CLI for managing the nested git submodule hierarchy in this repositor
 ### Installation
 
 ```bash
-cd grove && pip install -e .
+pip install -r requirements.txt
+```
 
-# With test dependencies
-pip install -e ".[dev]"
+For active grove development, use an editable install from the [grove repository](https://github.com/Cleanroom-Labs/grove):
+
+```bash
+pip install -e ~/Projects/cleanroom-labs/grove
 ```
 
 Requires Python 3.11+. All commands can be run from any subdirectory.
@@ -90,7 +94,7 @@ Requires Python 3.11+. All commands can be run from any subdirectory.
 
 Grove reads `.grove.toml` in the repository root for sync group definitions and worktree merge test commands. Configuration is optional — commands gracefully handle repos without it.
 
-See [grove/README.md](grove/README.md) for full documentation including flags, exit codes, and configuration format.
+See the [grove repository](https://github.com/Cleanroom-Labs/grove) for full documentation including flags, exit codes, and configuration format.
 
 ### Claude Code Skills
 
