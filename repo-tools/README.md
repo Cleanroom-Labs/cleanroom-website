@@ -124,14 +124,17 @@ The GUI supports:
 
 ### `repo-tools worktree`
 
-Create and remove git worktrees with automatic recursive submodule initialization.
+Create and remove git worktrees with automatic recursive submodule initialization. Local git config (e.g. `user.name`, `user.email`, signing settings) is copied from the main worktree and its submodules to the new worktree by default. Structural keys (`core.*`, `remote.*`, `submodule.*`, `extensions.*`, `gc.*`) are excluded.
 
 ```bash
 # Create a new worktree with a new branch
-repo-tools worktree add --branch feature-x ../feature-x-wt
+repo-tools worktree add feature-x ../feature-x-wt
 
 # Create a worktree using an existing branch
-repo-tools worktree add --branch existing-branch --checkout ../wt-path
+repo-tools worktree add --checkout existing-branch ../wt-path
+
+# Skip copying local git config
+repo-tools worktree add --no-copy-config feature-x ../feature-x-wt
 
 # Remove a worktree
 repo-tools worktree remove ../feature-x-wt
