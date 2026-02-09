@@ -160,6 +160,11 @@ examples:
         action="store_true",
         help="Checkout an existing branch instead of creating a new one",
     )
+    worktree_add_parser.add_argument(
+        "--no-copy-config",
+        action="store_true",
+        help="Skip copying local git config from the main worktree",
+    )
 
     worktree_remove_parser = worktree_subparsers.add_parser(
         "remove",
