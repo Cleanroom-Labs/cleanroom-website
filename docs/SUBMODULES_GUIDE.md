@@ -32,7 +32,7 @@ git submodule update --recursive --remote
 
 ### Check Status
 ```bash
-repo-tools check
+grove check
 ```
 
 ### Update a Project
@@ -99,7 +99,7 @@ For troubleshooting, see [TROUBLESHOOTING.md](TROUBLESHOOTING.md#submodule-issue
 ## Best Practices
 
 1. Use helper scripts for multi-level updates
-2. Run `repo-tools check` before committing
+2. Run `grove check` before committing
 3. Use semantic versioning for documentation releases
 4. Keep docs and code versions synchronized
 5. Test builds locally before pushing
@@ -108,7 +108,7 @@ For troubleshooting, see [TROUBLESHOOTING.md](TROUBLESHOOTING.md#submodule-issue
 
 | Script | Purpose |
 |--------|---------|
-| `repo-tools check` | Verify submodule health |
+| `grove check` | Verify submodule health |
 | `update-project-docs.sh` | Update project to specific version |
 | `add-new-project.sh` | Add new project documentation |
 | `build-single-project.sh` | Build project docs locally |

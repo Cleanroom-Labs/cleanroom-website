@@ -9,9 +9,9 @@ See [README.md](README.md) for complete documentation including build commands, 
 **Build docs:** `node scripts/build-docs.mjs` (add `--version <ver>` to build a specific version)
 **Build site only:** `npm run build:web`
 
-**Check submodules:** `repo-tools check`
+**Check submodules:** `grove check`
 
-**Sync common:** `repo-tools sync`
+**Sync common:** `grove sync`
 
 **Check theme staleness:** `cd common && npm run check-staleness`
 
@@ -33,7 +33,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the submodule structure, de
 | File | Purpose |
 |------|---------|
 | `scripts/build-docs.mjs` | Main build orchestrator |
-| `repo-tools/` | Git submodule management CLI (`repo-tools check/push/sync/visualize`) |
+| `grove/` | Git submodule management CLI (`grove check/push/sync/visualize`) |
 | `scripts/generate-pdf/` | PDF report generator for website content |
 | `technical-docs/source/conf.py` | Master Sphinx configuration |
 | `technical-docs/scripts/update-versions-json.sh` | Update versions.json manifest for multi-version docs |
