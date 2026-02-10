@@ -32,10 +32,10 @@ Extract `<branch-name>` and `<path>` from `$ARGUMENTS`.
 
 Run the appropriate command:
 
-- **New branch:** `grove worktree add --copy-venv <branch-name> <path>`
-- **Existing branch:** `grove worktree add --copy-venv --checkout <branch-name> <path>`
+- **New branch:** `grove worktree add --copy-venv --local-remotes <branch-name> <path>`
+- **Existing branch:** `grove worktree add --copy-venv --local-remotes --checkout <branch-name> <path>`
 
-This creates the worktree and recursively initializes all submodules using the main worktree as a reference. It also copies local git config (user.name, user.email, signing settings), copies the Python virtual environment from the main worktree (auto-detects `.direnv/python-*`, `.venv/`, or `venv/` and fixes hardcoded paths), and runs `direnv allow` if an `.envrc` file is present.
+This creates the worktree and recursively initializes all submodules using the main worktree as a reference. It also copies local git config (user.name, user.email, signing settings), copies the Python virtual environment from the main worktree (auto-detects `.direnv/python-*`, `.venv/`, or `venv/` and fixes hardcoded paths), keeps submodule remotes pointing to the main worktree so pushes stay on-machine, and runs `direnv allow` if an `.envrc` file is present.
 
 If the command fails:
 - Report the error output.
