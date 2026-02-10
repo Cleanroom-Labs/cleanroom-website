@@ -32,10 +32,10 @@ Extract `<branch-name>` and `<path>` from `$ARGUMENTS`.
 
 Run the appropriate command:
 
-- **New branch:** `grove worktree add <branch-name> <path>`
-- **Existing branch:** `grove worktree add --checkout <branch-name> <path>`
+- **New branch:** `grove worktree add --copy-venv <branch-name> <path>`
+- **Existing branch:** `grove worktree add --copy-venv --checkout <branch-name> <path>`
 
-This creates the worktree and recursively initializes all submodules using the main worktree as a reference. It also copies local git config (user.name, user.email, signing settings).
+This creates the worktree and recursively initializes all submodules using the main worktree as a reference. It also copies local git config (user.name, user.email, signing settings), copies the Python virtual environment from the main worktree (auto-detects `.direnv/python-*`, `.venv/`, or `venv/` and fixes hardcoded paths), and runs `direnv allow` if an `.envrc` file is present.
 
 If the command fails:
 - Report the error output.
@@ -46,6 +46,7 @@ If the command fails:
 
 1. `git -C <path> branch --show-current` -- confirm correct branch.
 2. `git -C <path> submodule status --recursive` -- confirm all submodules initialized (no `-` prefixes).
+3. Check that a Python venv directory exists in the new worktree (e.g., `ls <path>/.direnv/python-*` or `ls <path>/.venv`).
 
 ### Step 5: Report status
 
@@ -53,5 +54,6 @@ Summarize:
 - Worktree path (absolute)
 - Branch name
 - Number of submodules initialized
+- Whether the Python venv was copied successfully
 - Remind: remove later with `grove worktree remove <path>`
 - Remind: merge back with `grove worktree merge <branch-name>` from the main worktree when done
