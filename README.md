@@ -1,3 +1,5 @@
+[![Netlify Status](https://api.netlify.com/api/v1/badges/cfbc479f-26a0-4031-aa6c-f4d80183e7c2/deploy-status)](https://app.netlify.com/projects/cleanroomlabswebsite/deploys)
+
 # Cleanroom Website
 
 Documentation aggregation platform using nested git submodules to manage technical documentation for multiple projects with version-coupled releases.
