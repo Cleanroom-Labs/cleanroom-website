@@ -7,3 +7,6 @@ test-command = "npm run build"
 [worktree-merge.test-overrides]
 "common" = "npm run check-staleness"
 "technical-docs" = "make html"
+
+[aliases]
+wt = "worktree"
