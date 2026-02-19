@@ -71,6 +71,14 @@ The sequence follows a narrative arc: **Problem → Philosophy → Strategy → 
 
 **Social media angle:** Technical and compliance-focused. Submit to r/netsec, r/cybersecurity, r/devops, and r/programming. The SBOM/CBOM angle is timely given U.S. regulatory requirements (2021 executive order, CISA guidance). On HN, the "offline vulnerability scanning" angle is novel and practical.
 
+### Phase 8: Encryption Feature (Week 13+)
+
+| Week | Post | Slug | Why This Order |
+|------|------|------|----------------|
+| 13 | **Encrypting the Air Gap: Why Your USB Transfers Need More Than Checksums** | `encrypting-the-air-gap` | Announces v1.2's AEAD encryption feature. Builds on Week 6's USB security post by going deeper on the cryptographic response to USB interception. Explains the threat model (lost/stolen drives, border crossings, supply chain interception), why AEAD was chosen over digital signatures, and the ChaCha20-Poly1305 + Argon2id design. Ties back to the quantum era post (Week 4) since symmetric AEAD is inherently PQC-resilient. |
+
+**Social media angle:** Strong HN material — the HMAC vs. digital signatures decision and the "why not asymmetric crypto" reasoning will generate discussion among cryptography-literate readers. Submit to r/netsec, r/crypto, r/cybersecurity. The "checksums aren't enough" framing is accessible enough for r/privacy and r/selfhosted.
+
 ## Platform-Specific Notes
 
 ### HackerNews
@@ -109,3 +117,4 @@ Titles that work on HN are factual, specific, and avoid marketing language:
 | 10 | Deploying Ollama and Large Models Across the Air Gap with Multi-USB Orchestration |
 | 11 | Start a Sneakernet with Your Friends — File Sharing Without the Cloud |
 | 12 | Maintaining Air-Gapped Systems with SBOMs, CBOMs, and Offline Vulnerability Scanning |
+| 13 | Encrypting Air-Gapped USB Transfers: Why Checksums Aren't Enough and AEAD Is |

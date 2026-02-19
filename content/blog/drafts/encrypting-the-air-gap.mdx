@@ -1,0 +1,123 @@
+---
+title: "Encrypting the Air Gap: Why Your USB Transfers Need More Than Checksums"
+date: "2026-02-18"
+author: "Lead Dev"
+tags: ["security", "airgap-transfer", "cryptography"]
+excerpt: "Checksums catch corruption, but they don't stop someone who intercepts your USB drive. Authenticated encryption closes that gap — here's the threat model and why we chose AEAD over digital signatures."
+slug: "encrypting-the-air-gap"
+readTime: "10 min"
+---
+
+---
+
+## Introduction
+
+[AirGap Transfer](/blog/introducing-airgap-tools) verifies file integrity using SHA-256 checksums. Every chunk gets a hash, that hash goes into a JSON manifest, and the unpack operation verifies everything matches before reconstruction. For the primary threat — accidental corruption during USB writes — this works perfectly.
+
+But checksums have a blind spot. They answer the question "did the bits survive the transfer?" They don't answer "did someone replace the bits with something else?"
+
+If your threat model includes USB interception — a drive lost in transit, confiscated at a border, or accessed by someone with temporary physical access — checksums alone aren't enough. An attacker who modifies a chunk can simply recompute the SHA-256 hash and update the manifest. The verification passes. The data is compromised. You'd never know.
+
+This post explains the threat, the cryptographic response we're building into AirGap Transfer v1.2, and the engineering decisions behind the design — including why we chose authenticated encryption over digital signatures.
+
+## The USB interception threat
+
+[Air-gapped systems](/blog/why-air-gapping) are isolated from networks by design. That isolation is the whole point — data that never touches a network can't be harvested from one. But the transfer boundary (the USB drive itself) creates a concentrated point of exposure.
+
+Consider the scenarios:
+
+**Lost or stolen drives.** A USB drive left in a taxi, dropped in an airport, or stolen from a bag. The data on it is plaintext. Anyone who finds the drive can read everything — source code, model weights, patient records, whatever crossed the air gap.
+
+**Border crossings.** Drives can be inspected or cloned at customs. This isn't hypothetical — it's documented practice in multiple jurisdictions. If you're transferring sensitive data internationally via physical media, the drive's contents are exposed during inspection.
+
+**Temporary physical access.** A drive left unattended in a lab, a server room with shared access, a conference room between meetings. Someone with a few minutes and a laptop can clone the drive, or worse, modify the contents and put it back.
+
+**Supply chain interception.** For high-value targets, drives can be intercepted in shipping and modified before delivery. This is the most sophisticated threat and the hardest to detect without cryptographic protection.
+
+In all these cases, plain checksums provide zero protection. The checksum verifies consistency between the chunk and the manifest — but if the attacker controls both, consistency is trivial to maintain.
+
+## What we need: confidentiality and authenticity
+
+The USB interception threat actually involves two distinct problems, and a complete solution needs to address both.
+
+**Confidentiality** means an unauthorized person can't read the data. If the drive is lost or cloned, the contents are gibberish without the passphrase. This is encryption at rest.
+
+**Authenticity** means you can detect if someone tampered with the data. If an attacker modifies a chunk (say, injecting malware into a software package), you'll know the contents were altered even if the attacker updated the checksums. This is what "authenticated" means in authenticated encryption.
+
+Plain checksums give you neither. A hash is a fingerprint, not a lock — anyone can compute one, and anyone can compute a new one after making changes. What you need is a keyed operation: something that requires a secret to produce and verify.
+
+## Why AEAD, not digital signatures
+
+Your research notes from Applied Cryptography 101 probably list two options for authentication: HMAC (symmetric, shared secret) and digital signatures (asymmetric, key pairs). Both provide tamper detection. But for air-gap transfers, the choice is clear.
+
+**Digital signatures solve the wrong problem.** They're designed for open-world scenarios where unknown third parties need to verify authenticity — think software distribution, certificate chains, or blockchain transactions. The signer has a private key; anyone with the corresponding public key can verify. This is powerful when you need public verifiability.
+
+But AirGap Transfer operates in a closed world. The person who packs the data is the same person (or at minimum, the same organization) who unpacks it. There's no third party who needs to verify. There's no legal non-repudiation requirement. The two endpoints are mutually trusted.
+
+Digital signatures would drag in asymmetric key infrastructure — key pairs, possibly a PKI, key distribution across the air gap — all solving a problem that doesn't exist in this context. They'd also add computational overhead and larger payloads for no practical benefit.
+
+**HMAC is closer, but incomplete.** HMAC gives you authentication (tamper detection) with a simple shared secret. That's the right trust model. But HMAC alone doesn't give you confidentiality — the data on the drive is still plaintext, readable by anyone with physical access.
+
+**AEAD gives you both in one construction.** Authenticated Encryption with Associated Data combines encryption (confidentiality) and authentication (tamper detection) into a single algorithm. You don't have to compose separate encrypt and MAC operations — which is historically where cryptographic implementation errors happen. One algorithm, one key, both properties.
+
+## The design: ChaCha20-Poly1305
+
+AirGap Transfer v1.2 will use [ChaCha20-Poly1305](https://datatracker.ietf.org/doc/html/rfc7539) as the default AEAD algorithm. Here's why:
+
+**Performance without hardware dependencies.** AES-GCM is the other common AEAD choice, and it's fast — when your CPU has AES-NI hardware acceleration. Without it, AES-GCM is significantly slower. ChaCha20-Poly1305 performs well on all platforms, including ARM devices and older hardware, without requiring special instructions. For a tool that targets air-gapped systems (which are often not running the latest hardware), this matters.
+
+**Battle-tested.** ChaCha20-Poly1305 is used in TLS 1.3, WireGuard, and QUIC. It's standardized in RFC 7539. The security properties are well-understood and the algorithm has survived extensive cryptanalysis.
+
+**Quantum-resilient by default.** Because ChaCha20-Poly1305 is symmetric cryptography, it's already resistant to quantum attacks. Grover's algorithm (the relevant quantum threat for symmetric crypto) only provides a square-root speedup — effectively halving the key strength. A 256-bit key retains roughly 128 bits of effective security under quantum attack. That's still far beyond practical brute-force. For more on the quantum threat landscape, see [Air-Gapping in the Quantum Era](/blog/air-gapping-in-the-quantum-era).
+
+**Crypto agility built in.** The AEAD module uses a trait-based interface, consistent with AirGap Transfer's existing hash algorithm abstraction. If a future algorithm becomes preferable — say, a NIST post-quantum AEAD standard — it can be added without rearchitecting. The manifest records which algorithm was used, so older transfers remain decodable.
+
+## Key derivation: from passphrase to encryption key
+
+AEAD algorithms need a key, not a passphrase. The gap between "something a human can remember" and "256 bits of cryptographic key material" is bridged by a key derivation function (KDF).
+
+AirGap Transfer v1.2 uses Argon2id — the winner of the Password Hashing Competition and currently recommended by OWASP. Argon2id is specifically designed to be resistant to GPU and ASIC-based brute-force attacks by requiring large amounts of memory during computation. An attacker who captures an encrypted USB drive and wants to brute-force the passphrase faces a deliberately expensive computation for every guess.
+
+The KDF parameters (memory cost, time cost, parallelism, salt) are stored in the manifest. This means the unpack side can reproduce the same derived key from the same passphrase without any out-of-band configuration. The passphrase itself never touches disk — it's read from an interactive prompt with echo disabled, used for key derivation, and then zeroized from memory.
+
+## Manifest: readable but tamper-proof
+
+One design decision worth explaining: the manifest stays as human-readable JSON. It's not encrypted.
+
+This is deliberate. The manifest's purpose is to let you inspect the transfer metadata — how many chunks, what sizes, what algorithms, whether everything transferred successfully. Encrypting it would defeat that purpose and break the "easy to inspect and debug" design principle.
+
+Instead, the manifest is authenticated with a keyed MAC derived from the same passphrase. Think of it as a tamper-evident seal: you can read the label on the package, but you can tell if someone opened it and changed the contents. If an attacker modifies any manifest field — chunk count, checksums, nonces, anything — the MAC verification fails and the unpack operation aborts before processing any chunks.
+
+## What this means in practice
+
+The workflow barely changes. For transfers that don't need encryption, everything works exactly as before — no passphrase, no encryption, just checksums. The `--passphrase` flag opts in when you need it:
+
+```bash
+# Pack with encryption
+airgap-transfer pack ./sensitive-data /media/usb --passphrase
+
+# Unpack with decryption
+airgap-transfer unpack /media/usb ./destination --passphrase
+```
+
+Both commands prompt for the passphrase interactively (no echo). The passphrase has to cross the air gap separately from the USB drive — you need to communicate it out-of-band (memorize it, write it down, phone call, etc.). This is the fundamental security property: the key and the ciphertext travel by different paths.
+
+If someone intercepts the USB drive, they get encrypted chunks and an authenticated manifest. Without the passphrase, the chunks are unreadable. Without the passphrase, they can't forge a valid manifest MAC. The drive is cryptographically useless to them.
+
+## When you need this (and when you don't)
+
+Not every air-gap transfer needs encryption. If you're moving public datasets, open-source packages, or non-sensitive files across the gap, plain checksum verification is appropriate. Adding encryption would be friction without benefit.
+
+Encryption matters when the data on the USB drive would be harmful if read by an unauthorized person — medical records, classified information, proprietary source code, ML model weights, financial data, legal documents. It also matters when the physical custody chain has gaps: the drive leaves your hands, travels through untrusted environments, or could be accessed by people outside the trust boundary.
+
+The rule of thumb: if losing the USB drive would be a security incident, encrypt it.
+
+## Conclusion
+
+Checksums verify that data survived the transfer. Encryption ensures it's unreadable if the transfer medium is compromised. AEAD gives you both — integrity and confidentiality — in a single construction that's hard to misuse.
+
+AirGap Transfer v1.2 adds optional AEAD encryption precisely because the air gap's strength (physical isolation) creates a corresponding vulnerability (physical media as a single point of exposure). The choice of ChaCha20-Poly1305 with Argon2id key derivation balances security, performance, and quantum resilience without introducing the infrastructure complexity of asymmetric cryptography.
+
+The air gap protects your data from the network. Encryption protects your data from the drive.
+
+For more on the physical security side of USB transfers, see [USB Security for Airgap Data Transfers](/blog/usb-security-airgap-transfers). For the broader case for air-gapping as a security strategy, see [Why Air-Gapping?](/blog/why-air-gapping). For the full suite of tools, see [Privacy-First Tools for Air-Gapped Environments](/blog/introducing-airgap-tools).
