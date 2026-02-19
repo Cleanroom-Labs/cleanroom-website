@@ -8,7 +8,7 @@ This document describes the layered architecture of the blog content and how pos
 |-------|---------|------|-------|
 | **Why privacy matters** | The human, societal, and legal case for privacy | Evidence-based, measured, values-oriented | `wired-for-surveillance.mdx`, `the-case-for-privacy.mdx` |
 | **Why air-gap?** | Foundational thesis for air-gapping as a strategy | Technical but accessible, honest about tradeoffs | `why-air-gapping.mdx` |
-| **Specific threats** | Deep dives into individual threat vectors | Technical, well-sourced, practical | `air-gapping-in-the-quantum-era.mdx`, `air-gapping-your-software-supply-chain.mdx`, `usb-security-airgap-transfers.mdx` |
+| **Specific threats** | Deep dives into individual threat vectors | Technical, well-sourced, practical | `air-gapping-in-the-quantum-era.mdx`, `air-gapping-your-software-supply-chain.mdx`, `usb-security-airgap-transfers.mdx`, `encrypting-the-air-gap.mdx` |
 | **Tools** | What we built and how they work together | Practical, feature-focused | `introducing-airgap-tools.mdx`, `maintaining-airgapped-systems-with-boms.mdx` |
 | **Demos** | Step-by-step walkthroughs of specific workflows | Tutorial-style, hands-on | `demo-deploy-rust-app.mdx`, `demo-transfer-ollama.mdx`, `demo-whisper-quick-capture.mdx` |
 | **Community** | Fun, approachable use cases that show air-gapping in everyday life | Casual, encouraging, social | `start-a-sneakernet.mdx` |
