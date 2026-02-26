@@ -74,6 +74,28 @@ Grove ships Claude Code skills for common submodule workflows. Install with `gro
 | [docs/STYLE_GUIDE.md](docs/STYLE_GUIDE.md) | Writing style and terminology conventions |
 | [docs/VERSIONING_GUIDE.md](docs/VERSIONING_GUIDE.md) | Versioning, branching, and multi-version hosting |
 
+## Design System & Styling
+
+Design tokens live in `common/tokens/colors.js` — the single source of truth for all colors across the website and Sphinx docs.
+
+**Color categories:**
+- **Backgrounds:** slate-950 (#030712, deepest), slate-900 (#111827, primary), slate-800 (#1f2937, nav/footer)
+- **Text tiers:** text-primary (#f9fafb, headings), text-secondary (#d1d5db, body), text-muted (#9ca3af, secondary)
+- **Accent:** emerald (#10b981), emerald-light (#34d399, hover), emerald-dark (#059669, pressed), emerald-glow (#10b98133, shadows)
+- **Semantic:** warning (#f59e0b), danger (#ef4444), info (#3b82f6), success (#10b981)
+
+**Rules:**
+- Use token names (`text-emerald`, `bg-slate-800`) — never hardcode hex values
+- Use opacity syntax for translucency: `bg-slate-800/50` (not separate opacity utilities)
+- Don't guess colors — reference the token file or ask for exact values
+
+**Mobile layout:**
+- Fixed nav is **56px** tall — overlays need `top-[56px]` or `pt-[56px]`
+- RTD docs `.wy-nav-top`: use `margin-top` (not `top`) because it's `position: relative`
+- Flex wrapping: use `gap-x-` and `gap-y-` explicitly, not margin hacks
+
+**After token changes:** `cd common && npm run build && npm run check-staleness`, then commit both source and generated files.
+
 ## NPM Scripts
 
 | Command | Purpose |
