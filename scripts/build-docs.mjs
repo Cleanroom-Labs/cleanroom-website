@@ -141,7 +141,7 @@ function installDependencies() {
   const pipCmd = join(venvBinDir, 'pip');
   
   const result = exec(
-    `${pipCmd} install -q -r requirements.txt`,
+    `${pipCmd} install -q --upgrade -r requirements.txt`,
     technicalDocsDir
   );
   
