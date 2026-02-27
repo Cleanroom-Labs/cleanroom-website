@@ -1,4 +1,4 @@
-name: Verify Submodule Health
+name: Submodule Health
 
 on:
   push:
