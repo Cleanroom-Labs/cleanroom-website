@@ -1,4 +1,7 @@
 [![Netlify Status](https://api.netlify.com/api/v1/badges/cfbc479f-26a0-4031-aa6c-f4d80183e7c2/deploy-status)](https://app.netlify.com/projects/cleanroomlabswebsite/deploys)
+[![Test Suite](https://github.com/Cleanroom-Labs/cleanroom-website/actions/workflows/test.yml/badge.svg)](https://github.com/Cleanroom-Labs/cleanroom-website/actions/workflows/test.yml)
+[![Build All Documentation](https://github.com/Cleanroom-Labs/cleanroom-website/actions/workflows/build-all-docs.yml/badge.svg)](https://github.com/Cleanroom-Labs/cleanroom-website/actions/workflows/build-all-docs.yml)
+[![Submodule Health](https://github.com/Cleanroom-Labs/cleanroom-website/actions/workflows/verify-submodules.yml/badge.svg)](https://github.com/Cleanroom-Labs/cleanroom-website/actions/workflows/verify-submodules.yml)
 
 # Cleanroom Website
 
