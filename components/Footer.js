@@ -16,14 +16,14 @@ export default function Footer() {
               href="https://github.com/cleanroom-labs"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-emerald transition-colors"
+              className="py-2.5 hover:text-emerald transition-colors"
             >
               GitHub
             </a>
             {/* Donate link hidden — re-enable when ready */}
             <a
               href="mailto:lead@cleanroomlabs.dev"
-              className="hover:text-emerald transition-colors"
+              className="py-2.5 hover:text-emerald transition-colors"
             >
               Contact
             </a>
