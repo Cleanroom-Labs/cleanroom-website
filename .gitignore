@@ -13,6 +13,7 @@ out/
 
 # Claude Code (local settings only - shared settings.json is committed)
 .claude/settings.local.json
+.envrc
 
 # Personal scratch files
 scratch.txt
