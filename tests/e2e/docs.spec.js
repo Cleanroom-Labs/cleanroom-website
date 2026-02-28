@@ -257,3 +257,50 @@ test.describe('Docs - Mobile', () => {
     await expect(hamburger).toBeVisible();
   });
 });
+
+// ---------------------------------------------------------------------------
+// Version Sub-bar
+// ---------------------------------------------------------------------------
+test.describe('Version Sub-bar', () => {
+  test('version sub-bar is visible on docs pages', async ({ page }) => {
+    await page.goto(TRANSFER_INDEX);
+    const versionBar = page.locator('.version-sub-bar');
+    await expect(versionBar).toBeVisible();
+  });
+
+  test('version select dropdown is present', async ({ page }) => {
+    await page.goto(TRANSFER_INDEX);
+    const versionSelect = page.locator('#version-select');
+    await expect(versionSelect).toBeVisible();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// No Console Errors
+// ---------------------------------------------------------------------------
+test.describe('No Console Errors on Docs Pages', () => {
+  test('transfer index page produces no unexpected console errors', async ({ page }) => {
+    const errors = [];
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') {
+        const text = msg.text();
+        // Filter known non-issues: CDN warnings, resource 404s, React DevTools
+        if (
+          text.includes('Failed to load resource') ||
+          text.includes('cdn.tailwindcss.com') ||
+          text.includes('React DevTools') ||
+          text.includes('versions.json')
+        ) return;
+        errors.push(text);
+      }
+    });
+
+    await page.goto(TRANSFER_INDEX);
+    // Use domcontentloaded — networkidle is unreliable with Sphinx search polling
+    await page.waitForLoadState('domcontentloaded');
+    // Give scripts a moment to execute
+    await page.waitForTimeout(2000);
+
+    expect(errors, `Unexpected console errors: ${errors.join('; ')}`).toHaveLength(0);
+  });
+});
