@@ -1,9 +1,0 @@
-[build]
-  command = "git submodule update --init --recursive && find public/ -type l | while read link; do target=$(readlink -f \"$link\"); rm \"$link\"; cp \"$target\" \"$link\"; done && npm run build"
-  publish = ".next"
-  ignore = "exit 0"
-
-[build.environment]
-  NODE_VERSION = "20"
-  PYTHON_VERSION = "3.12"
-  NEXT_TELEMETRY_DISABLED = "1"
