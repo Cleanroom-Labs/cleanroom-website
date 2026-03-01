@@ -1,4 +1,4 @@
-name: Submodule Health
+name: Submodules
 
 on:
   push:
