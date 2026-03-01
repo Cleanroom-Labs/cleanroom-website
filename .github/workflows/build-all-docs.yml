@@ -1,4 +1,4 @@
-name: Documentation Build
+name: Docs
 # trigger: needs_extra_options/links revert (e5016d4)
 on:
   push:
