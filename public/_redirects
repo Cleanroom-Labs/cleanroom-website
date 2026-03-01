@@ -1,0 +1,5 @@
+# Cloudflare Pages redirect rules
+# See: https://developers.cloudflare.com/pages/configuration/redirects/
+
+/donate    /                       302
+/docs      /docs/dev/index.html    302
