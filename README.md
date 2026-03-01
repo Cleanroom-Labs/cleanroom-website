@@ -1,6 +1,6 @@
-[![Netlify Status](https://api.netlify.com/api/v1/badges/cfbc479f-26a0-4031-aa6c-f4d80183e7c2/deploy-status)](https://app.netlify.com/projects/cleanroomlabswebsite/deploys)&nbsp;&nbsp;[![Test Suite](https://github.com/Cleanroom-Labs/cleanroom-website/actions/workflows/test.yml/badge.svg)](https://github.com/Cleanroom-Labs/cleanroom-website/actions/workflows/test.yml)&nbsp;&nbsp;[![Documentation Build](https://github.com/Cleanroom-Labs/cleanroom-website/actions/workflows/build-all-docs.yml/badge.svg)](https://github.com/Cleanroom-Labs/cleanroom-website/actions/workflows/build-all-docs.yml)&nbsp;&nbsp;[![Submodule Health](https://github.com/Cleanroom-Labs/cleanroom-website/actions/workflows/verify-submodules.yml/badge.svg)](https://github.com/Cleanroom-Labs/cleanroom-website/actions/workflows/verify-submodules.yml)
-
 # Cleanroom Website
+
+[![Deploy](https://github.com/Cleanroom-Labs/cleanroom-website/actions/workflows/deploy.yml/badge.svg)](https://github.com/Cleanroom-Labs/cleanroom-website/actions/workflows/deploy.yml)&nbsp;&nbsp;[![Test Suite](https://github.com/Cleanroom-Labs/cleanroom-website/actions/workflows/test.yml/badge.svg)](https://github.com/Cleanroom-Labs/cleanroom-website/actions/workflows/test.yml)&nbsp;&nbsp;[![Documentation Build](https://github.com/Cleanroom-Labs/cleanroom-website/actions/workflows/build-all-docs.yml/badge.svg)](https://github.com/Cleanroom-Labs/cleanroom-website/actions/workflows/build-all-docs.yml)&nbsp;&nbsp;[![Submodule Health](https://github.com/Cleanroom-Labs/cleanroom-website/actions/workflows/verify-submodules.yml/badge.svg)](https://github.com/Cleanroom-Labs/cleanroom-website/actions/workflows/verify-submodules.yml)
 
 Documentation aggregation platform using nested git submodules to manage technical documentation for multiple projects with version-coupled releases.
 
@@ -179,7 +179,9 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the submodule structure, de
 
 | Workflow | Location | Purpose |
 |----------|----------|---------|
+| `deploy.yml` | `cleanroom-website` | Deploy to Cloudflare Pages (daily + manual) |
 | `build-all-docs.yml` | `cleanroom-website` | Build and verify all documentation |
+| `check-theme-staleness.yml` | `cleanroom-website` | Warn if generated theme files are out of date |
 | `verify-submodules.yml` | `cleanroom-website` | Weekly submodule health checks |
 | `sphinx-docs.yml` | `technical-docs` | Build, check warnings, and verify docs |
 
