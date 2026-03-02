@@ -323,7 +323,7 @@ See [VERSIONING_GUIDE.md](VERSIONING_GUIDE.md) for the full versioning strategy.
 To deploy somewhere other than GitHub Pages:
 
 1. Replace `actions/deploy-pages@v4` with custom deployment
-2. Examples: AWS S3, Netlify, Vercel, self-hosted server
+2. Examples: AWS S3, Cloudflare Pages, Vercel, self-hosted server
 
 ```yaml
 - name: Deploy to custom target
