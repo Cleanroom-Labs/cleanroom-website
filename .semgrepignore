@@ -1,0 +1,15 @@
+# Centralized Semgrep exclusions for local and CI scans.
+.next/
+out/
+node_modules/
+coverage/
+playwright-report/
+test-results/
+.playwright-mcp/
+.venv/
+.pytest_cache/
+public/docs/
+technical-docs/build/
+technical-docs/**/build/
+common/tests/fixture-site/_build/
+technical-docs/**/tests/fixture-site/_build/
